@@ -91,6 +91,54 @@ export const recipeIdeasResponseSchema = z.object({
 
 export type RecipeIdea = z.infer<typeof recipeIdeaSchema>;
 export type RecipeIdeasResponse = z.infer<typeof recipeIdeasResponseSchema>;
+
+export const nutritionPlanRequestSchema = z.object({
+  name: z.string().max(40).optional(),
+  targets: z.object({
+    calories: z.number().nonnegative(),
+    proteinG: z.number().nonnegative(),
+    carbsG: z.number().nonnegative(),
+    fatG: z.number().nonnegative(),
+    fiberG: z.number().nonnegative(),
+    waterMl: z.number().nonnegative(),
+  }),
+  mealsPerDay: z.number().int().min(2).max(5),
+  dietaryPreferences: z
+    .array(
+      z.enum([
+        "omnivore",
+        "vegetarian",
+        "vegan",
+        "pescatarian",
+        "no-dairy",
+        "no-gluten",
+        "halal",
+        "kosher",
+      ]),
+    )
+    .max(8),
+  approvedFoods: z.array(z.string().min(1)).max(60),
+});
+
+const nutritionLessonCopySchema = z.object({
+  headline: z.string().min(1).max(80),
+  body: z.string().min(1).max(900),
+  bullets: z.array(z.string().min(1).max(160)).min(2).max(3),
+});
+
+export const nutritionPlanResponseSchema = z.object({
+  overview: nutritionLessonCopySchema,
+  protein: nutritionLessonCopySchema,
+  carbs: nutritionLessonCopySchema,
+  fats: nutritionLessonCopySchema,
+  fiber: nutritionLessonCopySchema,
+  beverages: nutritionLessonCopySchema,
+  plate: nutritionLessonCopySchema,
+  timing: nutritionLessonCopySchema,
+});
+
+export type NutritionPlanRequest = z.infer<typeof nutritionPlanRequestSchema>;
+export type NutritionPlanResponse = z.infer<typeof nutritionPlanResponseSchema>;
 export type MealEstimate = z.infer<typeof mealEstimateSchema>;
 export type CoachResponse = z.infer<typeof coachResponseSchema>;
 

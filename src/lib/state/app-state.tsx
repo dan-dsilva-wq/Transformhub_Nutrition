@@ -35,6 +35,7 @@ import type {
   ChatMessage,
   CheckIn,
   MealLog,
+  NutritionPlan,
   OnboardingExtras,
   ProfileDraft,
   Subscription,
@@ -511,6 +512,29 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setOnboardingExtrasState((prev) => ({ ...prev, hasSeenTour: true }));
   }, []);
 
+  const setNutritionPlan = useCallback<AppActions["setNutritionPlan"]>(
+    (plan) => {
+      setOnboardingExtrasState((prev) => ({ ...prev, nutritionPlan: plan }));
+    },
+    [],
+  );
+
+  const markLessonComplete = useCallback<AppActions["markLessonComplete"]>(
+    (index) => {
+      setOnboardingExtrasState((prev) => {
+        const plan = prev.nutritionPlan;
+        if (!plan) return prev;
+        if (plan.lessonsCompleted.includes(index)) return prev;
+        const next: NutritionPlan = {
+          ...plan,
+          lessonsCompleted: [...plan.lessonsCompleted, index].sort((a, b) => a - b),
+        };
+        return { ...prev, nutritionPlan: next };
+      });
+    },
+    [],
+  );
+
   const bumpUsage = useCallback<AppActions["bumpUsage"]>((kind) => {
     setOnboardingExtrasState((prev) => {
       if (kind === "ai-photo") {
@@ -554,6 +578,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       commitTo,
       completeTour,
       bumpUsage,
+      setNutritionPlan,
+      markLessonComplete,
     }),
     [
       commitDraft,
@@ -578,6 +604,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       commitTo,
       completeTour,
       bumpUsage,
+      setNutritionPlan,
+      markLessonComplete,
     ],
   );
 

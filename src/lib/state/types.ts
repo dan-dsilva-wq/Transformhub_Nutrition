@@ -87,6 +87,33 @@ export type DietaryPref =
   | "halal"
   | "kosher";
 
+export interface NutritionLessonCopy {
+  headline: string;
+  body: string;
+  bullets: string[];
+}
+
+export interface NutritionPlan {
+  generatedAtIso: string;
+  basis: {
+    calories: number;
+    proteinG: number;
+    mealsPerDay: number;
+    dietaryPreferences: DietaryPref[];
+  };
+  copy: {
+    overview: NutritionLessonCopy;
+    protein: NutritionLessonCopy;
+    carbs: NutritionLessonCopy;
+    fats: NutritionLessonCopy;
+    fiber: NutritionLessonCopy;
+    beverages: NutritionLessonCopy;
+    plate: NutritionLessonCopy;
+    timing: NutritionLessonCopy;
+  };
+  lessonsCompleted: number[];
+}
+
 export interface OnboardingExtras {
   name?: string;
   motivation?: string;
@@ -99,6 +126,7 @@ export interface OnboardingExtras {
   aiPhotoUsage?: { dayKey: string; count: number };
   /** Tracks Coach message usage per ISO week for the free-tier 5/week cap. */
   coachUsage?: { weekKey: string; count: number };
+  nutritionPlan?: NutritionPlan;
 }
 
 export interface AppState {
@@ -166,6 +194,8 @@ export interface AppActions {
   commitTo(patch: Partial<OnboardingExtras["commitments"]>): void;
   completeTour(): void;
   bumpUsage(kind: "ai-photo" | "coach"): void;
+  setNutritionPlan(plan: NutritionPlan): void;
+  markLessonComplete(index: number): void;
 }
 
 export interface AppContextValue extends AppState {

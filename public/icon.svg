@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Pace app icon">
+  <rect width="512" height="512" rx="112" fill="#1f5d50"/>
+  <text
+    x="256"
+    y="356"
+    text-anchor="middle"
+    font-family="ui-serif, Georgia, 'Times New Roman', serif"
+    font-size="320"
+    font-weight="500"
+    font-style="italic"
+    fill="#faf8f5"
+  >P</text>
+  <circle cx="384" cy="148" r="20" fill="#f0c66e"/>
+</svg>

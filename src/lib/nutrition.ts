@@ -1,0 +1,323 @@
+export type FoodCategory = "proteins" | "carbs" | "fiber" | "fats";
+
+export interface FoodItem {
+  name: string;
+  category: FoodCategory;
+  portion: string;
+  note: string;
+  prep: "no-cook" | "quick" | "batch" | "portable";
+}
+
+export type MealHint = "breakfast" | "lunch" | "dinner" | "snack" | "any";
+
+export interface QuickMeal {
+  name: string;
+  tags: string[];
+  calories: number;
+  proteinG: number;
+  foodNames: string[];
+  parts: string[];
+  mealHint?: MealHint;
+}
+
+export const handPortions: Record<FoodCategory, string> = {
+  proteins: "1 palm",
+  carbs: "1 cupped hand",
+  fiber: "1 fist",
+  fats: "1 thumb",
+};
+
+export const foodCatalog: Record<FoodCategory, FoodItem[]> = {
+  proteins: [
+    { name: "Chicken breast", category: "proteins", portion: "1 palm", note: "Lean, quick to batch cook.", prep: "batch" },
+    { name: "Turkey mince", category: "proteins", portion: "1 palm", note: "Easy for bowls, wraps, and chilli.", prep: "batch" },
+    { name: "Lean beef mince", category: "proteins", portion: "1 palm", note: "Useful for higher-satiety dinners.", prep: "batch" },
+    { name: "Greek yogurt", category: "proteins", portion: "1 palm", note: "High protein breakfast or snack.", prep: "no-cook" },
+    { name: "Cottage cheese", category: "proteins", portion: "1 palm", note: "No-cook protein for fast meals.", prep: "no-cook" },
+    { name: "Eggs", category: "proteins", portion: "1 palm", note: "Useful when the day is busy.", prep: "quick" },
+    { name: "Tofu or tempeh", category: "proteins", portion: "1 palm", note: "Plant-based protein option.", prep: "quick" },
+    { name: "Tuna or salmon", category: "proteins", portion: "1 palm", note: "Protein plus useful fats.", prep: "portable" },
+    { name: "White fish", category: "proteins", portion: "1 palm", note: "Lean and fast from frozen.", prep: "quick" },
+    { name: "Prawns", category: "proteins", portion: "1 palm", note: "Fast protein for stir-fries.", prep: "quick" },
+    { name: "Protein powder", category: "proteins", portion: "1 scoop", note: "Backup option when food prep falls apart.", prep: "portable" },
+  ],
+  carbs: [
+    { name: "Rice", category: "carbs", portion: "1 cupped hand", note: "Easy training-day fuel.", prep: "batch" },
+    { name: "Oats", category: "carbs", portion: "1 cupped hand", note: "Filling and budget friendly.", prep: "quick" },
+    { name: "Potatoes", category: "carbs", portion: "1 cupped hand", note: "High satiety carb.", prep: "batch" },
+    { name: "Sweet potato", category: "carbs", portion: "1 cupped hand", note: "Good batch-prep carb.", prep: "batch" },
+    { name: "Wholegrain wraps", category: "carbs", portion: "1 cupped hand", note: "Good for portable meals.", prep: "portable" },
+    { name: "Wholegrain pasta", category: "carbs", portion: "1 cupped hand", note: "Easy family-meal option.", prep: "batch" },
+    { name: "Noodles", category: "carbs", portion: "1 cupped hand", note: "Fast stir-fry base.", prep: "quick" },
+    { name: "Quinoa", category: "carbs", portion: "1 cupped hand", note: "Batch-prep carb with extra protein.", prep: "batch" },
+    { name: "Sourdough bread", category: "carbs", portion: "1 cupped hand", note: "Simple toast or sandwich base.", prep: "portable" },
+    { name: "Fruit", category: "carbs", portion: "1 cupped hand", note: "Simple snack with fiber.", prep: "no-cook" },
+  ],
+  fiber: [
+    { name: "Broccoli", category: "fiber", portion: "1 fist", note: "Volume with very few calories.", prep: "quick" },
+    { name: "Mixed salad", category: "fiber", portion: "1 fist", note: "Adds crunch and fullness.", prep: "no-cook" },
+    { name: "Mixed vegetables", category: "fiber", portion: "1 fist", note: "Frozen bags make this easy.", prep: "quick" },
+    { name: "Beans and lentils", category: "fiber", portion: "1 fist", note: "Fiber plus extra protein.", prep: "batch" },
+    { name: "Peppers", category: "fiber", portion: "1 fist", note: "Fast no-cook option.", prep: "no-cook" },
+    { name: "Spinach", category: "fiber", portion: "1 fist", note: "Easy to add to eggs or bowls.", prep: "quick" },
+    { name: "Green beans", category: "fiber", portion: "1 fist", note: "Low effort side from frozen.", prep: "quick" },
+    { name: "Cauliflower rice", category: "fiber", portion: "1 fist", note: "Adds volume to bowls.", prep: "quick" },
+    { name: "Mushrooms", category: "fiber", portion: "1 fist", note: "Useful for bigger breakfasts.", prep: "quick" },
+    { name: "Carrots", category: "fiber", portion: "1 fist", note: "Portable crunch for snacks.", prep: "portable" },
+    { name: "Berries", category: "fiber", portion: "1 fist", note: "Sweet, lower-calorie option.", prep: "no-cook" },
+  ],
+  fats: [
+    { name: "Olive oil", category: "fats", portion: "1 thumb", note: "Measure it; it adds up fast.", prep: "quick" },
+    { name: "Avocado", category: "fats", portion: "1 thumb", note: "Great with high-protein meals.", prep: "no-cook" },
+    { name: "Nuts", category: "fats", portion: "1 thumb", note: "Use a small portion.", prep: "portable" },
+    { name: "Peanut butter", category: "fats", portion: "1 thumb", note: "Tasty but dense.", prep: "no-cook" },
+    { name: "Cheese", category: "fats", portion: "1 thumb", note: "Flavor boost in small amounts.", prep: "no-cook" },
+    { name: "Light mayo", category: "fats", portion: "1 thumb", note: "Useful for tuna wraps.", prep: "no-cook" },
+    { name: "Sesame oil", category: "fats", portion: "1 thumb", note: "Small amount for stir-fries.", prep: "quick" },
+    { name: "Hummus", category: "fats", portion: "1 thumb", note: "Easy dip or wrap spread.", prep: "no-cook" },
+  ],
+};
+
+export const allFoodItems = Object.values(foodCatalog).flat();
+
+export const defaultApprovedFoods = [
+  "Chicken breast",
+  "Turkey mince",
+  "Greek yogurt",
+  "Eggs",
+  "Tuna or salmon",
+  "Tofu or tempeh",
+  "Rice",
+  "Oats",
+  "Potatoes",
+  "Wholegrain wraps",
+  "Fruit",
+  "Broccoli",
+  "Mixed salad",
+  "Mixed vegetables",
+  "Peppers",
+  "Berries",
+  "Olive oil",
+  "Avocado",
+  "Peanut butter",
+  "Light mayo",
+];
+
+export const quickMeals: QuickMeal[] = [
+  {
+    name: "Protein yogurt bowl",
+    tags: ["5 min", "no cook"],
+    calories: 420,
+    proteinG: 38,
+    foodNames: ["Greek yogurt", "Berries", "Oats", "Peanut butter"],
+    parts: ["Greek yogurt", "berries", "oats", "thumb of peanut butter"],
+    mealHint: "breakfast",
+  },
+  {
+    name: "Eggs on sourdough",
+    tags: ["10 min", "veg"],
+    calories: 460,
+    proteinG: 28,
+    foodNames: ["Eggs", "Sourdough bread", "Spinach", "Avocado"],
+    parts: ["3 eggs", "1 slice sourdough", "fist of spinach", "thumb of avocado"],
+    mealHint: "breakfast",
+  },
+  {
+    name: "Tofu scramble",
+    tags: ["plant", "10 min"],
+    calories: 410,
+    proteinG: 30,
+    foodNames: ["Tofu or tempeh", "Mushrooms", "Peppers", "Olive oil"],
+    parts: ["palm of tofu", "fist mushrooms", "fist peppers", "thumb olive oil"],
+    mealHint: "breakfast",
+  },
+  {
+    name: "Cottage cheese bowl",
+    tags: ["no cook", "high protein"],
+    calories: 380,
+    proteinG: 36,
+    foodNames: ["Cottage cheese", "Fruit", "Oats", "Nuts"],
+    parts: ["palm cottage cheese", "cupped hand fruit", "small handful oats", "thumb nuts"],
+    mealHint: "breakfast",
+  },
+  {
+    name: "Smoked salmon plate",
+    tags: ["pescatarian", "5 min"],
+    calories: 500,
+    proteinG: 34,
+    foodNames: ["Tuna or salmon", "Sourdough bread", "Avocado", "Spinach"],
+    parts: ["palm salmon", "1 slice sourdough", "thumb avocado", "fist spinach"],
+    mealHint: "breakfast",
+  },
+  {
+    name: "Chicken rice box",
+    tags: ["batch", "high protein"],
+    calories: 610,
+    proteinG: 48,
+    foodNames: ["Chicken breast", "Rice", "Mixed vegetables", "Olive oil"],
+    parts: ["palm of chicken", "cupped hand of rice", "2 fists veg", "thumb olive oil"],
+    mealHint: "lunch",
+  },
+  {
+    name: "Tuna wrap",
+    tags: ["portable", "5 min"],
+    calories: 470,
+    proteinG: 42,
+    foodNames: ["Tuna or salmon", "Wholegrain wraps", "Mixed salad", "Light mayo"],
+    parts: ["palm of tuna", "wholegrain wrap", "fist salad", "thumb light mayo"],
+    mealHint: "lunch",
+  },
+  {
+    name: "Turkey chilli bowl",
+    tags: ["batch", "freezer-friendly"],
+    calories: 540,
+    proteinG: 42,
+    foodNames: ["Turkey mince", "Beans and lentils", "Peppers", "Rice"],
+    parts: ["palm turkey", "fist beans", "fist peppers", "cupped hand rice"],
+    mealHint: "lunch",
+  },
+  {
+    name: "Quinoa power bowl",
+    tags: ["plant", "batch"],
+    calories: 520,
+    proteinG: 22,
+    foodNames: ["Quinoa", "Beans and lentils", "Peppers", "Hummus"],
+    parts: ["cupped hand quinoa", "fist beans", "fist peppers", "thumb hummus"],
+    mealHint: "lunch",
+  },
+  {
+    name: "Salmon poke",
+    tags: ["pescatarian", "fresh"],
+    calories: 580,
+    proteinG: 40,
+    foodNames: ["Tuna or salmon", "Rice", "Mixed vegetables", "Sesame oil"],
+    parts: ["palm salmon", "cupped hand rice", "2 fists veg", "thumb sesame oil"],
+    mealHint: "lunch",
+  },
+  {
+    name: "Chicken pasta",
+    tags: ["family", "30 min"],
+    calories: 590,
+    proteinG: 46,
+    foodNames: ["Chicken breast", "Wholegrain pasta", "Broccoli", "Olive oil"],
+    parts: ["palm chicken", "cupped hand pasta", "2 fists broccoli", "thumb olive oil"],
+    mealHint: "lunch",
+  },
+  {
+    name: "White fish plate",
+    tags: ["pescatarian", "20 min"],
+    calories: 510,
+    proteinG: 38,
+    foodNames: ["White fish", "Sweet potato", "Green beans", "Olive oil"],
+    parts: ["palm white fish", "cupped hand sweet potato", "2 fists green beans", "thumb olive oil"],
+    mealHint: "lunch",
+  },
+  {
+    name: "Tofu stir fry",
+    tags: ["plant", "20 min"],
+    calories: 560,
+    proteinG: 34,
+    foodNames: ["Tofu or tempeh", "Noodles", "Mixed vegetables", "Sesame oil"],
+    parts: ["palm tofu", "cupped hand noodles", "2 fists veg", "thumb sesame oil"],
+    mealHint: "dinner",
+  },
+  {
+    name: "Beef chilli",
+    tags: ["batch", "freezer-friendly"],
+    calories: 600,
+    proteinG: 44,
+    foodNames: ["Lean beef mince", "Beans and lentils", "Peppers", "Olive oil"],
+    parts: ["palm beef", "fist beans", "fist peppers", "thumb olive oil"],
+    mealHint: "dinner",
+  },
+  {
+    name: "Salmon and potatoes",
+    tags: ["pescatarian", "30 min"],
+    calories: 620,
+    proteinG: 42,
+    foodNames: ["Tuna or salmon", "Potatoes", "Broccoli", "Olive oil"],
+    parts: ["palm salmon", "cupped hand potatoes", "2 fists broccoli", "thumb olive oil"],
+    mealHint: "dinner",
+  },
+  {
+    name: "Prawn noodles",
+    tags: ["pescatarian", "15 min"],
+    calories: 540,
+    proteinG: 38,
+    foodNames: ["Prawns", "Noodles", "Mixed vegetables", "Sesame oil"],
+    parts: ["palm prawns", "cupped hand noodles", "2 fists veg", "thumb sesame oil"],
+    mealHint: "dinner",
+  },
+  {
+    name: "Chicken sweet potato",
+    tags: ["batch", "30 min"],
+    calories: 580,
+    proteinG: 46,
+    foodNames: ["Chicken breast", "Sweet potato", "Mixed vegetables", "Olive oil"],
+    parts: ["palm chicken", "cupped hand sweet potato", "2 fists veg", "thumb olive oil"],
+    mealHint: "dinner",
+  },
+  {
+    name: "Vegan bean bowl",
+    tags: ["plant", "batch"],
+    calories: 520,
+    proteinG: 24,
+    foodNames: ["Beans and lentils", "Quinoa", "Mushrooms", "Hummus"],
+    parts: ["fist beans", "cupped hand quinoa", "fist mushrooms", "thumb hummus"],
+    mealHint: "dinner",
+  },
+  {
+    name: "Roast tofu and veg",
+    tags: ["plant", "30 min"],
+    calories: 540,
+    proteinG: 30,
+    foodNames: ["Tofu or tempeh", "Sweet potato", "Carrots", "Olive oil"],
+    parts: ["palm tofu", "cupped hand sweet potato", "2 fists carrots", "thumb olive oil"],
+    mealHint: "dinner",
+  },
+  {
+    name: "Apple and peanut butter",
+    tags: ["plant", "no cook"],
+    calories: 220,
+    proteinG: 6,
+    foodNames: ["Fruit", "Peanut butter"],
+    parts: ["1 apple", "thumb peanut butter"],
+    mealHint: "snack",
+  },
+  {
+    name: "Greek yogurt and berries",
+    tags: ["high protein", "no cook"],
+    calories: 200,
+    proteinG: 18,
+    foodNames: ["Greek yogurt", "Berries"],
+    parts: ["small palm yogurt", "fist berries"],
+    mealHint: "snack",
+  },
+  {
+    name: "Hummus and carrots",
+    tags: ["plant", "no cook"],
+    calories: 180,
+    proteinG: 6,
+    foodNames: ["Hummus", "Carrots"],
+    parts: ["thumb hummus", "fist carrots"],
+    mealHint: "snack",
+  },
+  {
+    name: "Cottage cheese plate",
+    tags: ["high protein", "no cook"],
+    calories: 240,
+    proteinG: 22,
+    foodNames: ["Cottage cheese", "Fruit", "Nuts"],
+    parts: ["small palm cottage cheese", "fist berries", "thumb nuts"],
+    mealHint: "snack",
+  },
+  {
+    name: "Protein shake",
+    tags: ["portable", "5 min"],
+    calories: 220,
+    proteinG: 28,
+    foodNames: ["Protein powder", "Fruit"],
+    parts: ["1 scoop protein", "1 piece fruit"],
+    mealHint: "snack",
+  },
+];

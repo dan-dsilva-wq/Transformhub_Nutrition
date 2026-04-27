@@ -1,0 +1,334 @@
+@import "tailwindcss";
+
+/* ───────────────────────── Pace design tokens ─────────────────────────
+   Mint Frost.
+   Bone canvas with a fixed mint/sky/peach mesh, frosted-glass cards,
+   teal primary, lime + sky + peach supports.
+   ──────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* Surface */
+  --color-canvas: #fbfaf6;          /* page background base (the mesh sits on body) */
+  --color-paper: #ffffff;           /* solid sheets / drawers */
+  --color-stone: #eef3ec;           /* secondary tile */
+  --color-stone-2: #e2eae0;         /* subtle border */
+  --color-hairline: #e6ece4;        /* divider line */
+
+  /* Ink */
+  --color-ink: #0f1714;             /* primary text */
+  --color-ink-2: #0f1714;           /* heading */
+  --color-muted: #5b6863;           /* secondary text */
+  --color-faint: #94a097;           /* placeholder, hint */
+
+  /* Brand + intent (Mint Frost palette) */
+  --color-forest: #0d9488;          /* teal — primary accent */
+  --color-forest-2: #0b7c70;        /* darker teal — hover */
+  --color-sage: #65a30d;            /* lime — positive */
+  --color-clay: #fb923c;            /* peach — warm warning */
+  --color-amber: #f59e0b;           /* amber — highlight */
+  --color-sky: #0284c7;             /* sky — secondary */
+  --color-cream: #e8f3ec;           /* mint tint surface */
+
+  /* Effects */
+  --shadow-card: 0 12px 40px rgba(15, 23, 20, 0.06);
+  --shadow-elevated: 0 24px 60px rgba(15, 23, 20, 0.10);
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-xl: 32px;
+  --radius-full: 9999px;
+
+  /* Safe-area aware viewport */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@theme inline {
+  --color-canvas: var(--color-canvas);
+  --color-paper: var(--color-paper);
+  --color-stone: var(--color-stone);
+  --color-stone-2: var(--color-stone-2);
+  --color-hairline: var(--color-hairline);
+
+  --color-ink: var(--color-ink);
+  --color-ink-2: var(--color-ink-2);
+  --color-muted: var(--color-muted);
+  --color-faint: var(--color-faint);
+
+  --color-forest: var(--color-forest);
+  --color-forest-2: var(--color-forest-2);
+  --color-sage: var(--color-sage);
+  --color-clay: var(--color-clay);
+  --color-amber: var(--color-amber);
+  --color-sky: var(--color-sky);
+  --color-cream: var(--color-cream);
+
+  --font-display: var(--font-body), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-body: var(--font-body), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+
+  --shadow-card: var(--shadow-card);
+  --shadow-elevated: var(--shadow-elevated);
+}
+
+/* base */
+html { background: var(--color-canvas); color: var(--color-ink); }
+body {
+  background:
+    radial-gradient(circle at 18% 8%, rgba(167, 243, 208, 0.55) 0%, transparent 50%),
+    radial-gradient(circle at 90% 28%, rgba(186, 230, 253, 0.55) 0%, transparent 50%),
+    radial-gradient(circle at 40% 95%, rgba(254, 215, 170, 0.50) 0%, transparent 55%),
+    linear-gradient(180deg, #fbfaf6 0%, #f4f7f3 100%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  color: var(--color-ink);
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "ss01", "cv11";
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+img { max-width: 100%; }
+::selection { background: var(--color-forest); color: #fff; }
+
+/* prevent the silly iOS zoom on focus and the rubber-band scroll on body */
+input, select, textarea { font-size: 16px; }
+body { overscroll-behavior-y: contain; }
+
+/* utility primitives — kept tiny so we don't drift from Tailwind */
+.font-display { font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif; letter-spacing: -0.03em; font-weight: 600; }
+.font-body { font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif; }
+
+/* Card: frosted glass surface (Mint Frost) */
+.card {
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(22px);
+  backdrop-filter: blur(22px);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+.card-flat {
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.70);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  border-radius: var(--radius-lg);
+}
+.card-tint {
+  background: rgba(167, 243, 208, 0.30);
+  border: 1px solid rgba(167, 243, 208, 0.50);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  border-radius: var(--radius-lg);
+}
+
+/* Hairline divider */
+.hairline { border-color: var(--color-hairline); }
+
+/* Quiet button reset */
+button { -webkit-tap-highlight-color: transparent; }
+
+/* Stat readouts — Mint Frost favours sans, tabular figures, tight tracking */
+.numerals {
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "tnum", "lnum";
+  letter-spacing: -0.03em;
+  font-weight: 600;
+}
+
+/* Smooth ring animation */
+@keyframes ring-fill {
+  from { stroke-dashoffset: var(--ring-from, 100); }
+  to { stroke-dashoffset: var(--ring-to, 0); }
+}
+.ring-anim { animation: ring-fill 700ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+
+/* Sheet enter animation */
+@keyframes sheet-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.sheet-anim { animation: sheet-up 280ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+.fade-anim  { animation: fade-in 200ms ease-out; }
+
+/* Shimmer skeleton */
+@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+.skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,0.45) 25%, rgba(255,255,255,0.75) 50%, rgba(255,255,255,0.45) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+  border-radius: var(--radius-md);
+}
+
+/* Tap target floor */
+[data-tap] { min-height: 44px; min-width: 44px; }
+
+/* Hide scrollbar but preserve scroll */
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* Onboarding plan-reveal & habit-pillar animations */
+@keyframes count-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes pillar-fade {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.count-up-anim   { animation: count-up 600ms cubic-bezier(.2,.8,.2,1) both; }
+.scale-in-anim   { animation: scale-in 420ms cubic-bezier(.2,.8,.2,1) both; }
+.pillar-fade-anim { animation: pillar-fade 380ms cubic-bezier(.2,.8,.2,1) both; }
+
+/* ───────────────────────── Motion library (extended) ─────────────────────────
+   A small, opinionated animation toolkit. Easings standardise on
+   "out-quint" cubic-bezier(.2,.8,.2,1) so every motion feels the same.
+   Every utility respects prefers-reduced-motion below.
+   ──────────────────────────────────────────────────────────────────────── */
+
+@keyframes slide-up-in {
+  from { opacity: 0; transform: translate3d(0, 14px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes slide-down-in {
+  from { opacity: 0; transform: translate3d(0, -10px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes slide-right-in {
+  from { opacity: 0; transform: translate3d(-16px, 0, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes slide-left-in {
+  from { opacity: 0; transform: translate3d(16px, 0, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes pop-in {
+  0%   { opacity: 0; transform: scale(0.92); }
+  60%  { opacity: 1; transform: scale(1.02); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes bubble-in {
+  0%   { opacity: 0; transform: translate3d(0, 8px, 0) scale(0.96); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes pulse-soft {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.0); }
+  50%      { box-shadow: 0 0 0 6px rgba(13, 148, 136, 0.10); }
+}
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 0 rgba(255,255,255,0.55), 0 0 0 9999px rgba(15,23,20,0.55); }
+  70%  { box-shadow: 0 0 0 14px rgba(255,255,255,0.0),  0 0 0 9999px rgba(15,23,20,0.55); }
+  100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.0),     0 0 0 9999px rgba(15,23,20,0.55); }
+}
+@keyframes float-soft {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-3px); }
+}
+@keyframes draw-stroke {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes blur-in {
+  from { opacity: 0; filter: blur(8px); transform: translateY(6px); }
+  to   { opacity: 1; filter: blur(0);   transform: translateY(0); }
+}
+@keyframes spin-soft {
+  to { transform: rotate(360deg); }
+}
+
+.slide-up-anim     { animation: slide-up-in     420ms cubic-bezier(.2,.8,.2,1) both; }
+.slide-down-anim   { animation: slide-down-in   320ms cubic-bezier(.2,.8,.2,1) both; }
+.slide-right-anim  { animation: slide-right-in  360ms cubic-bezier(.2,.8,.2,1) both; }
+.slide-left-anim   { animation: slide-left-in   360ms cubic-bezier(.2,.8,.2,1) both; }
+.pop-in-anim       { animation: pop-in          420ms cubic-bezier(.2,.8,.2,1) both; }
+.bubble-anim       { animation: bubble-in       320ms cubic-bezier(.2,.8,.2,1) both; }
+.blur-in-anim      { animation: blur-in         520ms cubic-bezier(.2,.8,.2,1) both; }
+.float-anim        { animation: float-soft 4.2s ease-in-out infinite; }
+.pulse-soft-anim   { animation: pulse-soft 2.4s cubic-bezier(.4,0,.6,1) infinite; }
+.pulse-ring-anim   { animation: pulse-ring 2.0s cubic-bezier(.4,0,.6,1) infinite; }
+
+/* Stagger helper: apply to a parent; direct children animate sequentially.
+   Pair with .slide-up-anim / .pop-in-anim / etc. on each child. */
+.stagger > * { animation-delay: 0ms; }
+.stagger > *:nth-child(1)  { animation-delay:  40ms; }
+.stagger > *:nth-child(2)  { animation-delay:  90ms; }
+.stagger > *:nth-child(3)  { animation-delay: 140ms; }
+.stagger > *:nth-child(4)  { animation-delay: 190ms; }
+.stagger > *:nth-child(5)  { animation-delay: 240ms; }
+.stagger > *:nth-child(6)  { animation-delay: 290ms; }
+.stagger > *:nth-child(7)  { animation-delay: 340ms; }
+.stagger > *:nth-child(8)  { animation-delay: 390ms; }
+.stagger > *:nth-child(9)  { animation-delay: 440ms; }
+.stagger > *:nth-child(10) { animation-delay: 490ms; }
+
+/* Convenience: parent that auto-applies slide-up-in to its direct children
+   and staggers them. Saves needing to mark every child individually. */
+.stagger-up > * { animation: slide-up-in 420ms cubic-bezier(.2,.8,.2,1) both; }
+.stagger-up > *:nth-child(1)  { animation-delay:  40ms; }
+.stagger-up > *:nth-child(2)  { animation-delay:  90ms; }
+.stagger-up > *:nth-child(3)  { animation-delay: 140ms; }
+.stagger-up > *:nth-child(4)  { animation-delay: 190ms; }
+.stagger-up > *:nth-child(5)  { animation-delay: 240ms; }
+.stagger-up > *:nth-child(6)  { animation-delay: 290ms; }
+.stagger-up > *:nth-child(7)  { animation-delay: 340ms; }
+.stagger-up > *:nth-child(8)  { animation-delay: 390ms; }
+.stagger-up > *:nth-child(9)  { animation-delay: 440ms; }
+.stagger-up > *:nth-child(10) { animation-delay: 490ms; }
+
+/* Tactile press response — pair with [data-tap] or any interactive element. */
+.tap-bounce { transition: transform 140ms cubic-bezier(.2,.8,.2,1); }
+.tap-bounce:active { transform: scale(0.96); }
+
+/* Soft glow that draws the eye to a primary CTA without being noisy. */
+.cta-glow { position: relative; }
+.cta-glow::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: inherit;
+  background: radial-gradient(circle at 50% 50%, rgba(13,148,136,0.20), transparent 70%);
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 280ms ease-out;
+  pointer-events: none;
+}
+.cta-glow:hover::after,
+.cta-glow:focus-visible::after { opacity: 1; }
+
+/* Underline reveal for nav tabs and inline buttons. */
+.link-reveal { background-image: linear-gradient(currentColor, currentColor); background-size: 0% 1px; background-position: 0 100%; background-repeat: no-repeat; transition: background-size 240ms cubic-bezier(.2,.8,.2,1); }
+.link-reveal:hover, .link-reveal:focus-visible { background-size: 100% 1px; }
+
+/* SVG line draw — set --draw-len on the path; pair with .draw-anim */
+.draw-anim {
+  stroke-dasharray: var(--draw-len, 600);
+  stroke-dashoffset: var(--draw-len, 600);
+  animation: draw-stroke 1100ms cubic-bezier(.2,.8,.2,1) forwards;
+}
+
+/* Reduced-motion guard — disable everything decorative. */
+@media (prefers-reduced-motion: reduce) {
+  .ring-anim, .sheet-anim, .fade-anim, .skeleton,
+  .count-up-anim, .scale-in-anim, .pillar-fade-anim,
+  .slide-up-anim, .slide-down-anim, .slide-right-anim, .slide-left-anim,
+  .pop-in-anim, .bubble-anim, .blur-in-anim, .float-anim,
+  .pulse-soft-anim, .pulse-ring-anim, .draw-anim,
+  .stagger-up > * {
+    animation: none !important;
+  }
+  .tap-bounce { transition: none !important; }
+  .stagger > * { animation-delay: 0ms !important; }
+  .stagger-up > * { animation-delay: 0ms !important; }
+}

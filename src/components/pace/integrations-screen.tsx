@@ -31,19 +31,20 @@ export function IntegrationsScreen() {
   useEffect(() => {
     let cancelled = false;
     async function check() {
+      if (!isHealthConnectPlatform()) {
+        if (!cancelled) setHealthStatus("unsupported");
+        return;
+      }
       try {
-        const platform = isHealthConnectPlatform();
-        const avail = await HealthConnect.isAvailable();
-        setError(`DEBUG: platform=${platform} available=${avail.available} status=${avail.status}`);
-        if (!avail.available) {
+        const { available } = await HealthConnect.isAvailable();
+        if (!available) {
           if (!cancelled) setHealthStatus("unsupported");
           return;
         }
         const { granted } = await HealthConnect.hasPermissions();
         if (cancelled) return;
         setHealthStatus(granted ? "connected" : "available");
-      } catch (e) {
-        setError(`DEBUG check error: ${e instanceof Error ? e.message : String(e)}`);
+      } catch {
         if (!cancelled) setHealthStatus("unsupported");
       }
     }
@@ -74,16 +75,15 @@ export function IntegrationsScreen() {
     setBusy(true);
     setError(null);
     try {
-      setError("DEBUG: calling requestHealthPermissions...");
-      const result = await HealthConnect.requestHealthPermissions();
-      setError(`DEBUG: returned granted=${result.granted}`);
-      if (result.granted) {
+      const { granted } = await HealthConnect.requestHealthPermissions();
+      if (granted) {
         setHealthStatus("connected");
         await syncOnce();
-        setError(null);
+      } else {
+        setError("Permission denied. Open Health Connect to grant access.");
       }
     } catch (e) {
-      setError(`DEBUG ERROR: ${e instanceof Error ? e.message : String(e)}`);
+      setError(e instanceof Error ? e.message : "Could not connect");
     } finally {
       setBusy(false);
     }

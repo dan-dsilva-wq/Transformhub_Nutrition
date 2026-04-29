@@ -111,11 +111,13 @@ export function AppShell({ children }: { children: ReactNode }) {
             data-tour="log-button"
             aria-label="Log a meal"
             className={clsx(
-              "tap-bounce cta-glow absolute left-1/2 -translate-x-1/2 -top-5 grid h-14 w-14 place-items-center rounded-full bg-forest text-white shadow-elevated transition",
+              "absolute left-1/2 -top-5 grid h-14 w-14 -translate-x-1/2 place-items-center rounded-full",
               isActive("/log") && "ring-4 ring-forest/15",
             )}
           >
-            <Plus size={26} strokeWidth={2.4} aria-hidden />
+            <span className="tap-bounce cta-glow grid h-14 w-14 place-items-center rounded-full bg-forest text-white shadow-elevated transition">
+              <Plus size={26} strokeWidth={2.4} aria-hidden />
+            </span>
           </Link>
           <NavTab item={tabs[1]} active={isActive(tabs[1].href)} tourId="progress-tab" />
         </div>

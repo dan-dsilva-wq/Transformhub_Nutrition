@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import {
   Camera,
@@ -15,7 +15,7 @@ import {
   getMealConfidenceLabel,
   type MealEstimate,
 } from "@/lib/ai/schemas";
-import type { FoodSearchItem } from "@/lib/food-search";
+import { parseFoodSearchQuery, type FoodSearchItem } from "@/lib/food-search";
 import type { BarcodeProduct } from "@/lib/barcode-product";
 import { useAppState, useTodayMeals } from "@/lib/state/app-state";
 import {
@@ -159,10 +159,12 @@ function PhotoFlow() {
     setPreview(dataUrl);
     setEstimate(null);
     setError(null);
+    setSource(null);
+    void runEstimate(dataUrl);
   }
 
-  async function runEstimate() {
-    if (!preview) return;
+  async function runEstimate(imageDataUrl = preview) {
+    if (!imageDataUrl) return;
     if (!verdict.allowed) {
       setPaywallOpen(true);
       return;
@@ -174,7 +176,7 @@ function PhotoFlow() {
       const res = await fetch("/api/ai/meal-estimate", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ imageDataUrl: preview, note: note.trim() || undefined }),
+        body: JSON.stringify({ imageDataUrl, note: note.trim() || undefined }),
       });
       if (res.ok) {
         const json = await res.json();
@@ -213,6 +215,8 @@ function PhotoFlow() {
     setEstimate(null);
     setNote("");
     setError(null);
+    setSource(null);
+    setBusy(false);
   }
 
   if (!preview) {
@@ -283,8 +287,8 @@ function PhotoFlow() {
               placeholder="Anything the photo doesn't show…"
             />
           </Field>
-          <Button size="lg" fullWidth className="mt-4" onClick={runEstimate} loading={busy}>
-            Estimate this meal
+          <Button size="lg" fullWidth className="mt-4" onClick={() => runEstimate()} loading={busy}>
+            {busy ? "Estimating macros" : "Update estimate"}
           </Button>
           {error ? <p className="mt-2 text-sm text-clay">{error}</p> : null}
         </Card>
@@ -322,6 +326,22 @@ function EstimateEditor({
   function updateItem(idx: number, patch: Partial<MealEstimate["items"][number]>) {
     const items = estimate.items.map((it, i) => (i === idx ? { ...it, ...patch } : it));
     onChange({ ...estimate, items, totals: sumItems(items) });
+  }
+
+  function applyMilkVariant(idx: number, variant: (typeof milkVariants)[number]) {
+    const item = estimate.items[idx];
+    if (!item) return;
+    const ml = inferMilkMl(item);
+    const factor = ml / 100;
+    updateItem(idx, {
+      name: `${variant.label} milk`,
+      portion: `${ml} ml`,
+      calories: Math.round(variant.calories * factor),
+      proteinG: Number((variant.proteinG * factor).toFixed(1)),
+      carbsG: Number((variant.carbsG * factor).toFixed(1)),
+      fatG: Number((variant.fatG * factor).toFixed(1)),
+      fiberG: Number((variant.fiberG * factor).toFixed(1)),
+    });
   }
   return (
     <Card>
@@ -368,6 +388,21 @@ function EstimateEditor({
               <MacroEdit label="F" value={item.fatG} onChange={(v) => updateItem(idx, { fatG: v })} />
               <MacroEdit label="Fb" value={item.fiberG} onChange={(v) => updateItem(idx, { fiberG: v })} />
             </div>
+            {isMilkItem(item.name) ? (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {milkVariants.map((variant) => (
+                  <button
+                    key={variant.label}
+                    type="button"
+                    data-tap
+                    onClick={() => applyMilkVariant(idx, variant)}
+                    className="rounded-full border border-white/70 bg-white/70 px-3 py-1.5 text-xs font-medium text-ink hover:bg-white"
+                  >
+                    {variant.label}
+                  </button>
+                ))}
+              </div>
+            ) : null}
           </li>
         ))}
       </ul>
@@ -464,6 +499,25 @@ function sumItems(items: MealEstimate["items"]): MealEstimate["totals"] {
 
 /* ───────────────────────── Search flow ───────────────────────── */
 
+const milkVariants = [
+  { label: "Full fat", calories: 64, proteinG: 3.3, carbsG: 4.7, fatG: 3.6, fiberG: 0 },
+  { label: "Semi-skimmed", calories: 47, proteinG: 3.4, carbsG: 4.8, fatG: 1.7, fiberG: 0 },
+  { label: "Skimmed", calories: 35, proteinG: 3.4, carbsG: 5, fatG: 0.1, fiberG: 0 },
+] as const;
+
+function isMilkItem(name: string) {
+  return /\bmilk\b/i.test(name);
+}
+
+function inferMilkMl(item: MealEstimate["items"][number]) {
+  const portionMl = item.portion.match(/(\d+(?:\.\d+)?)\s*(?:ml|millilit)/i);
+  if (portionMl) {
+    return Number(portionMl[1]);
+  }
+
+  return Math.max(Math.round((item.calories / milkVariants[1].calories) * 100), 100);
+}
+
 function SearchFlow() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<FoodSearchItem[]>([]);
@@ -471,15 +525,27 @@ function SearchFlow() {
   const [picked, setPicked] = useState<FoodSearchItem | null>(null);
   const [grams, setGrams] = useState("100");
   const [error, setError] = useState<string | null>(null);
+  const [hasSearched, setHasSearched] = useState(false);
+  const searchIdRef = useRef(0);
   const { actions } = useAppState();
 
-  async function search() {
-    if (query.trim().length < 2) return;
+  const search = useCallback(async (nextQuery = query) => {
+    const trimmed = nextQuery.trim();
+    if (trimmed.length < 2) {
+      setResults([]);
+      setHasSearched(false);
+      return;
+    }
+    const searchId = searchIdRef.current + 1;
+    searchIdRef.current = searchId;
+    setHasSearched(true);
     setBusy(true);
     setError(null);
     try {
-      const res = await fetch(`/api/food/search?q=${encodeURIComponent(query.trim())}`);
+      const res = await fetch(`/api/food/search?q=${encodeURIComponent(trimmed)}`);
       const contentType = res.headers.get("content-type") ?? "";
+
+      if (searchId !== searchIdRef.current) return;
 
       if (!res.ok) {
         setResults([]);
@@ -501,11 +567,53 @@ function SearchFlow() {
         setError(json.error ?? "Couldn't search foods.");
       }
     } catch {
+      if (searchId !== searchIdRef.current) return;
       setResults([]);
       setError("Network unavailable.");
     } finally {
+      if (searchId === searchIdRef.current) {
+        setBusy(false);
+      }
+    }
+  }, [query]);
+
+  useEffect(() => {
+    const trimmed = query.trim();
+    if (trimmed.length < 2) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      void search(trimmed);
+    }, 350);
+
+    return () => window.clearTimeout(timer);
+  }, [query, search]);
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    void search();
+  }
+
+  function handleQueryChange(value: string) {
+    setQuery(value);
+    if (value.trim().length < 2) {
+      setResults([]);
+      setHasSearched(false);
       setBusy(false);
     }
+  }
+
+  function pickFood(food: FoodSearchItem) {
+    const requested = parseFoodSearchQuery(query).amount;
+    const requestedGrams = requested
+      ? requested.unit === "serving" || requested.unit === "egg" || requested.unit === "eggs"
+        ? requested.quantity * food.servingGrams
+        : requested.grams
+      : food.servingGrams;
+
+    setPicked(food);
+    setGrams(String(Math.round(requestedGrams)));
   }
 
   function save() {
@@ -525,6 +633,7 @@ function SearchFlow() {
     setGrams("100");
     setQuery("");
     setResults([]);
+    setHasSearched(false);
   }
 
   if (picked) {
@@ -584,15 +693,14 @@ function SearchFlow() {
 
   return (
     <Card>
-      <div className="flex items-center gap-2">
+      <form className="flex items-center gap-2" onSubmit={handleSubmit}>
         <Input
           placeholder="Search foods (e.g. 'banana', 'oats')…"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && search()}
+          onChange={(e) => handleQueryChange(e.target.value)}
         />
-        <Button onClick={search} loading={busy}>Search</Button>
-      </div>
+        <Button type="submit" loading={busy}>Search</Button>
+      </form>
       {error ? <p className="mt-2 text-sm text-clay">{error}</p> : null}
       {busy ? (
         <div className="mt-4 space-y-2">
@@ -607,7 +715,7 @@ function SearchFlow() {
               <button
                 type="button"
                 data-tap
-                onClick={() => setPicked(f)}
+                onClick={() => pickFood(f)}
                 className="flex w-full items-center justify-between gap-3 rounded-2xl border border-white/70 bg-white/60 px-4 py-3 text-left backdrop-blur-xl hover:bg-white/80 transition"
               >
                 <div className="min-w-0">
@@ -617,13 +725,13 @@ function SearchFlow() {
                   </div>
                 </div>
                 <span className="numerals shrink-0 text-sm text-ink-2">
-                  {Math.round(f.caloriesPer100g)}<span className="text-xs text-muted">/100g</span>
+                  {Math.round((f.caloriesPer100g * f.servingGrams) / 100)}<span className="text-xs text-muted">/{f.servingText}</span>
                 </span>
               </button>
             </li>
           ))}
         </ul>
-      ) : query.length >= 2 && !busy ? (
+      ) : hasSearched && query.trim().length >= 2 && !busy ? (
         <EmptyState title="No matches" body="Try a simpler word — 'oats' beats 'overnight oats'." />
       ) : (
         <p className="mt-4 text-xs text-muted">

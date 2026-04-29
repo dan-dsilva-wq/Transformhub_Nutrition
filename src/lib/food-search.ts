@@ -13,6 +13,16 @@ export interface FoodSearchItem {
   source: "USDA FoodData Central";
 }
 
+export interface ParsedFoodSearchQuery {
+  original: string;
+  searchTerms: string;
+  amount?: {
+    quantity: number;
+    unit: string;
+    grams: number;
+  };
+}
+
 interface UsdaFoodNutrient {
   nutrientId?: number;
   nutrientName?: string;
@@ -59,6 +69,96 @@ const nutrientIds = {
   fiber: 1079,
 } as const;
 
+const unitToGrams: Record<string, number> = {
+  g: 1,
+  gram: 1,
+  grams: 1,
+  kg: 1000,
+  ml: 1,
+  milliliter: 1,
+  milliliters: 1,
+  l: 1000,
+  litre: 1000,
+  litres: 1000,
+  tsp: 5,
+  teaspoon: 5,
+  teaspoons: 5,
+  tbsp: 15,
+  tablespoon: 15,
+  tablespoons: 15,
+  cup: 240,
+  cups: 240,
+  oz: 28.35,
+  ounce: 28.35,
+  ounces: 28.35,
+  lb: 453.6,
+  pound: 453.6,
+  pounds: 453.6,
+};
+
+const pieceLikeUnits = new Set([
+  "egg",
+  "eggs",
+  "slice",
+  "slices",
+  "piece",
+  "pieces",
+  "serving",
+  "servings",
+  "banana",
+  "bananas",
+  "apple",
+  "apples",
+]);
+
+export function parseFoodSearchQuery(query: string): ParsedFoodSearchQuery {
+  const original = query.trim().replace(/\s+/g, " ");
+  const match = original.match(/^(\d+(?:[.,]\d+)?|\d+\s*\/\s*\d+)\s*([a-zA-Z]+)?\b\s*(.*)$/);
+
+  if (!match) {
+    return { original, searchTerms: original };
+  }
+
+  const rawQuantity = match[1].replace(",", ".");
+  const quantity = rawQuantity.includes("/")
+    ? rawQuantity
+        .split("/")
+        .map((part) => Number(part.trim()))
+        .reduce((acc, part, index) => (index === 0 ? part : acc / part), 0)
+    : Number(rawQuantity);
+
+  if (!Number.isFinite(quantity) || quantity <= 0) {
+    return { original, searchTerms: original };
+  }
+
+  const unit = match[2]?.toLowerCase();
+  const rest = match[3]?.trim() ?? "";
+
+  if (!unit || pieceLikeUnits.has(unit)) {
+    return {
+      original,
+      searchTerms: rest || unit || original,
+      amount: { quantity, unit: unit || "serving", grams: quantity },
+    };
+  }
+
+  const gramsPerUnit = unitToGrams[unit];
+
+  if (!gramsPerUnit) {
+    return { original, searchTerms: [unit, rest].filter(Boolean).join(" "), amount: undefined };
+  }
+
+  return {
+    original,
+    searchTerms: rest || original,
+    amount: {
+      quantity,
+      unit,
+      grams: quantity * gramsPerUnit,
+    },
+  };
+}
+
 function nutrientValue(food: UsdaFoodSearchResult, id: number) {
   return food.foodNutrients?.find((nutrient) => nutrient.nutrientId === id)?.value ?? 0;
 }
@@ -84,13 +184,14 @@ function normaliseServingGrams(food: UsdaFoodSearchResult) {
 
 export function normaliseUsdaFood(food: UsdaFoodSearchResult): FoodSearchItem {
   const servingGrams = normaliseServingGrams(food);
+  const servingText = food.householdServingFullText || `${Math.round(servingGrams)} g`;
 
   return {
     id: String(food.fdcId),
     name: food.description || `USDA food ${food.fdcId}`,
     brand: food.brandName || food.brandOwner || undefined,
     category: food.foodCategory || undefined,
-    servingText: food.householdServingFullText || `${Math.round(servingGrams)} g`,
+    servingText,
     servingGrams,
     caloriesPer100g: nutrientValue(food, nutrientIds.calories),
     proteinPer100g: nutrientValue(food, nutrientIds.protein),

@@ -4,6 +4,7 @@ import {
   databaseRowToFoodSearchItem,
   foodSearchItemToDatabaseRow,
   normaliseUsdaFood,
+  parseFoodSearchQuery,
   type FoodDatabaseRow,
   type UsdaSearchResponse,
 } from "@/lib/food-search";
@@ -65,7 +66,9 @@ export async function GET(request: Request) {
     return NextResponse.json({ foods: [] });
   }
 
-  const cachedFoods = await searchCachedFoods(parsed.data);
+  const foodQuery = parseFoodSearchQuery(parsed.data);
+  const searchTerms = foodQuery.searchTerms || parsed.data;
+  const cachedFoods = await searchCachedFoods(searchTerms);
 
   if (cachedFoods.length >= 4) {
     return NextResponse.json({ foods: cachedFoods, source: "cache" });
@@ -83,7 +86,7 @@ export async function GET(request: Request) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        query: parsed.data,
+        query: searchTerms,
         pageSize: 8,
         pageNumber: 1,
         dataType: ["Foundation", "SR Legacy", "Survey (FNDDS)", "Branded"],

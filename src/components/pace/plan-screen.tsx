@@ -63,13 +63,14 @@ export function PlanScreen() {
     <div className="stagger-up space-y-6">
       <header>
         <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-muted">
-          YOU · PLAN
+          YOU &amp; TARGETS
         </p>
         <h1 className="font-display mt-2 text-[38px] leading-[1.05] text-ink-2">
-          Your <span className="text-forest">plan.</span>
+          You &amp; your <span className="text-forest">targets.</span>
         </h1>
         <p className="mt-2 text-sm text-muted">
-          The maths behind your day. Adjust when life changes.
+          Update your basics &mdash; height, weight, goal &mdash; and we&rsquo;ll
+          recalculate the maths behind your day.
         </p>
       </header>
 

@@ -12,7 +12,6 @@ import {
   MessageCircle,
   Target,
   Dumbbell,
-  Apple,
   Salad,
   BellRing,
   Activity,
@@ -34,13 +33,12 @@ const tabs: NavItem[] = [
   { href: "/today", label: "Today", icon: <Home size={20} aria-hidden /> },
   { href: "/you/foods", label: "Food", icon: <Salad size={20} aria-hidden /> },
   { href: "/progress", label: "Progress", icon: <TrendingUp size={20} aria-hidden /> },
+  { href: "/you/coach", label: "Coach", icon: <MessageCircle size={20} aria-hidden /> },
 ];
 
 const drawerItems: NavItem[] = [
-  { href: "/you/coach", label: "Coach", icon: <MessageCircle size={18} aria-hidden /> },
-  { href: "/you/plan", label: "Plan & targets", icon: <Target size={18} aria-hidden /> },
+  { href: "/you/plan", label: "You & targets", icon: <Target size={18} aria-hidden /> },
   { href: "/you/workouts", label: "Workouts", icon: <Dumbbell size={18} aria-hidden /> },
-  { href: "/you/foods", label: "Food guide", icon: <Apple size={18} aria-hidden /> },
   { href: "/you/reminders", label: "Reminders", icon: <BellRing size={18} aria-hidden /> },
   { href: "/you/integrations", label: "Integrations", icon: <Activity size={18} aria-hidden /> },
   { href: "/you/settings", label: "Settings", icon: <SettingsIcon size={18} aria-hidden /> },
@@ -105,7 +103,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
         aria-label="Primary"
       >
-        <div className="relative mx-auto grid h-16 max-w-md grid-cols-4 items-end">
+        <div className="relative mx-auto grid h-16 max-w-md grid-cols-5 items-end">
           <NavTab item={tabs[0]} active={isActive(tabs[0].href)} />
           <NavTab item={tabs[1]} active={isActive(tabs[1].href)} />
           <div className="relative h-full">
@@ -125,6 +123,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Link>
           </div>
           <NavTab item={tabs[2]} active={isActive(tabs[2].href)} tourId="progress-tab" />
+          <NavTab item={tabs[3]} active={isActive(tabs[3].href)} />
         </div>
       </nav>
 

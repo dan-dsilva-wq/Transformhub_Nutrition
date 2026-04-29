@@ -255,20 +255,22 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [workoutPlan, setWorkoutPlan] = useState(demoWorkoutPlan);
 
   const [meals, setMeals] = useState<MealLog[]>(() =>
-    demoMeals.map((meal, index) => ({
-      id: `demo-${index}`,
-      name: meal.name,
-      loggedAt: new Date().toISOString().slice(0, 10) + `T${meal.time}:00`,
-      calories: meal.calories,
-      proteinG: meal.proteinG,
-      carbsG: meal.carbsG,
-      fatG: meal.fatG,
-      fiberG: meal.fiberG,
-    })),
+    supabase
+      ? []
+      : demoMeals.map((meal, index) => ({
+          id: `demo-${index}`,
+          name: meal.name,
+          loggedAt: new Date().toISOString().slice(0, 10) + `T${meal.time}:00`,
+          calories: meal.calories,
+          proteinG: meal.proteinG,
+          carbsG: meal.carbsG,
+          fatG: meal.fatG,
+          fiberG: meal.fiberG,
+        })),
   );
 
-  const [waterMl, setWaterMl] = useState<number>(1450);
-  const [steps, setStepsState] = useState<number>(6200);
+  const [waterMl, setWaterMl] = useState<number>(supabase ? 0 : 1450);
+  const [steps, setStepsState] = useState<number>(supabase ? 0 : 6200);
   const [weights, setWeights] = useState<WeightEntry[]>([]);
   const [checkIns, setCheckIns] = useState<CheckIn[]>([]);
   const [chat, setChat] = useState<ChatMessage[]>(defaultChat);
@@ -299,20 +301,23 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setDraft(profileToDraft(demoProfile));
     setTargets(demoTargets);
     setWorkoutPlan(demoWorkoutPlan);
+    const isDemo = storageScope === DEMO_SCOPE;
     setMeals(
-      demoMeals.map((meal, index) => ({
-        id: `demo-${index}`,
-        name: meal.name,
-        loggedAt: new Date().toISOString().slice(0, 10) + `T${meal.time}:00`,
-        calories: meal.calories,
-        proteinG: meal.proteinG,
-        carbsG: meal.carbsG,
-        fatG: meal.fatG,
-        fiberG: meal.fiberG,
-      })),
+      isDemo
+        ? demoMeals.map((meal, index) => ({
+            id: `demo-${index}`,
+            name: meal.name,
+            loggedAt: new Date().toISOString().slice(0, 10) + `T${meal.time}:00`,
+            calories: meal.calories,
+            proteinG: meal.proteinG,
+            carbsG: meal.carbsG,
+            fatG: meal.fatG,
+            fiberG: meal.fiberG,
+          }))
+        : [],
     );
-    setWaterMl(1450);
-    setStepsState(6200);
+    setWaterMl(isDemo ? 1450 : 0);
+    setStepsState(isDemo ? 6200 : 0);
     setWeights([]);
     setCheckIns([]);
     setChat(defaultChat);

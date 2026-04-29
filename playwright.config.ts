@@ -40,6 +40,15 @@ export default defineConfig({
     {
       name: "mobile-chrome",
       use: { ...devices["Pixel 7"] },
+      testIgnore: /screenshots\.spec\.ts/,
+    },
+    {
+      // Used only for Play Store / marketing screenshot capture. The viewport
+      // is overridden per-test inside e2e/screenshots.spec.ts, so the desktop
+      // device profile here is just a sensible default.
+      name: "screenshot",
+      use: { ...devices["Desktop Chrome"] },
+      testMatch: /screenshots\.spec\.ts/,
     },
   ],
 });

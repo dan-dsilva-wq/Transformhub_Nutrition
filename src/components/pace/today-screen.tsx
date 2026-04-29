@@ -246,14 +246,26 @@ export function TodayScreen() {
           pct={waterRatio}
           colorVar="--color-sky"
           action={
-            <button
-              type="button"
-              data-tap
-              onClick={() => actions.addWater(250)}
-              className="text-[11px] font-medium text-forest underline-offset-4 hover:underline"
-            >
-              +250 ml
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                data-tap
+                onClick={() => actions.addWater(-250)}
+                disabled={waterMl <= 0}
+                aria-label="Remove 250 ml of water"
+                className="text-[11px] font-medium text-muted underline-offset-4 hover:underline hover:text-ink disabled:opacity-40 disabled:no-underline"
+              >
+                −250 ml
+              </button>
+              <button
+                type="button"
+                data-tap
+                onClick={() => actions.addWater(250)}
+                className="text-[11px] font-medium text-forest underline-offset-4 hover:underline"
+              >
+                +250 ml
+              </button>
+            </div>
           }
         />
         <TileFrost

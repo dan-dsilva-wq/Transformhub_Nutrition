@@ -131,6 +131,8 @@ export interface OnboardingExtras {
   unlikedFoods?: string[];
   /** Selected diet preset for the food list filter. Defaults to "omnivore". */
   foodDiet?: "omnivore" | "pescatarian" | "vegetarian" | "vegan";
+  /** Whether the user has dismissed the first-time food guide walkthrough. */
+  hasSeenFoodIntro?: boolean;
 }
 
 interface AppState {

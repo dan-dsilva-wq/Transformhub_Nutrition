@@ -2,7 +2,17 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { ArrowLeft, ChevronLeft, ChevronRight, Printer, RefreshCw, Utensils } from "lucide-react";
+import {
+  ArrowLeft,
+  Ban,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Printer,
+  RefreshCw,
+  Shuffle,
+  Utensils,
+} from "lucide-react";
 import { clsx } from "clsx";
 import { useAppState } from "@/lib/state/app-state";
 import { LockedState } from "./paywall-sheet";
@@ -41,17 +51,46 @@ function mealSlotsFor(mealsPerDay: number): string[] {
   return ["Breakfast", "Lunch", "Dinner"];
 }
 
-function makeDays(seed: number, slots: string[]): DayPlan[] {
-  const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  return dayNames.map((n, i) => ({
+const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+function pickRecipeKey(
+  shift: number,
+  dayIdx: number,
+  slotIdx: number,
+  banned: Set<string>,
+): string {
+  const candidates = recipeKeys.filter((k) => !banned.has(k));
+  const list = candidates.length > 0 ? candidates : recipeKeys;
+  return list[(dayIdx + shift + slotIdx * 2) % list.length];
+}
+
+function makeDays(
+  weekIdx: number,
+  shift: number,
+  slots: string[],
+  banned: Set<string>,
+  overrides: Record<string, string>,
+): DayPlan[] {
+  return dayNames.map((n, dayIdx) => ({
     name: n,
-    meals: slots.map((_, slotIndex) => ({
-      key: recipeKeys[(i + seed + slotIndex * 2) % recipeKeys.length],
-    })),
+    meals: slots.map((_, slotIdx) => {
+      const positionKey = `${weekIdx}|${dayIdx}|${slotIdx}`;
+      const overridden = overrides[positionKey];
+      const key =
+        overridden && !banned.has(overridden) && recipes[overridden]
+          ? overridden
+          : pickRecipeKey(shift, dayIdx, slotIdx, banned);
+      return { key };
+    }),
   }));
 }
 
-function buildWeeks(seed: number, slots: string[]): WeekPlan[] {
+function buildWeeks(
+  seed: number,
+  slots: string[],
+  banned: Set<string>,
+  overrides: Record<string, string>,
+): WeekPlan[] {
   const last = weekStart(-1);
   const lastEnd = new Date(last);
   lastEnd.setDate(lastEnd.getDate() + 6);
@@ -68,7 +107,7 @@ function buildWeeks(seed: number, slots: string[]): WeekPlan[] {
       range: `${fmt(last)} – ${fmt(lastEnd)}`,
       badge: "Past",
       badgeClass: "past",
-      days: makeDays(seed, slots),
+      days: makeDays(0, seed, slots, banned, overrides),
       showShop: true,
     },
     {
@@ -76,7 +115,7 @@ function buildWeeks(seed: number, slots: string[]): WeekPlan[] {
       range: `${fmt(cur)} – ${fmt(curEnd)}`,
       badge: "Current",
       badgeClass: "this-week",
-      days: makeDays(seed + 1, slots),
+      days: makeDays(1, seed + 1, slots, banned, overrides),
       showShop: true,
     },
     {
@@ -84,7 +123,7 @@ function buildWeeks(seed: number, slots: string[]): WeekPlan[] {
       range: `${fmt(next)} – ${fmt(nextEnd)}`,
       badge: "Planned",
       badgeClass: "future",
-      days: makeDays(seed + 3, slots),
+      days: makeDays(2, seed + 3, slots, banned, overrides),
       showShop: false,
     },
   ];
@@ -97,17 +136,35 @@ const badgeTone: Record<WeekPlan["badgeClass"], string> = {
 };
 
 export function FoodsWeekScreen() {
-  const { onboardingExtras } = useAppState();
+  const { onboardingExtras, actions } = useAppState();
   const mealsPerDay = onboardingExtras.routine?.mealsPerDay ?? 3;
   const [planSeed, setPlanSeed] = useState(0);
+  const [mealCountOpen, setMealCountOpen] = useState(false);
   const slots = useMemo(() => mealSlotsFor(mealsPerDay), [mealsPerDay]);
-  const weeks = useMemo(() => buildWeeks(planSeed, slots), [planSeed, slots]);
+  const banned = useMemo(
+    () => new Set(onboardingExtras.bannedRecipes ?? []),
+    [onboardingExtras.bannedRecipes],
+  );
+  const overrides = onboardingExtras.weekSwaps ?? {};
+  const weeks = useMemo(
+    () => buildWeeks(planSeed, slots, banned, overrides),
+    [planSeed, slots, banned, overrides],
+  );
   const [weekIndex, setWeekIndex] = useState<number>(1);
   const [openRecipe, setOpenRecipe] = useState<{
     day: string;
     slot: string;
     key: string;
     recipe: Recipe;
+    dayIdx: number;
+    slotIdx: number;
+  } | null>(null);
+  const [swapTarget, setSwapTarget] = useState<{
+    day: string;
+    slot: string;
+    currentKey: string;
+    dayIdx: number;
+    slotIdx: number;
   } | null>(null);
 
   const week = weeks[weekIndex];
@@ -118,10 +175,45 @@ export function FoodsWeekScreen() {
     setWeekIndex((i) => Math.min(weeks.length - 1, Math.max(0, i + dir)));
   }
 
-  function tapMeal(day: string, slot: string, key: string) {
+  function tapMeal(
+    day: string,
+    slot: string,
+    key: string,
+    dayIdx: number,
+    slotIdx: number,
+  ) {
     const recipe = recipes[key];
     if (!recipe) return;
-    setOpenRecipe({ day, slot, key, recipe });
+    setOpenRecipe({ day, slot, key, recipe, dayIdx, slotIdx });
+  }
+
+  function applySwap(dayIdx: number, slotIdx: number, newKey: string) {
+    const positionKey = `${weekIndex}|${dayIdx}|${slotIdx}`;
+    const next = { ...overrides, [positionKey]: newKey };
+    actions.setOnboardingExtras({ weekSwaps: next });
+  }
+
+  function banRecipe(key: string) {
+    const nextBanned = Array.from(new Set([...(onboardingExtras.bannedRecipes ?? []), key]));
+    // Drop any overrides that pointed at this banned recipe so they re-pick.
+    const cleaned: Record<string, string> = {};
+    for (const [pos, val] of Object.entries(overrides)) {
+      if (val !== key) cleaned[pos] = val;
+    }
+    actions.setOnboardingExtras({
+      bannedRecipes: nextBanned,
+      weekSwaps: cleaned,
+    });
+  }
+
+  function setMealsPerDay(nextMealsPerDay: number) {
+    actions.setOnboardingExtras({
+      routine: {
+        ...onboardingExtras.routine,
+        mealsPerDay: nextMealsPerDay,
+      },
+    });
+    setMealCountOpen(false);
   }
 
   return (
@@ -149,9 +241,16 @@ export function FoodsWeekScreen() {
               )}
             </h1>
           </div>
-          <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-xs shadow-sm">
+          <button
+            type="button"
+            data-tap
+            onClick={() => setMealCountOpen(true)}
+            aria-haspopup="dialog"
+            className="tap-bounce inline-flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-xs shadow-sm"
+            aria-label="Change meals per day"
+          >
             <Utensils size={12} aria-hidden /> {mealsPerDay}/day
-          </span>
+          </button>
         </div>
 
         <div className="flex items-center justify-between gap-3 rounded-3xl border border-white/85 bg-white/55 px-3 py-2.5 backdrop-blur-xl">
@@ -209,22 +308,42 @@ export function FoodsWeekScreen() {
               </div>
               <div className="space-y-2">
                 {d.meals.map((m, mi) => (
-                  <button
+                  <div
                     key={`${d.name}-${mi}`}
-                    type="button"
-                    data-tap
-                    onClick={() => tapMeal(d.name, slots[mi], m.key)}
-                    className="tap-bounce flex w-full items-center gap-3 rounded-2xl border border-white/70 bg-white/60 px-3 py-2.5 text-left"
+                    className="flex items-center gap-2 rounded-2xl border border-white/70 bg-white/60 px-3 py-2.5"
                   >
-                    <span className="text-2xl leading-none">{mealIcoFor(m.key)}</span>
-                    <div className="min-w-0 flex-1">
-                      <div className="text-[10.5px] font-medium uppercase tracking-[0.12em] text-muted">
-                        {slots[mi]}
+                    <button
+                      type="button"
+                      data-tap
+                      onClick={() => tapMeal(d.name, slots[mi], m.key, i, mi)}
+                      className="tap-bounce flex min-w-0 flex-1 items-center gap-3 text-left"
+                    >
+                      <span className="text-2xl leading-none">{mealIcoFor(m.key)}</span>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-[10.5px] font-medium uppercase tracking-[0.12em] text-muted">
+                          {slots[mi]}
+                        </div>
+                        <div className="truncate text-sm font-medium">{m.key}</div>
                       </div>
-                      <div className="text-sm font-medium">{m.key}</div>
-                    </div>
-                    <span className="text-xs text-forest">Recipe ›</span>
-                  </button>
+                    </button>
+                    <button
+                      type="button"
+                      data-tap
+                      onClick={() =>
+                        setSwapTarget({
+                          day: d.name,
+                          slot: slots[mi],
+                          currentKey: m.key,
+                          dayIdx: i,
+                          slotIdx: mi,
+                        })
+                      }
+                      aria-label={`Swap ${m.key}`}
+                      className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-hairline bg-white text-muted hover:text-ink"
+                    >
+                      <Shuffle size={14} aria-hidden />
+                    </button>
+                  </div>
                 ))}
               </div>
             </article>
@@ -277,9 +396,125 @@ export function FoodsWeekScreen() {
           name={openRecipe.key}
           recipe={openRecipe.recipe}
           onClose={() => setOpenRecipe(null)}
+          onSwap={() => {
+            setSwapTarget({
+              day: openRecipe.day,
+              slot: openRecipe.slot,
+              currentKey: openRecipe.key,
+              dayIdx: openRecipe.dayIdx,
+              slotIdx: openRecipe.slotIdx,
+            });
+            setOpenRecipe(null);
+          }}
+          onBan={() => {
+            banRecipe(openRecipe.key);
+            setOpenRecipe(null);
+          }}
+        />
+      ) : null}
+
+      {swapTarget ? (
+        <SwapSheet
+          day={swapTarget.day}
+          slot={swapTarget.slot}
+          currentKey={swapTarget.currentKey}
+          banned={banned}
+          onPick={(newKey) => {
+            applySwap(swapTarget.dayIdx, swapTarget.slotIdx, newKey);
+            setSwapTarget(null);
+          }}
+          onBan={(key) => banRecipe(key)}
+          onClose={() => setSwapTarget(null)}
+        />
+      ) : null}
+
+      {mealCountOpen ? (
+        <MealCountSheet
+          value={mealsPerDay}
+          onSelect={setMealsPerDay}
+          onClose={() => setMealCountOpen(false)}
         />
       ) : null}
     </LockedState>
+  );
+}
+
+const mealCountOptions = [
+  { value: 2, label: "2/day", detail: "Breakfast + dinner" },
+  { value: 3, label: "3/day", detail: "Breakfast, lunch, dinner" },
+  { value: 4, label: "4/day", detail: "Adds a snack" },
+  { value: 5, label: "5/day", detail: "Two smaller snacks" },
+] as const;
+
+function MealCountSheet({
+  value,
+  onSelect,
+  onClose,
+}: {
+  value: number;
+  onSelect: (value: number) => void;
+  onClose: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-end">
+      <button
+        type="button"
+        aria-label="Close meal count picker"
+        className="fade-anim absolute inset-0 bg-black/30 backdrop-blur-[2px]"
+        onClick={onClose}
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Meals per day"
+        className="sheet-anim relative mx-auto w-full max-w-[480px] rounded-t-[28px] bg-white px-5 pt-3 shadow-elevated"
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 22px)" }}
+      >
+        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-stone-2" />
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h3 className="font-display text-2xl text-ink-2">Meals per day</h3>
+            <p className="mt-0.5 text-xs text-muted">Updates this week&apos;s meal slots.</p>
+          </div>
+          <Utensils size={20} className="text-forest" aria-hidden />
+        </div>
+
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          {mealCountOptions.map((option) => {
+            const selected = option.value === value;
+            return (
+              <button
+                key={option.value}
+                type="button"
+                data-tap
+                onClick={() => onSelect(option.value)}
+                className={clsx(
+                  "tap-bounce min-h-[78px] rounded-2xl border px-3 py-3 text-left transition",
+                  selected
+                    ? "border-forest bg-forest text-white shadow-sm"
+                    : "border-hairline bg-paper text-ink",
+                )}
+                aria-pressed={selected}
+              >
+                <span className="block text-lg font-semibold numerals">{option.label}</span>
+                <span className={clsx("mt-1 block text-xs", selected ? "text-white/80" : "text-muted")}>
+                  {option.detail}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <button
+          type="button"
+          data-tap
+          onClick={onClose}
+          className="tap-bounce mt-4 inline-flex h-11 w-full items-center justify-center rounded-full border border-stone-2 bg-paper text-sm"
+        >
+          Done
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -289,12 +524,16 @@ function RecipeSheet({
   name,
   recipe,
   onClose,
+  onSwap,
+  onBan,
 }: {
   day: string;
   slot: string;
   name: string;
   recipe: Recipe;
   onClose: () => void;
+  onSwap: () => void;
+  onBan: () => void;
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end">
@@ -355,16 +594,149 @@ function RecipeSheet({
           ))}
         </ol>
 
-        <div className="mt-4 flex gap-2">
+        <div className="mt-4 grid grid-cols-3 gap-2">
+          <button
+            type="button"
+            data-tap
+            onClick={onSwap}
+            className="tap-bounce inline-flex h-11 items-center justify-center gap-1.5 rounded-full border border-stone-2 bg-paper text-xs"
+          >
+            <Shuffle size={14} aria-hidden /> Swap
+          </button>
+          <button
+            type="button"
+            data-tap
+            onClick={onBan}
+            className="tap-bounce inline-flex h-11 items-center justify-center gap-1.5 rounded-full border border-stone-2 bg-paper text-xs"
+          >
+            <Ban size={14} aria-hidden /> Don&rsquo;t suggest
+          </button>
           <button
             type="button"
             data-tap
             onClick={onClose}
-            className="tap-bounce inline-flex h-11 flex-1 items-center justify-center rounded-full border border-stone-2 bg-paper text-sm"
+            className="tap-bounce inline-flex h-11 items-center justify-center rounded-full bg-forest text-xs font-medium text-white"
           >
             Done
           </button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function SwapSheet({
+  day,
+  slot,
+  currentKey,
+  banned,
+  onPick,
+  onBan,
+  onClose,
+}: {
+  day: string;
+  slot: string;
+  currentKey: string;
+  banned: Set<string>;
+  onPick: (newKey: string) => void;
+  onBan: (key: string) => void;
+  onClose: () => void;
+}) {
+  const alternatives = recipeKeys.filter(
+    (k) => k !== currentKey && !banned.has(k),
+  );
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end">
+      <button
+        type="button"
+        aria-label="Close swap"
+        className="fade-anim absolute inset-0 bg-black/30 backdrop-blur-[2px]"
+        onClick={onClose}
+      />
+      <div
+        className="sheet-anim relative mx-auto max-h-[85vh] w-full max-w-[480px] overflow-y-auto rounded-t-[28px] bg-white px-5 pt-3 shadow-elevated"
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 22px)" }}
+      >
+        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-stone-2" />
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h3 className="font-display text-2xl text-ink-2">Swap meal</h3>
+            <p className="text-xs text-muted">
+              {day} · {slot} · replacing <span className="font-medium text-ink">{currentKey}</span>
+            </p>
+          </div>
+          <Shuffle size={20} className="text-forest" aria-hidden />
+        </div>
+
+        <button
+          type="button"
+          data-tap
+          onClick={() => {
+            onBan(currentKey);
+            onClose();
+          }}
+          className="tap-bounce mt-4 inline-flex w-full items-center gap-2 rounded-2xl border border-clay/30 bg-clay/5 px-3 py-2.5 text-left text-sm text-clay"
+        >
+          <Ban size={14} aria-hidden />
+          <span className="flex-1">Don&rsquo;t suggest &ldquo;{currentKey}&rdquo; again</span>
+        </button>
+
+        <div className="mt-4 mb-2 text-[11px] font-medium uppercase tracking-[0.18em] text-muted">
+          Pick an alternative
+        </div>
+
+        {alternatives.length === 0 ? (
+          <p className="rounded-2xl border border-hairline bg-paper px-4 py-6 text-center text-sm text-muted">
+            No more alternatives. Unban a meal in &ldquo;Edit foods&rdquo; or add new recipes to your list.
+          </p>
+        ) : (
+          <ul className="space-y-1.5">
+            {alternatives.map((key) => {
+              const r = recipes[key];
+              return (
+                <li
+                  key={key}
+                  className="flex items-center gap-2 rounded-2xl border border-hairline bg-white px-3 py-2"
+                >
+                  <button
+                    type="button"
+                    data-tap
+                    onClick={() => onPick(key)}
+                    className="tap-bounce flex min-w-0 flex-1 items-center gap-3 text-left"
+                  >
+                    <span className="text-2xl leading-none">{mealIcoFor(key)}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-sm font-medium">{key}</div>
+                      <div className="text-[11px] text-muted">
+                        {r ? `${r.kcal} kcal · ${r.p}g protein · ${r.time}` : "—"}
+                      </div>
+                    </div>
+                    <Check size={14} className="text-forest opacity-0" aria-hidden />
+                  </button>
+                  <button
+                    type="button"
+                    data-tap
+                    onClick={() => onBan(key)}
+                    aria-label={`Don't suggest ${key}`}
+                    className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-hairline bg-paper text-muted hover:text-clay"
+                  >
+                    <Ban size={13} aria-hidden />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+
+        <button
+          type="button"
+          data-tap
+          onClick={onClose}
+          className="tap-bounce mt-4 inline-flex h-11 w-full items-center justify-center rounded-full border border-stone-2 bg-paper text-sm"
+        >
+          Cancel
+        </button>
       </div>
     </div>
   );

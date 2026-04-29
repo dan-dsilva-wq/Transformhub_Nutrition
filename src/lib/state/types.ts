@@ -133,6 +133,10 @@ export interface OnboardingExtras {
   foodDiet?: "omnivore" | "pescatarian" | "vegetarian" | "vegan";
   /** Whether the user has dismissed the first-time food guide walkthrough. */
   hasSeenFoodIntro?: boolean;
+  /** Recipe keys the user has banned from showing up in the week plan. */
+  bannedRecipes?: string[];
+  /** Per-position recipe overrides for the week plan. Key is `${weekIdx}|${dayIdx}|${slotIdx}`. */
+  weekSwaps?: Record<string, string>;
 }
 
 interface AppState {

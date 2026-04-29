@@ -20,9 +20,9 @@ export function IntegrationsScreen() {
   const integrations: Integration[] = [
     {
       id: "health",
-      name: "Apple Health & Google Fit",
-      body: `Pull steps and weight automatically. Today: ${steps.toLocaleString()} steps.`,
-      status: "available",
+      name: "Apple Health & Health Connect",
+      body: `Pull steps and weight automatically. Today: ${steps.toLocaleString()} steps (entered manually for now).`,
+      status: "coming-soon",
       icon: <AppleIcon size={18} aria-hidden />,
       tone: "forest",
     },

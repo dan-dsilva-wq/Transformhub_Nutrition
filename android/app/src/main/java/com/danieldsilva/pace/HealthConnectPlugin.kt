@@ -74,7 +74,7 @@ class HealthConnectPlugin : Plugin() {
     }
 
     @PluginMethod
-    fun requestPermissions(call: PluginCall) {
+    fun requestHealthPermissions(call: PluginCall) {
         if (clientOrNull() == null) {
             call.reject("Health Connect is not available on this device")
             return

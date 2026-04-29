@@ -75,7 +75,7 @@ export function IntegrationsScreen() {
     setBusy(true);
     setError(null);
     try {
-      const { granted } = await HealthConnect.requestPermissions();
+      const { granted } = await HealthConnect.requestHealthPermissions();
       if (granted) {
         setHealthStatus("connected");
         await syncOnce();

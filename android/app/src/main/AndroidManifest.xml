@@ -30,6 +30,14 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
 
+            <!-- Supabase OAuth deep-link callback -->
+            <intent-filter android:autoVerify="false">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="com.danieldsilva.pace" android:host="auth" />
+            </intent-filter>
+
         </activity>
 
         <activity

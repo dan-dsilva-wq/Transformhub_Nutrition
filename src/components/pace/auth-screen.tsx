@@ -1,9 +1,18 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { Capacitor } from "@capacitor/core";
 import { Mail, ArrowRight } from "lucide-react";
 import { Button, Field, Input, Wordmark } from "./primitives";
 import { getSupabase } from "@/lib/state/app-state";
+
+const NATIVE_REDIRECT = "com.danieldsilva.pace://auth/callback";
+
+function authRedirect(): string {
+  return Capacitor.isNativePlatform()
+    ? NATIVE_REDIRECT
+    : `${window.location.origin}/auth/callback`;
+}
 
 export function AuthScreen() {
   const supabase = getSupabase();
@@ -29,7 +38,7 @@ export function AuthScreen() {
         : await supabase!.auth.signUp({
             email,
             password,
-            options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+            options: { emailRedirectTo: authRedirect() },
           });
 
     setIsSubmitting(false);
@@ -48,7 +57,7 @@ export function AuthScreen() {
     setMessage(null);
     const { error } = await supabase!.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: authRedirect() },
     });
     setIsSubmitting(false);
     if (error) setMessage(error.message);

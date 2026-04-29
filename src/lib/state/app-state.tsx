@@ -13,6 +13,8 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { App as CapacitorApp } from "@capacitor/app";
+import { Capacitor } from "@capacitor/core";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import {
   demoMeals,
@@ -425,6 +427,30 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     subscription,
     onboardingExtras,
   ]);
+
+  // Native deep-link → exchange OAuth code for a session in-app.
+  useEffect(() => {
+    if (!supabase) return;
+    if (!Capacitor.isNativePlatform()) return;
+    let listener: { remove: () => void } | null = null;
+    void CapacitorApp.addListener("appUrlOpen", async ({ url }) => {
+      try {
+        if (!url.startsWith("com.danieldsilva.pace://")) return;
+        const parsed = new URL(url);
+        const code = parsed.searchParams.get("code");
+        if (code) {
+          await supabase.auth.exchangeCodeForSession(code);
+        }
+      } catch {
+        /* ignore — bad URL */
+      }
+    }).then((handle) => {
+      listener = handle;
+    });
+    return () => {
+      listener?.remove();
+    };
+  }, [supabase]);
 
   // Auth wiring (light — full sync logic intentionally simplified for this rebuild).
   useEffect(() => {

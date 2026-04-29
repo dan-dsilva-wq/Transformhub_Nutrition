@@ -31,6 +31,8 @@ import {
 } from "./primitives";
 import { DailyReviewSheet } from "./daily-review-sheet";
 import { trackTesterEvent } from "@/lib/tester/track";
+import { App as CapacitorApp } from "@capacitor/app";
+import { Capacitor } from "@capacitor/core";
 
 function greet() {
   const h = new Date().getHours();
@@ -106,6 +108,23 @@ export function TodayScreen() {
     () => new Set(),
   );
   const [reviewDay, setReviewDay] = useState<string | null>(null);
+  const [appVersion, setAppVersion] = useState<string>("1.3");
+
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    let cancelled = false;
+    CapacitorApp.getInfo()
+      .then((info) => {
+        if (cancelled) return;
+        setAppVersion(`${info.version} (${info.build})`);
+      })
+      .catch(() => {
+        /* keep web fallback */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (auth.kind !== "signed-in") return;
@@ -469,6 +488,10 @@ export function TodayScreen() {
           </Card>
         )}
       </section>
+
+      <div className="pt-2 pb-1 text-center text-[10px] tracking-[0.16em] uppercase text-faint">
+        Pace · v{appVersion}
+      </div>
 
       <Sheet
         open={isEditingSteps}

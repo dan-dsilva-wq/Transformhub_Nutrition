@@ -186,7 +186,13 @@ function PhotoFlow() {
   }
 
   async function openCapture(kind: "camera" | "library") {
-    if (Capacitor.isNativePlatform()) {
+    // Only use the native plugin if the AAB actually has it installed.
+    // Older AAB shells without @capacitor/camera return false here, in which
+    // case we fall back to the HTML file input (which the WebView can show).
+    const useNative =
+      Capacitor.isNativePlatform() && Capacitor.isPluginAvailable("Camera");
+
+    if (useNative) {
       const dataUrl = await captureNative(
         kind === "camera" ? CameraSource.Camera : CameraSource.Photos,
       );
@@ -198,8 +204,10 @@ function PhotoFlow() {
       void runEstimate(dataUrl);
       return;
     }
-    // Web fallback: HTML file input. Camera button keeps `capture="environment"`,
-    // library button removes it so the chooser goes straight to gallery.
+
+    // Web (and old-AAB) fallback: HTML file input. Camera button keeps
+    // `capture="environment"`; library button drops it so Android shows
+    // the gallery picker instead.
     const input = fileRef.current;
     if (!input) return;
     if (kind === "camera") {

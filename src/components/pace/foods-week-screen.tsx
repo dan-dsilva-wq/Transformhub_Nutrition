@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
   Ban,
@@ -11,6 +11,7 @@ import {
   Printer,
   RefreshCw,
   Shuffle,
+  Sparkles,
   Utensils,
 } from "lucide-react";
 import { clsx } from "clsx";
@@ -145,7 +146,10 @@ export function FoodsWeekScreen() {
     () => new Set(onboardingExtras.bannedRecipes ?? []),
     [onboardingExtras.bannedRecipes],
   );
-  const overrides = onboardingExtras.weekSwaps ?? {};
+  const overrides = useMemo(
+    () => onboardingExtras.weekSwaps ?? {},
+    [onboardingExtras.weekSwaps],
+  );
   const weeks = useMemo(
     () => buildWeeks(planSeed, slots, banned, overrides),
     [planSeed, slots, banned, overrides],
@@ -214,6 +218,22 @@ export function FoodsWeekScreen() {
       },
     });
     setMealCountOpen(false);
+  }
+
+  if (!onboardingExtras.weekGenerated) {
+    return (
+      <LockedState feature="nutrition-guide">
+        <GenerateWeek
+          name={onboardingExtras.name}
+          mealsPerDay={mealsPerDay}
+          likedCount={Math.max(
+            recipeKeys.length - (onboardingExtras.bannedRecipes?.length ?? 0),
+            0,
+          )}
+          onDone={() => actions.setOnboardingExtras({ weekGenerated: true })}
+        />
+      </LockedState>
+    );
   }
 
   return (
@@ -755,6 +775,171 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
     <div className="mt-5 mb-2 text-[11px] font-medium uppercase tracking-[0.18em] text-muted">
       {children}
+    </div>
+  );
+}
+
+const generateSteps = [
+  "Reading your foods…",
+  "Balancing protein, carbs &amp; fat…",
+  "Rotating meals across the week…",
+  "Wrapping up your plan…",
+];
+
+function GenerateWeek({
+  name,
+  mealsPerDay,
+  likedCount,
+  onDone,
+}: {
+  name: string | undefined;
+  mealsPerDay: number;
+  likedCount: number;
+  onDone: () => void;
+}) {
+  const [phase, setPhase] = useState<"idle" | "running">("idle");
+  const [stepIdx, setStepIdx] = useState(0);
+
+  useEffect(() => {
+    if (phase !== "running") return;
+    const stepDuration = 500;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    for (let i = 1; i < generateSteps.length; i++) {
+      timers.push(
+        setTimeout(() => setStepIdx(i), i * stepDuration),
+      );
+    }
+    timers.push(
+      setTimeout(() => onDone(), generateSteps.length * stepDuration + 200),
+    );
+    return () => {
+      for (const t of timers) clearTimeout(t);
+    };
+  }, [phase, onDone]);
+
+  return (
+    <div className="stagger-up space-y-4 pb-32">
+      <Link
+        href="/you/foods"
+        className="inline-flex items-center gap-1 text-sm text-muted"
+      >
+        <ArrowLeft size={14} aria-hidden /> Back
+      </Link>
+
+      <header>
+        <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-muted">
+          YOUR WEEK
+        </p>
+        <h1 className="font-display mt-1 text-[34px] leading-[1.05] text-ink-2">
+          {phase === "running" ? (
+            <>
+              Building your <span className="text-forest">week…</span>
+            </>
+          ) : (
+            <>
+              Ready when <span className="text-forest">you are.</span>
+            </>
+          )}
+        </h1>
+        <p className="mt-2 text-sm text-muted">
+          {phase === "running"
+            ? "Hang tight — we're tailoring this to you."
+            : `Hi ${name ?? "there"} — let's spin up a 7-day plan from your foods.`}
+        </p>
+      </header>
+
+      <div className="rounded-3xl border border-white/85 bg-white/55 p-5 shadow-card backdrop-blur-xl">
+        <div className="flex items-center gap-3">
+          <div
+            className={clsx(
+              "grid h-12 w-12 shrink-0 place-items-center rounded-2xl",
+              phase === "running"
+                ? "animate-pulse bg-forest text-white"
+                : "bg-forest/10 text-forest",
+            )}
+          >
+            <Sparkles size={22} aria-hidden />
+          </div>
+          <div>
+            <div className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted">
+              Personalised plan
+            </div>
+            <div className="font-display text-lg text-ink-2">
+              {mealsPerDay} meals/day · {likedCount} recipes
+            </div>
+          </div>
+        </div>
+
+        <ul className="mt-4 space-y-2">
+          {generateSteps.map((s, i) => {
+            const done = phase === "running" && i < stepIdx;
+            const active = phase === "running" && i === stepIdx;
+            const pending = phase === "idle" || (!done && !active);
+            return (
+              <li
+                key={i}
+                className={clsx(
+                  "flex items-center gap-2.5 rounded-2xl border px-3 py-2 text-sm transition",
+                  done && "border-forest/20 bg-forest/[0.06] text-ink",
+                  active && "border-forest bg-white text-ink-2",
+                  pending && "border-hairline bg-white/40 text-faint",
+                )}
+              >
+                <span
+                  className={clsx(
+                    "grid h-6 w-6 place-items-center rounded-full text-[11px] font-semibold",
+                    done && "bg-forest text-white",
+                    active && "animate-pulse bg-forest/15 text-forest",
+                    pending && "bg-stone-2 text-muted",
+                  )}
+                >
+                  {done ? <Check size={12} aria-hidden /> : i + 1}
+                </span>
+                <span
+                  className="flex-1"
+                  dangerouslySetInnerHTML={{ __html: s }}
+                />
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+
+      <div className="rounded-3xl border border-white/85 bg-white/55 px-4 py-3 text-xs text-muted backdrop-blur-xl">
+        We rotate breakfast, lunch &amp; dinner across the week and balance kcal,
+        protein, carbs and fats to your targets. You can swap or ban any meal
+        afterwards.
+      </div>
+
+      <button
+        type="button"
+        data-tap
+        onClick={() => {
+          if (phase === "idle") {
+            setStepIdx(0);
+            setPhase("running");
+          }
+        }}
+        disabled={phase === "running"}
+        className={clsx(
+          "tap-bounce inline-flex h-12 w-full items-center justify-center gap-2 rounded-full text-sm font-medium shadow-elevated transition",
+          phase === "running"
+            ? "cursor-not-allowed bg-forest/70 text-white"
+            : "cta-glow bg-forest text-white",
+        )}
+      >
+        {phase === "running" ? (
+          <>
+            <Sparkles size={16} className="animate-pulse" aria-hidden />
+            Generating…
+          </>
+        ) : (
+          <>
+            <Sparkles size={16} aria-hidden />
+            Generate my week
+          </>
+        )}
+      </button>
     </div>
   );
 }

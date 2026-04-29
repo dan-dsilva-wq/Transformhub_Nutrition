@@ -614,14 +614,11 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     if (supabase) {
       await supabase.auth.signOut();
     }
-    // Wipe the just-signed-out user's namespaced blob so it can't be re-read
-    // if anyone signs back in on this device. The auth listener will flip
-    // storageScope to GUEST and reset in-memory state.
-    if (storageScope && storageScope !== GUEST_SCOPE && storageScope !== DEMO_SCOPE) {
-      clearPersisted(storageScope);
-    }
+    // Keep the signed-in user's namespaced blob so a normal sign-out/sign-in
+    // round trip does not force onboarding again. Account deletion and
+    // "Clear local data" remain the destructive paths.
     clearLegacy();
-  }, [supabase, storageScope]);
+  }, [supabase]);
 
   const deleteAccount = useCallback<AppActions["deleteAccount"]>(async () => {
     try {

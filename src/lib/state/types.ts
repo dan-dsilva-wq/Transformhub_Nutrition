@@ -137,6 +137,8 @@ export interface OnboardingExtras {
   bannedRecipes?: string[];
   /** Per-position recipe overrides for the week plan. Key is `${weekIdx}|${dayIdx}|${slotIdx}`. */
   weekSwaps?: Record<string, string>;
+  /** Whether the user has run the first-time week generator. */
+  weekGenerated?: boolean;
 }
 
 interface AppState {

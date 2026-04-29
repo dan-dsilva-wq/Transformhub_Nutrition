@@ -31,8 +31,7 @@ import {
 } from "./primitives";
 import { DailyReviewSheet } from "./daily-review-sheet";
 import { trackTesterEvent } from "@/lib/tester/track";
-import { App as CapacitorApp } from "@capacitor/app";
-import { Capacitor } from "@capacitor/core";
+import { useAppVersion } from "@/lib/app-version";
 
 function greet() {
   const h = new Date().getHours();
@@ -108,23 +107,7 @@ export function TodayScreen() {
     () => new Set(),
   );
   const [reviewDay, setReviewDay] = useState<string | null>(null);
-  const [appVersion, setAppVersion] = useState<string>("1.3");
-
-  useEffect(() => {
-    if (!Capacitor.isNativePlatform()) return;
-    let cancelled = false;
-    CapacitorApp.getInfo()
-      .then((info) => {
-        if (cancelled) return;
-        setAppVersion(`${info.version} (${info.build})`);
-      })
-      .catch(() => {
-        /* keep web fallback */
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const appVersion = useAppVersion();
 
   useEffect(() => {
     if (auth.kind !== "signed-in") return;

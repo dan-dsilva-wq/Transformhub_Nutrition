@@ -6,11 +6,13 @@ import { LogOut, Sparkles, Trash2, AlertTriangle } from "lucide-react";
 import { useAppState } from "@/lib/state/app-state";
 import { Button, Card, IconBadge, SectionHeader, Stat } from "./primitives";
 import { trialDaysLeft } from "@/lib/entitlement";
+import { useAppVersion } from "@/lib/app-version";
 
 export function SettingsScreen() {
   const router = useRouter();
   const { auth, profile, targets, subscription, actions } = useAppState();
   const daysLeft = trialDaysLeft(subscription.trialEndsAtIso);
+  const appVersion = useAppVersion();
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
@@ -207,7 +209,7 @@ export function SettingsScreen() {
       </button>
 
       <p className="text-center text-xs text-faint">
-        Pace · v1 · Build with care.
+        Pace · v{appVersion} · Build with care.
       </p>
     </div>
   );

@@ -230,11 +230,11 @@ export function TodayScreen() {
           {overshoot ? `${overshoot} kcal over target` : `${remaining} kcal remaining`}
         </div>
 
-        <div className="mt-5 grid grid-cols-4 gap-3 text-left">
-          <MacroCol letter="P" value={totals.proteinG} target={targets.proteinG} colorVar="--color-forest" />
-          <MacroCol letter="C" value={totals.carbsG} target={targets.carbsG} colorVar="--color-sky" />
-          <MacroCol letter="F" value={totals.fatG} target={targets.fatG} colorVar="--color-clay" />
-          <MacroCol letter="Fb" value={totals.fiberG} target={targets.fiberG} colorVar="--color-sage" />
+        <div className="mt-5 grid grid-cols-4 gap-3">
+          <MacroRing label="Protein" value={totals.proteinG} target={targets.proteinG} colorVar="--color-forest" />
+          <MacroRing label="Carbs" value={totals.carbsG} target={targets.carbsG} colorVar="--color-sky" />
+          <MacroRing label="Fat" value={totals.fatG} target={targets.fatG} colorVar="--color-clay" />
+          <MacroRing label="Fiber" value={totals.fiberG} target={targets.fiberG} colorVar="--color-sage" />
         </div>
       </Card>
 
@@ -670,28 +670,50 @@ function MacroField({
   );
 }
 
-function MacroCol({
-  letter,
+function MacroRing({
+  label,
   value,
   target,
   colorVar,
 }: {
-  letter: string;
+  label: string;
   value: number;
   target: number;
   colorVar: string;
 }) {
   const pct = target > 0 ? Math.min(value / target, 1) : 0;
+  const dash = Math.round(pct * 100);
   return (
-    <div>
-      <div className="text-[11px] uppercase tracking-[0.16em] text-muted">{letter}</div>
-      <div className="numerals mt-1 text-base text-ink-2 leading-none">{Math.round(value)}</div>
-      <div className="text-[10px] text-muted mt-0.5">/ {Math.round(target)}g</div>
-      <div className="mt-2 h-[3px] w-full overflow-hidden rounded-full bg-black/[0.08]">
-        <div
-          className="h-full rounded-full transition-[width] duration-500"
-          style={{ width: `${pct * 100}%`, background: `var(${colorVar})` }}
+    <div className="flex flex-col items-center">
+      <svg viewBox="0 0 36 36" className="h-14 w-14">
+        <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(0,0,0,0.07)" strokeWidth={3} />
+        <circle
+          cx="18"
+          cy="18"
+          r="15"
+          fill="none"
+          stroke={`var(${colorVar})`}
+          strokeWidth={3}
+          strokeLinecap="round"
+          strokeDasharray={`${dash} 100`}
+          transform="rotate(-90 18 18)"
+          style={{ transition: "stroke-dasharray 500ms ease" }}
         />
+        <text
+          x="18"
+          y="20.5"
+          textAnchor="middle"
+          fontSize="8.5"
+          fontWeight={700}
+          fill="var(--color-ink-2)"
+          className="numerals"
+        >
+          {dash}%
+        </text>
+      </svg>
+      <div className="mt-1.5 text-[11px] font-medium text-ink-2">{label}</div>
+      <div className="numerals text-[10px] text-muted">
+        {Math.round(value)} / {Math.round(target)}g
       </div>
     </div>
   );

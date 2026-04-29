@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Pace — macro display mockups</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root {
+    --forest: #1f5f4a;
+    --sky: #4f8fb0;
+    --clay: #b86a4a;
+    --sage: #8aa896;
+    --amber: #c98a3a;
+    --cream: #f6f1e7;
+    --paper: #fbf7ee;
+    --ink-2: #18241f;
+    --ink: #2c3a33;
+    --muted: #6c7a73;
+    --faint: #9aa69e;
+    --hairline: #e6dfcf;
+  }
+  body { background: #efe8d6; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; color: var(--ink); }
+  .font-display { font-family: "Fraunces", "Georgia", serif; font-weight: 600; letter-spacing: -0.01em; }
+  .text-forest { color: var(--forest); } .bg-forest { background: var(--forest); }
+  .text-sky { color: var(--sky); } .bg-sky { background: var(--sky); }
+  .text-clay { color: var(--clay); } .bg-clay { background: var(--clay); }
+  .text-sage { color: var(--sage); } .bg-sage { background: var(--sage); }
+  .text-ink-2 { color: var(--ink-2); } .text-ink { color: var(--ink); } .text-muted { color: var(--muted); } .text-faint { color: var(--faint); }
+  .bg-paper { background: var(--paper); } .bg-cream { background: var(--cream); }
+  .border-hairline { border-color: var(--hairline); }
+  .shadow-card { box-shadow: 0 8px 28px -16px rgba(24,36,31,.18), 0 2px 6px -2px rgba(24,36,31,.06); }
+  .glass { background: rgba(255,255,255,.6); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,.7); }
+  .label-eyebrow { font-size: 10.5px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); }
+  .numerals { font-variant-numeric: tabular-nums; }
+  .card-frame { width: 380px; padding: 18px 20px; border-radius: 28px; }
+</style>
+</head>
+<body>
+
+<div class="max-w-[1700px] mx-auto px-8 py-10">
+  <header class="mb-8">
+    <div class="label-eyebrow">Pace · Today screen</div>
+    <h1 class="font-display text-4xl text-ink-2 mt-1">Macro display — 6 directions</h1>
+    <p class="text-muted text-sm mt-2 max-w-2xl">
+      Same data each time: <b class="text-ink">1,420 / 2,100 kcal</b>,
+      P 92/142g · C 168/240g · F 38/68g · Fb 18/30g.
+      Pick the one that feels right and I'll wire it up.
+    </p>
+  </header>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+
+    <!-- ============== 1. Stacked calorie bar ============== -->
+    <section>
+      <div class="mb-3"><div class="label-eyebrow">Variant 1</div>
+        <h2 class="font-display text-xl text-ink-2">Stacked calorie bar</h2>
+        <p class="text-muted text-xs mt-1">One bar showing where today's calories came from. Reads like a budget.</p>
+      </div>
+      <div class="glass card-frame shadow-card">
+        <div class="label-eyebrow">Today</div>
+        <div class="mt-1 flex items-baseline gap-1.5">
+          <span class="font-display text-3xl text-ink-2 numerals">1,420</span>
+          <span class="text-xs text-muted">/ 2,100 kcal</span>
+        </div>
+        <div class="mt-3 h-3 w-full overflow-hidden rounded-full bg-black/5 flex">
+          <div style="width:26%;background:var(--forest)"></div>
+          <div style="width:32%;background:var(--sky)"></div>
+          <div style="width:16%;background:var(--clay)"></div>
+          <div style="width:6%;background:var(--sage)"></div>
+        </div>
+        <div class="mt-3 grid grid-cols-4 gap-2 text-[11px]">
+          <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-forest"></span>Protein <span class="text-muted ml-auto numerals">92g</span></div>
+          <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-sky"></span>Carbs <span class="text-muted ml-auto numerals">168g</span></div>
+          <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-clay"></span>Fat <span class="text-muted ml-auto numerals">38g</span></div>
+          <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-sage"></span>Fiber <span class="text-muted ml-auto numerals">18g</span></div>
+        </div>
+      </div>
+      <p class="text-[11px] text-muted mt-3"><b class="text-ink-2">Pros:</b> calm, single shape. <b class="text-ink-2">Cons:</b> doesn't show "remaining to target" per macro.</p>
+    </section>
+
+    <!-- ============== 2. Quad rings ============== -->
+    <section>
+      <div class="mb-3"><div class="label-eyebrow">Variant 2 · most common</div>
+        <h2 class="font-display text-xl text-ink-2">Four small rings</h2>
+        <p class="text-muted text-xs mt-1">Each macro gets its own progress ring. Familiar from MyFitnessPal & co.</p>
+      </div>
+      <div class="glass card-frame shadow-card">
+        <div class="flex items-baseline justify-between">
+          <div>
+            <div class="label-eyebrow">Macros today</div>
+            <div class="font-display text-2xl text-ink-2 numerals">1,420 <span class="text-muted text-sm">kcal</span></div>
+          </div>
+          <span class="text-xs text-muted">68% of goal</span>
+        </div>
+        <div class="mt-4 grid grid-cols-4 gap-2">
+          <!-- ring -->
+          <div class="flex flex-col items-center">
+            <svg viewBox="0 0 36 36" class="w-14 h-14">
+              <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(0,0,0,.07)" stroke-width="3"/>
+              <circle cx="18" cy="18" r="15" fill="none" stroke="var(--forest)" stroke-width="3" stroke-linecap="round"
+                      stroke-dasharray="65 100" transform="rotate(-90 18 18)"/>
+              <text x="18" y="20" text-anchor="middle" font-size="9" font-weight="700" fill="var(--ink-2)">65%</text>
+            </svg>
+            <div class="text-[11px] text-ink-2 mt-1.5 font-medium">Protein</div>
+            <div class="text-[10px] text-muted numerals">92 / 142g</div>
+          </div>
+          <div class="flex flex-col items-center">
+            <svg viewBox="0 0 36 36" class="w-14 h-14">
+              <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(0,0,0,.07)" stroke-width="3"/>
+              <circle cx="18" cy="18" r="15" fill="none" stroke="var(--sky)" stroke-width="3" stroke-linecap="round"
+                      stroke-dasharray="70 100" transform="rotate(-90 18 18)"/>
+              <text x="18" y="20" text-anchor="middle" font-size="9" font-weight="700" fill="var(--ink-2)">70%</text>
+            </svg>
+            <div class="text-[11px] text-ink-2 mt-1.5 font-medium">Carbs</div>
+            <div class="text-[10px] text-muted numerals">168 / 240g</div>
+          </div>
+          <div class="flex flex-col items-center">
+            <svg viewBox="0 0 36 36" class="w-14 h-14">
+              <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(0,0,0,.07)" stroke-width="3"/>
+              <circle cx="18" cy="18" r="15" fill="none" stroke="var(--clay)" stroke-width="3" stroke-linecap="round"
+                      stroke-dasharray="56 100" transform="rotate(-90 18 18)"/>
+              <text x="18" y="20" text-anchor="middle" font-size="9" font-weight="700" fill="var(--ink-2)">56%</text>
+            </svg>
+            <div class="text-[11px] text-ink-2 mt-1.5 font-medium">Fat</div>
+            <div class="text-[10px] text-muted numerals">38 / 68g</div>
+          </div>
+          <div class="flex flex-col items-center">
+            <svg viewBox="0 0 36 36" class="w-14 h-14">
+              <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(0,0,0,.07)" stroke-width="3"/>
+              <circle cx="18" cy="18" r="15" fill="none" stroke="var(--sage)" stroke-width="3" stroke-linecap="round"
+                      stroke-dasharray="60 100" transform="rotate(-90 18 18)"/>
+              <text x="18" y="20" text-anchor="middle" font-size="9" font-weight="700" fill="var(--ink-2)">60%</text>
+            </svg>
+            <div class="text-[11px] text-ink-2 mt-1.5 font-medium">Fiber</div>
+            <div class="text-[10px] text-muted numerals">18 / 30g</div>
+          </div>
+        </div>
+      </div>
+      <p class="text-[11px] text-muted mt-3"><b class="text-ink-2">Pros:</b> instantly readable. <b class="text-ink-2">Cons:</b> a bit "fitness-app generic".</p>
+    </section>
+
+    <!-- ============== 3. Big calorie ring + 3 lines ============== -->
+    <section>
+      <div class="mb-3"><div class="label-eyebrow">Variant 3 · recommended</div>
+        <h2 class="font-display text-xl text-ink-2">One ring, three lines</h2>
+        <p class="text-muted text-xs mt-1">Hero: a big calorie ring. Underneath, three macro rows with name, count, and a slim bar.</p>
+      </div>
+      <div class="glass card-frame shadow-card">
+        <div class="flex items-center gap-5">
+          <svg viewBox="0 0 42 42" class="w-24 h-24 -my-1">
+            <circle cx="21" cy="21" r="18" fill="none" stroke="rgba(0,0,0,.07)" stroke-width="3.5"/>
+            <circle cx="21" cy="21" r="18" fill="none" stroke="var(--forest)" stroke-width="3.5" stroke-linecap="round"
+                    stroke-dasharray="76 113" transform="rotate(-90 21 21)"/>
+            <text x="21" y="20" text-anchor="middle" font-size="9" font-weight="700" fill="var(--ink-2)">1,420</text>
+            <text x="21" y="28" text-anchor="middle" font-size="5" fill="var(--muted)">/ 2,100 kcal</text>
+          </svg>
+          <div class="flex-1 space-y-2">
+            <div>
+              <div class="flex items-baseline justify-between text-[11px]">
+                <span class="font-medium text-ink-2">Protein</span>
+                <span class="text-muted numerals">92<span class="opacity-60">/142g</span></span>
+              </div>
+              <div class="mt-1 h-1.5 rounded-full bg-black/5 overflow-hidden">
+                <div class="h-full rounded-full" style="width:65%;background:var(--forest)"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex items-baseline justify-between text-[11px]">
+                <span class="font-medium text-ink-2">Carbs</span>
+                <span class="text-muted numerals">168<span class="opacity-60">/240g</span></span>
+              </div>
+              <div class="mt-1 h-1.5 rounded-full bg-black/5 overflow-hidden">
+                <div class="h-full rounded-full" style="width:70%;background:var(--sky)"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex items-baseline justify-between text-[11px]">
+                <span class="font-medium text-ink-2">Fat</span>
+                <span class="text-muted numerals">38<span class="opacity-60">/68g</span></span>
+              </div>
+              <div class="mt-1 h-1.5 rounded-full bg-black/5 overflow-hidden">
+                <div class="h-full rounded-full" style="width:56%;background:var(--clay)"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-3 flex items-center justify-between text-[11px] text-muted">
+          <span>Fiber <span class="text-ink-2 numerals">18 / 30g</span></span>
+          <span class="numerals">680 kcal left</span>
+        </div>
+      </div>
+      <p class="text-[11px] text-muted mt-3"><b class="text-ink-2">Pros:</b> hero number stays, macros breathe. <b class="text-ink-2">Cons:</b> taller card.</p>
+    </section>
+
+    <!-- ============== 4. Bento tiles ============== -->
+    <section>
+      <div class="mb-3"><div class="label-eyebrow">Variant 4</div>
+        <h2 class="font-display text-xl text-ink-2">Bento tiles</h2>
+        <p class="text-muted text-xs mt-1">Each macro is a soft-tinted tile with its own colour wash and a clear "left to go" number.</p>
+      </div>
+      <div class="glass card-frame shadow-card">
+        <div class="label-eyebrow">Macros · today</div>
+        <div class="mt-3 grid grid-cols-2 gap-2.5">
+          <div class="rounded-2xl p-3" style="background:rgba(31,95,74,.10)">
+            <div class="text-[10px] uppercase tracking-wider font-semibold text-forest">Protein</div>
+            <div class="font-display text-2xl text-ink-2 numerals mt-1">92<span class="text-base text-muted">g</span></div>
+            <div class="text-[10px] text-muted numerals">50g to go</div>
+            <div class="mt-2 h-1 rounded-full bg-white/70 overflow-hidden">
+              <div class="h-full" style="width:65%;background:var(--forest)"></div>
+            </div>
+          </div>
+          <div class="rounded-2xl p-3" style="background:rgba(79,143,176,.10)">
+            <div class="text-[10px] uppercase tracking-wider font-semibold text-sky">Carbs</div>
+            <div class="font-display text-2xl text-ink-2 numerals mt-1">168<span class="text-base text-muted">g</span></div>
+            <div class="text-[10px] text-muted numerals">72g to go</div>
+            <div class="mt-2 h-1 rounded-full bg-white/70 overflow-hidden">
+              <div class="h-full" style="width:70%;background:var(--sky)"></div>
+            </div>
+          </div>
+          <div class="rounded-2xl p-3" style="background:rgba(184,106,74,.10)">
+            <div class="text-[10px] uppercase tracking-wider font-semibold text-clay">Fat</div>
+            <div class="font-display text-2xl text-ink-2 numerals mt-1">38<span class="text-base text-muted">g</span></div>
+            <div class="text-[10px] text-muted numerals">30g to go</div>
+            <div class="mt-2 h-1 rounded-full bg-white/70 overflow-hidden">
+              <div class="h-full" style="width:56%;background:var(--clay)"></div>
+            </div>
+          </div>
+          <div class="rounded-2xl p-3" style="background:rgba(138,168,150,.13)">
+            <div class="text-[10px] uppercase tracking-wider font-semibold text-sage">Fiber</div>
+            <div class="font-display text-2xl text-ink-2 numerals mt-1">18<span class="text-base text-muted">g</span></div>
+            <div class="text-[10px] text-muted numerals">12g to go</div>
+            <div class="mt-2 h-1 rounded-full bg-white/70 overflow-hidden">
+              <div class="h-full" style="width:60%;background:var(--sage)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="text-[11px] text-muted mt-3"><b class="text-ink-2">Pros:</b> playful, cohesive with the food hub tiles. <b class="text-ink-2">Cons:</b> takes vertical space.</p>
+    </section>
+
+    <!-- ============== 5. Plate (radial) ============== -->
+    <section>
+      <div class="mb-3"><div class="label-eyebrow">Variant 5</div>
+        <h2 class="font-display text-xl text-ink-2">The plate</h2>
+        <p class="text-muted text-xs mt-1">Donut chart sliced by macro share, kcal in the middle. Distinctive but read carefully.</p>
+      </div>
+      <div class="glass card-frame shadow-card flex items-center gap-4">
+        <svg viewBox="0 0 42 42" class="w-32 h-32 -my-1">
+          <!-- 4 segments by kcal share: P 26, C 32, F 16, Fb 6, empty 20 -->
+          <circle cx="21" cy="21" r="15.9" fill="none" stroke="rgba(0,0,0,.06)" stroke-width="6"/>
+          <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--forest)" stroke-width="6"
+                  stroke-dasharray="26 100" stroke-dashoffset="0" transform="rotate(-90 21 21)"/>
+          <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--sky)" stroke-width="6"
+                  stroke-dasharray="32 100" stroke-dashoffset="-26" transform="rotate(-90 21 21)"/>
+          <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--clay)" stroke-width="6"
+                  stroke-dasharray="16 100" stroke-dashoffset="-58" transform="rotate(-90 21 21)"/>
+          <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--sage)" stroke-width="6"
+                  stroke-dasharray="6 100" stroke-dashoffset="-74" transform="rotate(-90 21 21)"/>
+          <text x="21" y="20" text-anchor="middle" font-size="6.5" font-weight="700" fill="var(--ink-2)">1,420</text>
+          <text x="21" y="26" text-anchor="middle" font-size="3.5" fill="var(--muted)">/ 2,100 kcal</text>
+        </svg>
+        <div class="space-y-1.5 text-[11.5px]">
+          <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-sm bg-forest"></span><span class="text-ink-2 font-medium">Protein</span><span class="text-muted numerals ml-auto">92g</span></div>
+          <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-sm bg-sky"></span><span class="text-ink-2 font-medium">Carbs</span><span class="text-muted numerals ml-auto">168g</span></div>
+          <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-sm bg-clay"></span><span class="text-ink-2 font-medium">Fat</span><span class="text-muted numerals ml-auto">38g</span></div>
+          <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-sm bg-sage"></span><span class="text-ink-2 font-medium">Fiber</span><span class="text-muted numerals ml-auto">18g</span></div>
+        </div>
+      </div>
+      <p class="text-[11px] text-muted mt-3"><b class="text-ink-2">Pros:</b> on-brand &ldquo;your plate&rdquo; metaphor. <b class="text-ink-2">Cons:</b> hard to see remaining-to-target.</p>
+    </section>
+
+    <!-- ============== 6. Editorial summary line ============== -->
+    <section>
+      <div class="mb-3"><div class="label-eyebrow">Variant 6</div>
+        <h2 class="font-display text-xl text-ink-2">Editorial summary</h2>
+        <p class="text-muted text-xs mt-1">Words first, numbers second. A friendly sentence over a single bar.</p>
+      </div>
+      <div class="glass card-frame shadow-card">
+        <div class="label-eyebrow">Today</div>
+        <p class="mt-1 font-display text-xl text-ink-2 leading-snug">
+          You're <span class="text-forest">on track</span> &mdash; about <b>680 kcal</b> left and a little more <b>protein</b> would top off the day.
+        </p>
+        <div class="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-black/5 flex">
+          <div style="width:26%;background:var(--forest)" title="Protein"></div>
+          <div style="width:32%;background:var(--sky)" title="Carbs"></div>
+          <div style="width:16%;background:var(--clay)" title="Fat"></div>
+          <div style="width:6%;background:var(--sage)" title="Fiber"></div>
+        </div>
+        <details class="mt-3">
+          <summary class="text-[11px] text-muted cursor-pointer">Show numbers</summary>
+          <div class="mt-2 grid grid-cols-4 gap-2 text-[11px] text-ink">
+            <div class="numerals">P <b>92</b><span class="text-faint">/142</span></div>
+            <div class="numerals">C <b>168</b><span class="text-faint">/240</span></div>
+            <div class="numerals">F <b>38</b><span class="text-faint">/68</span></div>
+            <div class="numerals">Fb <b>18</b><span class="text-faint">/30</span></div>
+          </div>
+        </details>
+      </div>
+      <p class="text-[11px] text-muted mt-3"><b class="text-ink-2">Pros:</b> on-brand for Pace's quiet, editorial voice. <b class="text-ink-2">Cons:</b> needs Coach-style copy logic.</p>
+    </section>
+
+  </div>
+
+  <footer class="mt-10 text-xs text-muted max-w-2xl">
+    My pick: <b class="text-ink-2">Variant 3 (One ring, three lines)</b> — keeps the calorie hero,
+    gives each macro real estate, and reads at a glance. Variant 6 is a strong second if you want
+    Today to feel more like a journal than a dashboard.
+  </footer>
+</div>
+
+</body>
+</html>

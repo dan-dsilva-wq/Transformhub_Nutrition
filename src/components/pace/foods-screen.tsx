@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ChevronRight, History, Sparkles, Utensils, X } from "lucide-react";
+import { clsx } from "clsx";
 import { useAppState } from "@/lib/state/app-state";
 import { LockedState } from "./paywall-sheet";
 import { allFoodNames } from "./foods/food-data";
@@ -18,10 +19,23 @@ export function FoodsScreen() {
   const [introOpen, setIntroOpen] = useState(
     !onboardingExtras.hasSeenFoodIntro,
   );
+  const [mealCountOpen, setMealCountOpen] = useState(false);
 
   function dismissIntro() {
     actions.setOnboardingExtras({ hasSeenFoodIntro: true });
     setIntroOpen(false);
+  }
+
+  function setMealsPerDay(nextMealsPerDay: number) {
+    actions.setOnboardingExtras({
+      routine: {
+        ...onboardingExtras.routine,
+        mealsPerDay: nextMealsPerDay,
+      },
+      weekGenerated: false,
+      weekSwaps: {},
+    });
+    setMealCountOpen(false);
   }
 
   return (
@@ -39,15 +53,34 @@ export function FoodsScreen() {
           </p>
         </header>
 
-        <div className="rounded-3xl border border-white/70 bg-white/55 px-4 py-3 text-sm shadow-card backdrop-blur-xl">
-          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-            <span className="font-display text-lg text-ink-2">
-              {Math.round(targets.calories)} kcal
-            </span>
-            <span className="text-muted">·</span>
-            <span className="text-ink">{Math.round(targets.proteinG)}g protein</span>
-            <span className="text-muted">·</span>
-            <span className="text-ink">{mealsPerDay} meals/day</span>
+        <div className="rounded-3xl border border-white/70 bg-white/55 p-2 text-sm shadow-card backdrop-blur-xl">
+          <div className="flex flex-wrap items-stretch gap-2">
+            <Link
+              href="/you/plan"
+              data-tap
+              className="tap-bounce min-w-[180px] flex-1 rounded-2xl bg-white/65 px-3 py-2 text-left"
+              aria-label="Edit calorie and protein targets"
+            >
+              <span className="block font-display text-lg text-ink-2">
+                {Math.round(targets.calories)} kcal
+              </span>
+              <span className="block text-xs text-ink">
+                {Math.round(targets.proteinG)}g protein
+              </span>
+            </Link>
+            <button
+              type="button"
+              data-tap
+              onClick={() => setMealCountOpen(true)}
+              className="tap-bounce min-w-[118px] rounded-2xl bg-white/65 px-3 py-2 text-left"
+              aria-haspopup="dialog"
+              aria-label="Edit meals per day"
+            >
+              <span className="block font-display text-lg text-ink-2">
+                {mealsPerDay}
+              </span>
+              <span className="block text-xs text-ink">meals/day</span>
+            </button>
           </div>
           <p className="mt-1 text-xs text-muted">
             Tuned for {name} · {profile.currentWeightKg}→{profile.goalWeightKg} kg
@@ -72,12 +105,15 @@ export function FoodsScreen() {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <Link
-            href="/you/foods/list"
+          <button
+            type="button"
+            data-tap
+            onClick={() => setMealCountOpen(true)}
             className="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1.5 text-xs text-ink shadow-sm backdrop-blur"
+            aria-haspopup="dialog"
           >
             <Utensils size={13} aria-hidden /> {mealsPerDay} meals/day
-          </Link>
+          </button>
           <Link
             href="/you/foods/week"
             className="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1.5 text-xs text-ink shadow-sm backdrop-blur"
@@ -95,7 +131,93 @@ export function FoodsScreen() {
       </div>
 
       {introOpen ? <FoodIntroSheet onClose={dismissIntro} /> : null}
+      {mealCountOpen ? (
+        <MealCountSheet
+          value={mealsPerDay}
+          onSelect={setMealsPerDay}
+          onClose={() => setMealCountOpen(false)}
+        />
+      ) : null}
     </LockedState>
+  );
+}
+
+const mealCountOptions = [
+  { value: 2, label: "2/day", detail: "Breakfast + dinner" },
+  { value: 3, label: "3/day", detail: "Breakfast, lunch, dinner" },
+  { value: 4, label: "4/day", detail: "Adds a snack" },
+  { value: 5, label: "5/day", detail: "Two smaller snacks" },
+] as const;
+
+function MealCountSheet({
+  value,
+  onSelect,
+  onClose,
+}: {
+  value: number;
+  onSelect: (value: number) => void;
+  onClose: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-end">
+      <button
+        type="button"
+        aria-label="Close meal count picker"
+        className="fade-anim absolute inset-0 bg-black/30 backdrop-blur-[2px]"
+        onClick={onClose}
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Meals per day"
+        className="sheet-anim relative mx-auto w-full max-w-[480px] rounded-t-[28px] bg-white px-5 pt-3 shadow-elevated"
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 22px)" }}
+      >
+        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-stone-2" />
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h3 className="font-display text-2xl text-ink-2">Meals per day</h3>
+            <p className="mt-0.5 text-xs text-muted">Updates portions and rebuilds your week.</p>
+          </div>
+          <Utensils size={20} className="text-forest" aria-hidden />
+        </div>
+
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          {mealCountOptions.map((option) => {
+            const selected = option.value === value;
+            return (
+              <button
+                key={option.value}
+                type="button"
+                data-tap
+                onClick={() => onSelect(option.value)}
+                className={clsx(
+                  "tap-bounce min-h-[78px] rounded-2xl border px-3 py-3 text-left transition",
+                  selected
+                    ? "border-forest bg-forest text-white shadow-sm"
+                    : "border-hairline bg-paper text-ink",
+                )}
+                aria-pressed={selected}
+              >
+                <span className="block text-lg font-semibold numerals">{option.label}</span>
+                <span className={clsx("mt-1 block text-xs", selected ? "text-white/80" : "text-muted")}>
+                  {option.detail}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <button
+          type="button"
+          data-tap
+          onClick={onClose}
+          className="tap-bounce mt-4 inline-flex h-11 w-full items-center justify-center rounded-full border border-stone-2 bg-paper text-sm"
+        >
+          Done
+        </button>
+      </div>
+    </div>
   );
 }
 

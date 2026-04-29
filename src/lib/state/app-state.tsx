@@ -105,6 +105,19 @@ function draftToProfile(draft: ProfileDraft): TargetProfile {
   };
 }
 
+function sameTargetProfile(a: TargetProfile, b: TargetProfile) {
+  return (
+    a.age === b.age &&
+    a.sexForCalories === b.sexForCalories &&
+    a.heightCm === b.heightCm &&
+    a.currentWeightKg === b.currentWeightKg &&
+    a.goalWeightKg === b.goalWeightKg &&
+    a.activityLevel === b.activityLevel &&
+    (a.baselineSteps ?? 5000) === (b.baselineSteps ?? 5000) &&
+    (a.workoutsPerWeek ?? 3) === (b.workoutsPerWeek ?? 3)
+  );
+}
+
 function todayLabel(date = new Date()) {
   return new Intl.DateTimeFormat("en-GB", {
     day: "2-digit",
@@ -500,6 +513,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
   const commitDraft = useCallback(() => {
     const next = draftToProfile(draft);
+    const changed = !sameTargetProfile(profile, next);
     setProfile(next);
     try {
       setTargets(calculateDailyTargets(next));
@@ -507,7 +521,15 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       /* guardrail tripped — keep prior targets */
     }
     setWorkoutPlan(createBusyHomeWorkoutPlan(draft.equipment));
-  }, [draft]);
+    if (changed) {
+      setOnboardingExtrasState((prev) => ({
+        ...prev,
+        nutritionPlan: undefined,
+        weekGenerated: false,
+        weekSwaps: {},
+      }));
+    }
+  }, [draft, profile]);
 
   const finishOnboarding = useCallback(() => {
     const next = draftToProfile(draft);
@@ -578,10 +600,22 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       isoDate: todayIsoDate(),
       weightKg: Math.round(weightKg * 10) / 10,
     };
+    const nextProfile = { ...profile, currentWeightKg: entry.weightKg };
     setWeights((prev) => [...prev, entry]);
-    setProfile((prev) => ({ ...prev, currentWeightKg: entry.weightKg }));
+    setProfile(nextProfile);
+    try {
+      setTargets(calculateDailyTargets(nextProfile));
+    } catch {
+      /* keep prior targets if the saved profile trips guardrails */
+    }
     setDraft((prev) => ({ ...prev, currentWeightKg: String(entry.weightKg) }));
-  }, []);
+    setOnboardingExtrasState((prev) => ({
+      ...prev,
+      nutritionPlan: undefined,
+      weekGenerated: false,
+      weekSwaps: {},
+    }));
+  }, [profile]);
 
   const addCheckIn = useCallback<AppActions["addCheckIn"]>((checkIn) => {
     const next: CheckIn = {

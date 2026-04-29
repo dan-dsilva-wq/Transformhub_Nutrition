@@ -32,6 +32,28 @@ import { clsx } from "clsx";
 import { BrowserMultiFormatReader, type IScannerControls } from "@zxing/browser";
 import { useEntitlement } from "@/lib/entitlement";
 import { PaywallSheet } from "./paywall-sheet";
+import { Capacitor } from "@capacitor/core";
+import {
+  Camera as NativeCamera,
+  CameraResultType,
+  CameraSource,
+} from "@capacitor/camera";
+
+async function captureNative(source: CameraSource): Promise<string | null> {
+  try {
+    const photo = await NativeCamera.getPhoto({
+      source,
+      resultType: CameraResultType.DataUrl,
+      quality: 80,
+      allowEditing: false,
+      correctOrientation: true,
+    });
+    return photo.dataUrl ?? null;
+  } catch {
+    // User cancelled or denied permission — silent.
+    return null;
+  }
+}
 
 type Tab = "photo" | "search" | "barcode";
 
@@ -163,6 +185,31 @@ function PhotoFlow() {
     void runEstimate(dataUrl);
   }
 
+  async function openCapture(kind: "camera" | "library") {
+    if (Capacitor.isNativePlatform()) {
+      const dataUrl = await captureNative(
+        kind === "camera" ? CameraSource.Camera : CameraSource.Photos,
+      );
+      if (!dataUrl) return;
+      setPreview(dataUrl);
+      setEstimate(null);
+      setError(null);
+      setSource(null);
+      void runEstimate(dataUrl);
+      return;
+    }
+    // Web fallback: HTML file input. Camera button keeps `capture="environment"`,
+    // library button removes it so the chooser goes straight to gallery.
+    const input = fileRef.current;
+    if (!input) return;
+    if (kind === "camera") {
+      input.setAttribute("capture", "environment");
+    } else {
+      input.removeAttribute("capture");
+    }
+    input.click();
+  }
+
   async function runEstimate(imageDataUrl = preview) {
     if (!imageDataUrl) return;
     if (!verdict.allowed) {
@@ -245,12 +292,12 @@ function PhotoFlow() {
             className="hidden"
             onChange={handleFile}
           />
-          <Button size="lg" className="mt-6" onClick={() => fileRef.current?.click()}>
+          <Button size="lg" className="mt-6" onClick={() => openCapture("camera")}>
             <Camera size={18} /> Open camera
           </Button>
           <button
             type="button"
-            onClick={() => fileRef.current?.click()}
+            onClick={() => openCapture("library")}
             className="mt-3 text-sm text-muted underline-offset-4 hover:underline"
           >
             Or upload from photos

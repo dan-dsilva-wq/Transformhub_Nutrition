@@ -442,6 +442,30 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     onboardingExtras,
   ]);
 
+  // Reload the WebView when the app returns to foreground after a long
+  // background, so testers always see the latest Vercel deploy without
+  // having to manually clear cache. Skipped if backgrounded < 60s.
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    let hiddenAt: number | null = null;
+    let listener: { remove: () => void } | null = null;
+    void CapacitorApp.addListener("appStateChange", (state) => {
+      if (!state.isActive) {
+        hiddenAt = Date.now();
+        return;
+      }
+      if (hiddenAt && Date.now() - hiddenAt > 60_000) {
+        window.location.reload();
+      }
+      hiddenAt = null;
+    }).then((handle) => {
+      listener = handle;
+    });
+    return () => {
+      listener?.remove();
+    };
+  }, []);
+
   // Native deep-link → exchange OAuth code for a session in-app.
   useEffect(() => {
     if (!supabase) return;

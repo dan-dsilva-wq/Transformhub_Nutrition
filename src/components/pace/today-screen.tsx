@@ -29,6 +29,7 @@ import {
   SectionHeader,
   Sheet,
 } from "./primitives";
+import { DailyReviewSheet } from "./daily-review-sheet";
 
 function greet() {
   const h = new Date().getHours();
@@ -94,7 +95,7 @@ function formatHistoryDay(dayKey: string) {
 }
 
 export function TodayScreen() {
-  const { profile, targets, meals: allMeals, weights, waterMl, steps, actions } = useAppState();
+  const { profile, targets, meals: allMeals, weights, waterMl, steps, auth, actions } = useAppState();
   const totals = useDayTotals();
   const meals = useTodayMeals();
   const [isEditingSteps, setIsEditingSteps] = useState(false);
@@ -103,6 +104,32 @@ export function TodayScreen() {
   const [expandedHistoryDays, setExpandedHistoryDays] = useState<Set<string>>(
     () => new Set(),
   );
+  const [reviewDay, setReviewDay] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (auth.kind !== "signed-in") return;
+    if (typeof window === "undefined") return;
+    const userId = auth.userId;
+    const today = new Date();
+    const ymd = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    const lastKey = `pace.lastUsedDay.${userId}`;
+    const lastUsed = window.localStorage.getItem(lastKey);
+    if (lastUsed && lastUsed !== ymd) {
+      const seenKey = `pace.reviewSeen.${userId}.${lastUsed}`;
+      if (!window.localStorage.getItem(seenKey)) {
+        setReviewDay(lastUsed);
+      }
+    }
+    window.localStorage.setItem(lastKey, ymd);
+  }, [auth]);
+
+  function dismissReview(submitted: boolean) {
+    if (reviewDay && auth.kind === "signed-in" && typeof window !== "undefined") {
+      const seenKey = `pace.reviewSeen.${auth.userId}.${reviewDay}`;
+      window.localStorage.setItem(seenKey, submitted ? "submitted" : "skipped");
+    }
+    setReviewDay(null);
+  }
 
   const calorieRatio = Math.min(totals.calories / Math.max(targets.calories, 1), 1);
   const remaining = Math.max(targets.calories - totals.calories, 0);
@@ -202,6 +229,13 @@ export function TodayScreen() {
 
   return (
     <div className="stagger-up space-y-4">
+      {reviewDay ? (
+        <DailyReviewSheet
+          day={reviewDay}
+          onClose={() => dismissReview(false)}
+          onSubmitted={() => dismissReview(true)}
+        />
+      ) : null}
       {/* Eyebrow + headline */}
       <header data-tour="today-header">
         <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-muted">

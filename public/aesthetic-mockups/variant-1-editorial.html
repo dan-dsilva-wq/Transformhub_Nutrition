@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Pace — Editorial</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper:#f7efe1;
+    --paper-2:#efe5d2;
+    --ink:#1c1812;
+    --ink-2:#3a342a;
+    --muted:#7a6f5e;
+    --rule:#d9cfb9;
+    --accent:#7a3a18;   /* terracotta */
+    --leaf:#3f5f3a;
+    --olive:#8b8540;
+  }
+  * { box-sizing:border-box; }
+  html, body { margin:0; padding:0; }
+  body {
+    background: var(--paper);
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(217,200,160,0.45), transparent 55%),
+      radial-gradient(circle at 85% 80%, rgba(190,170,130,0.30), transparent 55%);
+    color: var(--ink);
+    font-family: "Inter", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .toolbar { position:sticky; top:0; z-index:5; background: rgba(247,239,225,0.92); backdrop-filter: blur(14px); border-bottom:1px solid var(--rule); padding:10px 18px; font-size:13px; display:flex; justify-content:space-between; }
+  .toolbar a { color:var(--accent); text-decoration:none; }
+  .phone { max-width:440px; margin:0 auto; padding:0 22px 80px; }
+
+  .serif { font-family: "Cormorant Garamond", "Georgia", serif; }
+  .masthead { padding:36px 0 18px; border-bottom:1px solid var(--rule); }
+  .masthead .issue { display:flex; justify-content:space-between; align-items:baseline; font-family:"Inter"; font-size:10.5px; letter-spacing:0.22em; text-transform:uppercase; color:var(--muted); }
+  .masthead h1 { font-family:"Cormorant Garamond",serif; font-size:64px; line-height:0.95; font-weight:500; letter-spacing:-0.02em; margin:14px 0 0; }
+  .masthead h1 em { font-style:italic; color:var(--accent); }
+  .masthead .deck { font-family:"Cormorant Garamond",serif; font-style:italic; font-size:19px; color:var(--ink-2); margin-top:10px; line-height:1.35; }
+
+  .screen { padding-top:32px; }
+  .screen + .screen { margin-top:48px; border-top:2px double var(--rule); padding-top:36px; }
+  .screen-tag { font-family:"Inter"; font-size:10px; letter-spacing:0.3em; text-transform:uppercase; color:var(--muted); }
+  .screen-title { font-family:"Cormorant Garamond",serif; font-size:42px; line-height:1; letter-spacing:-0.02em; font-weight:500; margin:10px 0 0; }
+  .screen-title em { font-style:italic; color:var(--accent); }
+
+  /* Today */
+  .today-grid {
+    margin-top:24px;
+    display:grid; grid-template-columns: 1fr 1fr; gap:0;
+    border-top:1px solid var(--rule);
+    border-bottom:1px solid var(--rule);
+  }
+  .today-cell { padding:16px 12px; border-right:1px solid var(--rule); }
+  .today-cell:nth-child(2n) { border-right:none; }
+  .today-cell:nth-child(n+3) { border-top:1px solid var(--rule); }
+  .today-cell .lbl { font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:var(--muted); }
+  .today-cell .num { font-family:"Cormorant Garamond",serif; font-size:44px; line-height:1; letter-spacing:-0.02em; margin-top:6px; }
+  .today-cell .num em { font-style:italic; color:var(--accent); font-size:22px; vertical-align:super; margin-left:2px; }
+  .today-cell .sub { font-size:12px; color:var(--muted); margin-top:4px; }
+
+  .ledger { margin-top:24px; }
+  .ledger h3 { font-family:"Cormorant Garamond",serif; font-size:24px; font-weight:500; margin:0 0 8px; }
+  .meal-line { display:flex; justify-content:space-between; align-items:baseline; padding:14px 0; border-top:1px solid var(--rule); }
+  .meal-line:last-child { border-bottom:1px solid var(--rule); }
+  .meal-line .mname { font-family:"Cormorant Garamond",serif; font-size:22px; font-weight:500; }
+  .meal-line .mname em { font-style:italic; color:var(--muted); font-size:14px; margin-left:8px; font-family:"Inter"; }
+  .meal-line .kcal { font-family:"Cormorant Garamond",serif; font-size:22px; }
+  .meal-line .kcal em { font-style:italic; color:var(--muted); font-size:13px; margin-left:4px; font-family:"Inter"; }
+
+  .pull { font-family:"Cormorant Garamond",serif; font-style:italic; font-size:26px; line-height:1.3; color:var(--ink-2); border-left:3px solid var(--accent); padding:6px 0 6px 16px; margin:28px 0; }
+
+  /* Foods hub — two big tiles */
+  .hub { display:grid; grid-template-columns:1fr; gap:18px; margin-top:26px; }
+  .hub-tile { padding:24px; border:1px solid var(--rule); border-radius:6px; background:rgba(255,255,255,0.45); display:flex; gap:18px; align-items:center; }
+  .hub-tile .num { font-family:"Cormorant Garamond",serif; font-size:54px; line-height:1; color:var(--accent); font-style:italic; flex-shrink:0; }
+  .hub-tile .body h4 { font-family:"Cormorant Garamond",serif; font-weight:500; font-size:26px; margin:0; }
+  .hub-tile .body p { font-size:13px; color:var(--muted); margin:4px 0 0; line-height:1.5; }
+
+  /* Foods list */
+  .filter-row { display:flex; gap:6px; flex-wrap:wrap; margin-top:20px; }
+  .chip { font-size:11px; letter-spacing:0.14em; text-transform:uppercase; padding:6px 12px; border:1px solid var(--rule); border-radius:999px; background:transparent; color:var(--ink-2); }
+  .chip.on { background:var(--ink); color:var(--paper); border-color:var(--ink); }
+
+  .cat-head { display:flex; justify-content:space-between; align-items:baseline; margin:28px 0 4px; padding-bottom:6px; border-bottom:1px solid var(--rule); }
+  .cat-head h4 { font-family:"Cormorant Garamond",serif; font-size:26px; font-weight:500; margin:0; }
+  .cat-head h4 em { font-style:italic; color:var(--accent); font-size:16px; margin-left:8px; font-family:"Inter"; letter-spacing:0.16em; text-transform:uppercase; }
+  .cat-head .count { font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); }
+  .food-list { columns:2; column-gap:18px; margin-top:10px; }
+  .food-list .item { break-inside:avoid; padding:6px 0; font-size:14px; display:flex; gap:8px; align-items:center; border-bottom:1px dotted var(--rule); }
+  .food-list .item .em { font-size:15px; }
+  .food-list .item .tick { font-size:11px; color:var(--leaf); }
+  .food-list .item.off { color:var(--muted); text-decoration:line-through; }
+  .food-list .item.off .tick { visibility:hidden; }
+
+  /* Recipe page */
+  .recipe-hero { margin-top:24px; }
+  .recipe-hero .kicker { font-size:10.5px; letter-spacing:0.3em; text-transform:uppercase; color:var(--muted); }
+  .recipe-hero h2 { font-family:"Cormorant Garamond",serif; font-size:48px; line-height:1; font-weight:500; letter-spacing:-0.02em; margin:8px 0 0; }
+  .recipe-hero h2 em { font-style:italic; color:var(--accent); }
+  .recipe-hero .deck { font-family:"Cormorant Garamond",serif; font-style:italic; font-size:18px; color:var(--ink-2); margin-top:8px; }
+  .recipe-meta { display:flex; gap:18px; margin-top:14px; padding:12px 0; border-top:1px solid var(--rule); border-bottom:1px solid var(--rule); }
+  .recipe-meta div .lbl { font-size:9px; letter-spacing:0.24em; text-transform:uppercase; color:var(--muted); }
+  .recipe-meta div .v { font-family:"Cormorant Garamond",serif; font-size:22px; }
+
+  .columns { columns:2; column-gap:24px; margin-top:18px; font-size:14px; line-height:1.55; }
+  .columns h5 { font-family:"Cormorant Garamond",serif; font-style:italic; font-size:18px; margin:0 0 6px; column-span:all; -webkit-column-span:all; }
+  .columns ol, .columns ul { margin:0; padding-left:18px; }
+  .columns li { margin-bottom:6px; }
+
+  .footer-rule { text-align:center; margin-top:36px; font-family:"Cormorant Garamond",serif; font-style:italic; color:var(--muted); }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <span><strong>Variant 1</strong> · Editorial</span>
+  <a href="./index.html">← all variants</a>
+</div>
+
+<div class="phone">
+
+  <!-- ============ TODAY ============ -->
+  <div class="screen">
+    <div class="masthead">
+      <div class="issue"><span>Vol. 1 · No. 119</span><span>Wed, 29 Apr</span></div>
+      <h1>Pace, <em>steady.</em></h1>
+      <div class="deck">A quiet Wednesday — you’re 312 calories under and ahead on protein. Keep it boring.</div>
+    </div>
+
+    <div class="today-grid">
+      <div class="today-cell"><div class="lbl">Calories</div><div class="num">1,538<em>kcal</em></div><div class="sub">312 left of 1,850</div></div>
+      <div class="today-cell"><div class="lbl">Protein</div><div class="num">112<em>g</em></div><div class="sub">28 to go</div></div>
+      <div class="today-cell"><div class="lbl">Steps</div><div class="num">7,420</div><div class="sub">+2,580 to target</div></div>
+      <div class="today-cell"><div class="lbl">Weight</div><div class="num">74.2<em>kg</em></div><div class="sub">−0.8 this fortnight</div></div>
+    </div>
+
+    <div class="ledger">
+      <h3>Today’s ledger</h3>
+      <div class="meal-line"><div class="mname">Breakfast <em>Greek yoghurt, blueberries, oats</em></div><div class="kcal">412<em>kcal</em></div></div>
+      <div class="meal-line"><div class="mname">Lunch <em>Chicken, rice, broccoli</em></div><div class="kcal">586<em>kcal</em></div></div>
+      <div class="meal-line"><div class="mname">Snack <em>Whey + apple</em></div><div class="kcal">240<em>kcal</em></div></div>
+      <div class="meal-line"><div class="mname">Dinner <em>Salmon, asparagus</em></div><div class="kcal">300<em>kcal</em></div></div>
+    </div>
+
+    <p class="pull">“If the boring days look like this, the result is inevitable.”</p>
+  </div>
+
+  <!-- ============ FOODS HUB ============ -->
+  <div class="screen">
+    <div class="screen-tag">II · Foods</div>
+    <h2 class="screen-title">Eat what you <em>actually</em> like.</h2>
+
+    <div class="hub">
+      <a class="hub-tile" href="#">
+        <div class="num">i.</div>
+        <div class="body">
+          <h4>Your foods</h4>
+          <p>Your personal pantry — every food tuned to 1,850 kcal & 140 g protein. Tap to remove what you don’t eat.</p>
+        </div>
+      </a>
+      <a class="hub-tile" href="#">
+        <div class="num">ii.</div>
+        <div class="body">
+          <h4>Your week</h4>
+          <p>Seven days planned, with recipes and shopping lists. Step back through history or plan ahead.</p>
+        </div>
+      </a>
+    </div>
+
+    <p class="pull" style="font-size:22px">Tuned for Sam · 75 → 65 kg · three meals.</p>
+  </div>
+
+  <!-- ============ FOODS LIST ============ -->
+  <div class="screen">
+    <div class="screen-tag">II.i · The pantry</div>
+    <h2 class="screen-title">Your <em>pantry.</em></h2>
+
+    <div class="filter-row">
+      <button class="chip on">Omnivore</button>
+      <button class="chip">Pescatarian</button>
+      <button class="chip">Vegetarian</button>
+      <button class="chip">Vegan</button>
+    </div>
+
+    <div class="cat-head"><h4>Proteins <em>per meal · 47 g</em></h4><span class="count">12 of 14 ✓</span></div>
+    <div class="food-list">
+      <div class="item"><span class="em">🍗</span>Chicken breast<span class="tick" style="margin-left:auto">✓</span></div>
+      <div class="item"><span class="em">🐟</span>Salmon<span class="tick" style="margin-left:auto">✓</span></div>
+      <div class="item"><span class="em">🥚</span>Eggs<span class="tick" style="margin-left:auto">✓</span></div>
+      <div class="item"><span class="em">🐄</span>Lean beef<span class="tick" style="margin-left:auto">✓</span></div>
+      <div class="item"><span class="em">🦐</span>Prawns<span class="tick" style="margin-left:auto">✓</span></div>
+      <div class="item"><span class="em">🐟</span>Tuna<span class="tick" style="margin-left:auto">✓</span></div>
+      <div class="item off"><span class="em">🐖</span>Pork loin<span class="tick" style="margin-left:auto">✓</span></div>
+      <div class="item"><span class="em">🥛</span>Greek yoghurt<span class="tick" style="margin-left:auto">✓</span></div>
+      <div class="item"><span class="em">🧀</span>Cottage cheese<span class="tick" style="margin-left:auto">✓</span></div>
+      <div class="item"><span class="em">🌱</span>Tofu<span class="tick" style="margin-left:auto">✓</span></div>
+      <div class="item"><span class="em">🥜</span>Tempeh<span class="tick" style="margin-left:auto">✓</span></div>
+      <div class="item off"><span class="em">🦃</span>Turkey thigh<span class="tick" style="margin-left:auto">✓</span></div>
+    </div>
+
+    <div class="cat-head"><h4>Carbs <em>per meal · 60 g</em></h4><span class="count">8 of 9 ✓</span></div>
+    <div class="food-list">
+      <div class="item"><span class="em">🍚</span>Rice<span class="tick" style="margin-left:auto">✓</span></div>
+      <div class="item"><span class="em">🥔</span>Potatoes<span class="tick" style="margin-left:auto">✓</span></div>
+      <div class="item"><span class="em">🍠</span>Sweet potato<span class="tick" style="margin-left:auto">✓</span></div>
+      <div class="item"><span class="em">🌾</span>Oats<span class="tick" style="margin-left:auto">✓</span></div>
+      <div class="item"><span class="em">🍞</span>Sourdough<span class="tick" style="margin-left:auto">✓</span></div>
+      <div class="item"><span class="em">🌯</span>Wraps<span class="tick" style="margin-left:auto">✓</span></div>
+      <div class="item"><span class="em">🍝</span>Pasta<span class="tick" style="margin-left:auto">✓</span></div>
+      <div class="item off"><span class="em">🌽</span>Polenta<span class="tick" style="margin-left:auto">✓</span></div>
+      <div class="item"><span class="em">🟫</span>Quinoa<span class="tick" style="margin-left:auto">✓</span></div>
+    </div>
+
+    <div class="cat-head"><h4>Vegetables <em>fill the rest of the plate</em></h4><span class="count">14 of 14 ✓</span></div>
+    <div class="food-list">
+      <div class="item"><span class="em">🥦</span>Broccoli<span class="tick" style="margin-left:auto">✓</span></div>
+      <div class="item"><span class="em">🥬</span>Spinach<span class="tick" style="margin-left:auto">✓</span></div>
+      <div class="item"><span class="em">🌶️</span>Peppers<span class="tick" style="margin-left:auto">✓</span></div>
+      <div class="item"><span class="em">🥒</span>Cucumber<span class="tick" style="margin-left:auto">✓</span></div>
+      <div class="item"><span class="em">🍅</span>Tomato<span class="tick" style="margin-left:auto">✓</span></div>
+      <div class="item"><span class="em">🥕</span>Carrot<span class="tick" style="margin-left:auto">✓</span></div>
+      <div class="item"><span class="em">🧅</span>Onion<span class="tick" style="margin-left:auto">✓</span></div>
+      <div class="item"><span class="em">🍆</span>Aubergine<span class="tick" style="margin-left:auto">✓</span></div>
+    </div>
+  </div>
+
+  <!-- ============ RECIPE ============ -->
+  <div class="screen">
+    <div class="recipe-hero">
+      <div class="kicker">II.ii · Wednesday · Dinner</div>
+      <h2>Salmon &amp; <em>asparagus.</em></h2>
+      <div class="deck">Twelve minutes from cold pan to plate. Crisp skin, soft middle, bright lemon.</div>
+      <div class="recipe-meta">
+        <div><div class="lbl">Calories</div><div class="v">438</div></div>
+        <div><div class="lbl">Protein</div><div class="v">42 g</div></div>
+        <div><div class="lbl">Time</div><div class="v">12 min</div></div>
+        <div><div class="lbl">Serves</div><div class="v">1</div></div>
+      </div>
+
+      <div class="columns">
+        <h5>Ingredients</h5>
+        <ul>
+          <li>Salmon fillet, 160 g</li>
+          <li>Asparagus, 1 bunch</li>
+          <li>Olive oil, 1 tbsp</li>
+          <li>Lemon, half</li>
+          <li>Salt, pepper, dill</li>
+        </ul>
+      </div>
+
+      <div class="columns">
+        <h5>Method</h5>
+        <ol>
+          <li>Pat salmon dry, salt the skin generously.</li>
+          <li>Cold non-stick pan, skin down, medium heat — 6 minutes untouched.</li>
+          <li>Toss asparagus with oil and salt, throw alongside for the last 4 minutes.</li>
+          <li>Flip salmon, 90 seconds, off the heat.</li>
+          <li>Squeeze lemon, scatter dill, eat.</li>
+        </ol>
+      </div>
+    </div>
+
+    <p class="footer-rule">— fin —</p>
+  </div>
+
+</div>
+</body>
+</html>

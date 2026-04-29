@@ -127,6 +127,10 @@ export interface OnboardingExtras {
   /** Tracks Coach message usage per ISO week for the free-tier 5/week cap. */
   coachUsage?: { weekKey: string; count: number };
   nutritionPlan?: NutritionPlan;
+  /** Names of foods the user has explicitly removed from the master list. Empty/undefined = all liked. */
+  unlikedFoods?: string[];
+  /** Selected diet preset for the food list filter. Defaults to "omnivore". */
+  foodDiet?: "omnivore" | "pescatarian" | "vegetarian" | "vegan";
 }
 
 export interface AppState {

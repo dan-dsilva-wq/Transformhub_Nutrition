@@ -6,25 +6,38 @@ Last checked: 29 April 2026
 
 - App name: Pace
 - Package name: `com.danieldsilva.pace`
-- Version code: `1`
-- Version name: `1.0`
+- Version code: `2`
+- Version name: `1.1`
 - Target SDK: `36`
-- Production web URL used by Capacitor: `https://nutrition-seven-tan.vercel.app`
-- Privacy policy URL: `https://nutrition-seven-tan.vercel.app/privacypolicy.html`
+- Production web URL used by Capacitor: `https://pace-nutrition.vercel.app`
+- Privacy policy URL: `https://pace-nutrition.vercel.app/privacypolicy.html`
 - Release bundle: `android/app/build/outputs/bundle/release/app-release.aab`
 
 ## Release Manifest Permissions
 
-Current release permissions after removing the unused Health Connect plugin:
+Current release permissions:
 
 - `android.permission.CAMERA`
 - `android.permission.INTERNET`
 - `android.permission.POST_NOTIFICATIONS`
 - `android.permission.RECEIVE_BOOT_COMPLETED`
 - `android.permission.WAKE_LOCK`
+- `android.permission.health.READ_STEPS`
+- `android.permission.health.READ_WEIGHT`
 - `com.leanlens.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`
 
-There are no `android.permission.health.*` permissions in the rebuilt release manifest.
+## Health Connect Declaration (required for v1.1)
+
+Re-introducing Health Connect read access in version code 2. Before submitting to a production track:
+
+1. Play Console → **App content → Health Connect declaration** → fill the questionnaire:
+   - Data types accessed: **Steps (read), Weight (read)**.
+   - Purpose: "Display the user's daily step total on the home screen and populate their weight history when newer readings are available." Tie it to the Integrations screen.
+   - Link the privacy policy URL above; the policy already includes a Health Connect-specific section.
+2. Confirm the rationale flow works:
+   - On Android 13 or earlier: tap "Privacy policy" inside Health Connect → opens browser to `/privacypolicy.html` (handled by `PrivacyPolicyActivity`).
+   - On Android 14+: same flow via `VIEW_PERMISSION_USAGE` on `MainActivity`.
+3. The first production review with the new permissions typically takes several days. Plan accordingly.
 
 ## Play Console Data Safety Draft
 
@@ -91,6 +104,6 @@ cd android
 
 After any web deploy, verify:
 
-- `https://nutrition-seven-tan.vercel.app` returns `200`.
-- `https://nutrition-seven-tan.vercel.app/privacypolicy.html` returns `200`.
-- `POST https://nutrition-seven-tan.vercel.app/api/ai/coach` without a signed-in session returns `401`.
+- `https://pace-nutrition.vercel.app` returns `200`.
+- `https://pace-nutrition.vercel.app/privacypolicy.html` returns `200`.
+- `POST https://pace-nutrition.vercel.app/api/ai/coach` without a signed-in session returns `401`.

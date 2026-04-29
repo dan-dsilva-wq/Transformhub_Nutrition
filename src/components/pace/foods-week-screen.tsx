@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
 import {
   ArrowLeft,
   Ban,
@@ -555,6 +555,26 @@ function RecipeSheet({
   onSwap: () => void;
   onBan: () => void;
 }) {
+  const dragStartY = useRef<number | null>(null);
+  const [dragY, setDragY] = useState(0);
+
+  function startDrag(event: PointerEvent<HTMLDivElement>) {
+    dragStartY.current = event.clientY;
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
+  function moveDrag(event: PointerEvent<HTMLDivElement>) {
+    if (dragStartY.current === null) return;
+    setDragY(Math.max(0, event.clientY - dragStartY.current));
+  }
+
+  function endDrag() {
+    const shouldClose = dragY > 84;
+    dragStartY.current = null;
+    setDragY(0);
+    if (shouldClose) onClose();
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-end">
       <button
@@ -565,9 +585,21 @@ function RecipeSheet({
       />
       <div
         className="sheet-anim relative mx-auto max-h-[92vh] w-full max-w-[480px] overflow-y-auto rounded-t-[28px] bg-white px-5 pt-3 shadow-elevated"
-        style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 22px)" }}
+        style={{
+          paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 22px)",
+          transform: dragY ? `translateY(${dragY}px)` : undefined,
+        }}
       >
-        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-stone-2" />
+        <div
+          className="mx-auto mb-3 flex h-7 w-24 touch-none cursor-grab items-start justify-center pt-2 active:cursor-grabbing"
+          onPointerDown={startDrag}
+          onPointerMove={moveDrag}
+          onPointerUp={endDrag}
+          onPointerCancel={endDrag}
+          aria-label="Swipe down to close"
+        >
+          <div className="h-1 w-10 rounded-full bg-stone-2" />
+        </div>
         <div className="flex items-center gap-3">
           <span className="text-[44px] leading-none">{mealIcoFor(name)}</span>
           <div>

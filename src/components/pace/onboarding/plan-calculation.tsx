@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Check } from "lucide-react";
 import { useAppState } from "@/lib/state/app-state";
 
@@ -19,7 +19,12 @@ export function PlanCalculation({ onNext }: { onNext: () => void }) {
   const [progress, setProgress] = useState(0);
 
   // Materialize the plan early so the reveal step has fresh targets.
+  // Run exactly once, even when commitDraft causes app-state to rebuild
+  // its memoized `actions` object (which would otherwise loop here).
+  const committedRef = useRef(false);
   useEffect(() => {
+    if (committedRef.current) return;
+    committedRef.current = true;
     actions.commitDraft();
   }, [actions]);
 
@@ -36,12 +41,20 @@ export function PlanCalculation({ onNext }: { onNext: () => void }) {
     return () => window.clearInterval(interval);
   }, []);
 
+  // Keep the latest onNext in a ref so the navigation timeout below isn't
+  // cancelled and rescheduled every time the parent re-renders (which
+  // happens when commitDraft updates app-state).
+  const onNextRef = useRef(onNext);
+  useEffect(() => {
+    onNextRef.current = onNext;
+  }, [onNext]);
+
   useEffect(() => {
     if (progress >= lines.length) {
-      const t = window.setTimeout(onNext, 700);
+      const t = window.setTimeout(() => onNextRef.current(), 700);
       return () => window.clearTimeout(t);
     }
-  }, [progress, onNext]);
+  }, [progress]);
 
   const name = onboardingExtras.name;
 

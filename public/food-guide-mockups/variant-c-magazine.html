@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>C · Magazine — Pace</title>
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .phone { max-width: 480px; }
+    .hero {
+      padding: 24px;
+      background:
+        radial-gradient(circle at 90% 0%, rgba(167, 243, 208, 0.45) 0%, transparent 60%),
+        rgba(255, 255, 255, 0.55);
+      border: 1px solid rgba(255,255,255,0.85);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border-radius: 28px;
+      box-shadow: 0 12px 40px rgba(15, 23, 20, 0.06);
+      margin-top: 14px;
+    }
+    .hero .targets {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
+      margin-top: 18px;
+    }
+    .hero .targets .cell {
+      padding: 12px 14px;
+      background: rgba(255,255,255,0.6);
+      border: 1px solid rgba(255,255,255,0.8);
+      border-radius: 14px;
+    }
+    .hero .targets .num { font-size: 22px; font-weight: 600; font-feature-settings: "tnum"; letter-spacing: -0.03em; }
+    .hero .targets .lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.14em; margin-top: 2px; }
+
+    /* Foods grid */
+    .foods-by-cat {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    }
+    .food-mini {
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.5);
+      border: 1px solid rgba(255,255,255,0.7);
+      border-radius: 12px;
+      font-size: 13px;
+    }
+    .food-mini .name { font-weight: 500; }
+    .food-mini .portion { color: var(--muted); font-size: 11.5px; margin-top: 2px; font-feature-settings: "tnum"; }
+    .cat-block { margin-bottom: 14px; }
+    .cat-block h4 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 500;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    /* Weekly calendar */
+    .weekly {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-top: 8px;
+    }
+    .day-col {
+      background: rgba(255,255,255,0.5);
+      border: 1px solid rgba(255,255,255,0.7);
+      border-radius: 10px;
+      padding: 8px 6px;
+      min-height: 220px;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .day-col .head {
+      font-size: 10px; font-weight: 600; text-align: center;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); padding-bottom: 4px;
+      border-bottom: 1px solid var(--hairline);
+    }
+    .meal-tile {
+      background: rgba(255,255,255,0.7);
+      border-radius: 6px;
+      padding: 5px 4px;
+      font-size: 9.5px;
+      line-height: 1.3;
+      text-align: center;
+    }
+    .meal-tile .slot { font-size: 8.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+
+    /* Shopping list */
+    .shop-list {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+    }
+    .shop-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 10px;
+      background: rgba(255,255,255,0.5);
+      border: 1px solid rgba(255,255,255,0.7);
+      border-radius: 10px;
+      font-size: 13px;
+    }
+    .shop-item input { accent-color: var(--forest); width: 16px; height: 16px; }
+    .shop-item .qty { color: var(--muted); margin-left: auto; font-size: 11.5px; font-feature-settings: "tnum"; }
+    .shop-section { margin-bottom: 10px; }
+    .shop-section .h {
+      font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--muted); margin: 12px 0 6px; font-weight: 500;
+    }
+
+    .sticky-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border-top: 1px solid var(--hairline);
+      padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px));
+      display: flex;
+      gap: 10px;
+      z-index: 5;
+    }
+    .sticky-bar .btn { flex: 1; justify-content: center; }
+  </style>
+</head>
+<body>
+  <div class="preview-toolbar no-print">
+    <span><span class="label">Variant C</span> · Magazine (full week + shopping list)</span>
+    <span><a href="index.html">← back</a> &nbsp;·&nbsp; <a href="#" onclick="window.print();return false;">print preview</a></span>
+  </div>
+
+  <main class="phone">
+    <p class="eyebrow">YOU · NUTRITION · ISSUE 1</p>
+    <h1 class="title">Sam's <span>week</span>.</h1>
+    <p class="title-sub">Cut, omnivore · 75 → 65 kg by Aug · 3 meals/day</p>
+
+    <!-- Hero summary -->
+    <div class="hero">
+      <div class="row-between">
+        <div>
+          <p class="eyebrow" style="margin:0">Daily target</p>
+          <div style="font-size:36px;font-weight:600;letter-spacing:-0.03em;font-feature-settings:'tnum';margin-top:6px;">1,850 <span style="font-size:14px;color:var(--muted);font-weight:500;letter-spacing:0;">kcal</span></div>
+        </div>
+        <span class="pill pill-cream">~ -0.4 kg / wk</span>
+      </div>
+      <div class="targets">
+        <div class="cell"><div class="num">140g</div><div class="lbl">Protein · 47g/meal</div></div>
+        <div class="cell"><div class="num">180g</div><div class="lbl">Carbs · 60g/meal</div></div>
+        <div class="cell"><div class="num">65g</div><div class="lbl">Fats · 22g/meal</div></div>
+        <div class="cell"><div class="num">2.4L</div><div class="lbl">Water · ~10 glasses</div></div>
+      </div>
+    </div>
+
+    <!-- Allowed foods at a glance -->
+    <p class="section-eyebrow">Pantry — what you can eat</p>
+    <div class="card">
+      <div class="cat-block">
+        <h4><span class="icon-badge bg-forest" style="width:20px;height:20px;font-size:10px;">P</span> Proteins</h4>
+        <div class="foods-by-cat">
+          <div class="food-mini"><div class="name">Chicken breast</div><div class="portion">~150g · 1 palm</div></div>
+          <div class="food-mini"><div class="name">Greek yogurt</div><div class="portion">~200g · 1 cup</div></div>
+          <div class="food-mini"><div class="name">Eggs</div><div class="portion">3 ea · 2 palms</div></div>
+          <div class="food-mini"><div class="name">Tinned tuna</div><div class="portion">1 tin · 1 palm</div></div>
+          <div class="food-mini"><div class="name">Tofu</div><div class="portion">~200g · 1 palm</div></div>
+          <div class="food-mini"><div class="name">Salmon</div><div class="portion">~130g · 1 palm</div></div>
+        </div>
+      </div>
+
+      <div class="cat-block">
+        <h4><span class="icon-badge bg-amber" style="width:20px;height:20px;font-size:10px;">C</span> Carbs</h4>
+        <div class="foods-by-cat">
+          <div class="food-mini"><div class="name">Brown rice</div><div class="portion">~200g · 1 cup</div></div>
+          <div class="food-mini"><div class="name">Oats</div><div class="portion">~80g dry · ½ cup</div></div>
+          <div class="food-mini"><div class="name">Sweet potato</div><div class="portion">~250g · 1 fist</div></div>
+          <div class="food-mini"><div class="name">Wholegrain bread</div><div class="portion">2 slices · 1 cup</div></div>
+        </div>
+      </div>
+
+      <div class="cat-block">
+        <h4><span class="icon-badge bg-sage" style="width:20px;height:20px;font-size:10px;">V</span> Veg &amp; fiber</h4>
+        <div class="foods-by-cat">
+          <div class="food-mini"><div class="name">Broccoli</div><div class="portion">~150g · 1 fist</div></div>
+          <div class="food-mini"><div class="name">Spinach</div><div class="portion">~80g · 2 fists</div></div>
+          <div class="food-mini"><div class="name">Cherry tomatoes</div><div class="portion">~150g · 1 fist</div></div>
+          <div class="food-mini"><div class="name">Berries</div><div class="portion">~100g · ½ fist</div></div>
+        </div>
+      </div>
+
+      <div class="cat-block" style="margin-bottom:0;">
+        <h4><span class="icon-badge bg-clay" style="width:20px;height:20px;font-size:10px;">F</span> Fats</h4>
+        <div class="foods-by-cat">
+          <div class="food-mini"><div class="name">Olive oil</div><div class="portion">15ml · 1 thumb</div></div>
+          <div class="food-mini"><div class="name">Avocado</div><div class="portion">½ · 1 thumb</div></div>
+          <div class="food-mini"><div class="name">Almonds</div><div class="portion">25g · 1 cup palm</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Weekly calendar -->
+    <p class="section-eyebrow">Your week</p>
+    <div class="card">
+      <div class="weekly">
+        <div class="day-col">
+          <div class="head">Mon</div>
+          <div class="meal-tile"><div class="slot">Brk</div>Yogurt + oats + berries</div>
+          <div class="meal-tile"><div class="slot">Lun</div>Chicken &amp; rice bowl</div>
+          <div class="meal-tile"><div class="slot">Din</div>Salmon &amp; sweet potato</div>
+        </div>
+        <div class="day-col">
+          <div class="head">Tue</div>
+          <div class="meal-tile"><div class="slot">Brk</div>Eggs on toast</div>
+          <div class="meal-tile"><div class="slot">Lun</div>Tuna &amp; sweet potato</div>
+          <div class="meal-tile"><div class="slot">Din</div>Tofu stir-fry + rice</div>
+        </div>
+        <div class="day-col">
+          <div class="head">Wed</div>
+          <div class="meal-tile"><div class="slot">Brk</div>Yogurt + oats + berries</div>
+          <div class="meal-tile"><div class="slot">Lun</div>Chicken wrap + greens</div>
+          <div class="meal-tile"><div class="slot">Din</div>Salmon &amp; broccoli rice</div>
+        </div>
+        <div class="day-col">
+          <div class="head">Thu</div>
+          <div class="meal-tile"><div class="slot">Brk</div>Eggs + avocado toast</div>
+          <div class="meal-tile"><div class="slot">Lun</div>Chicken &amp; rice bowl</div>
+          <div class="meal-tile"><div class="slot">Din</div>Tofu &amp; sweet potato</div>
+        </div>
+        <div class="day-col">
+          <div class="head">Fri</div>
+          <div class="meal-tile"><div class="slot">Brk</div>Yogurt + oats + berries</div>
+          <div class="meal-tile"><div class="slot">Lun</div>Tuna jacket potato</div>
+          <div class="meal-tile"><div class="slot">Din</div>Chicken &amp; veg rice</div>
+        </div>
+        <div class="day-col">
+          <div class="head">Sat</div>
+          <div class="meal-tile"><div class="slot">Brk</div>3-egg omelette + toast</div>
+          <div class="meal-tile"><div class="slot">Lun</div>Salmon &amp; greens bowl</div>
+          <div class="meal-tile"><div class="slot">Din</div>Chicken &amp; rice + avo</div>
+        </div>
+        <div class="day-col">
+          <div class="head">Sun</div>
+          <div class="meal-tile"><div class="slot">Brk</div>Yogurt + oats + berries</div>
+          <div class="meal-tile"><div class="slot">Lun</div>Tofu stir-fry + rice</div>
+          <div class="meal-tile"><div class="slot">Din</div>Salmon &amp; sweet potato</div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="row-between">
+        <div class="small muted">Tap any meal to swap it.</div>
+        <button class="btn btn-ghost small no-print" style="padding:6px 12px;">Re-roll week</button>
+      </div>
+    </div>
+
+    <!-- Shopping list -->
+    <p class="section-eyebrow">Shopping list · 7 days</p>
+    <div class="card">
+      <div class="shop-section">
+        <div class="h">Protein</div>
+        <div class="shop-list">
+          <label class="shop-item"><input type="checkbox" /> Chicken breast <span class="qty">600g</span></label>
+          <label class="shop-item"><input type="checkbox" /> Salmon fillets <span class="qty">3 × 130g</span></label>
+          <label class="shop-item"><input type="checkbox" /> Tinned tuna <span class="qty">2 tins</span></label>
+          <label class="shop-item"><input type="checkbox" /> Eggs <span class="qty">12</span></label>
+          <label class="shop-item"><input type="checkbox" /> Greek yogurt <span class="qty">1 kg</span></label>
+          <label class="shop-item"><input type="checkbox" /> Firm tofu <span class="qty">400g</span></label>
+        </div>
+      </div>
+      <div class="shop-section">
+        <div class="h">Carbs</div>
+        <div class="shop-list">
+          <label class="shop-item"><input type="checkbox" /> Brown rice <span class="qty">1 kg</span></label>
+          <label class="shop-item"><input type="checkbox" /> Rolled oats <span class="qty">500g</span></label>
+          <label class="shop-item"><input type="checkbox" /> Sweet potato <span class="qty">1.2 kg</span></label>
+          <label class="shop-item"><input type="checkbox" /> Wholegrain bread <span class="qty">1 loaf</span></label>
+        </div>
+      </div>
+      <div class="shop-section">
+        <div class="h">Veg &amp; fruit</div>
+        <div class="shop-list">
+          <label class="shop-item"><input type="checkbox" /> Broccoli <span class="qty">2 heads</span></label>
+          <label class="shop-item"><input type="checkbox" /> Spinach <span class="qty">300g</span></label>
+          <label class="shop-item"><input type="checkbox" /> Mixed berries <span class="qty">500g</span></label>
+          <label class="shop-item"><input type="checkbox" /> Cherry tomatoes <span class="qty">300g</span></label>
+        </div>
+      </div>
+      <div class="shop-section" style="margin-bottom:0;">
+        <div class="h">Fats &amp; pantry</div>
+        <div class="shop-list">
+          <label class="shop-item"><input type="checkbox" /> Avocado <span class="qty">3 ea</span></label>
+          <label class="shop-item"><input type="checkbox" /> Olive oil <span class="qty">if low</span></label>
+          <label class="shop-item"><input type="checkbox" /> Almonds <span class="qty">100g</span></label>
+        </div>
+      </div>
+    </div>
+
+    <p class="small muted" style="text-align:center;margin-top:24px;">Save as PDF and tick items off in-store. Re-generate for variety.</p>
+  </main>
+
+  <div class="sticky-bar no-print">
+    <button class="btn btn-ghost" onclick="window.print();return false;">🖨 PDF</button>
+    <a class="btn btn-ghost" href="#">✏️ Edit</a>
+    <button class="btn btn-primary">↻ Re-roll week</button>
+  </div>
+</body>
+</html>

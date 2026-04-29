@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>B · Plate-first — Pace</title>
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .meal-card {
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+    .meal-card .head {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .meal-card .head .name { font-weight: 600; font-size: 18px; letter-spacing: -0.02em; }
+    .meal-card .head .time { color: var(--muted); font-size: 12px; margin-left: auto; }
+
+    .macro-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .macro-cell {
+      background: rgba(255,255,255,0.5);
+      border: 1px solid rgba(255,255,255,0.7);
+      border-radius: 12px;
+      padding: 10px 8px;
+      text-align: center;
+    }
+    .macro-cell .num { font-size: 17px; font-weight: 600; font-feature-settings: "tnum"; letter-spacing: -0.02em; }
+    .macro-cell .lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 4px; }
+    .macro-cell .hand { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+    .suggestions {
+      margin-top: 14px;
+      border-top: 1px solid var(--hairline);
+      padding-top: 12px;
+    }
+    .suggestions .label {
+      font-size: 11px; font-weight: 500; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .suggestion-row {
+      padding: 8px 12px;
+      background: rgba(255,255,255,0.4);
+      border: 1px solid rgba(255,255,255,0.7);
+      border-radius: 12px;
+      font-size: 13px;
+      margin-bottom: 6px;
+      line-height: 1.5;
+    }
+    .suggestion-row .ingredients { color: var(--muted); font-size: 11.5px; margin-top: 2px; }
+
+    .foods-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    }
+    .food-chip {
+      padding: 8px 10px;
+      background: rgba(255,255,255,0.5);
+      border: 1px solid rgba(255,255,255,0.7);
+      border-radius: 12px;
+      font-size: 13px;
+    }
+    .food-chip .head { font-weight: 500; }
+    .food-chip .sub { font-size: 11px; color: var(--muted); }
+
+    .sticky-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border-top: 1px solid var(--hairline);
+      padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px));
+      display: flex;
+      gap: 10px;
+      z-index: 5;
+    }
+    .sticky-bar .btn { flex: 1; justify-content: center; }
+  </style>
+</head>
+<body>
+  <div class="preview-toolbar no-print">
+    <span><span class="label">Variant B</span> · Plate-first</span>
+    <span><a href="index.html">← back</a> &nbsp;·&nbsp; <a href="#" onclick="window.print();return false;">print preview</a></span>
+  </div>
+
+  <main class="phone">
+    <p class="eyebrow">YOU · NUTRITION</p>
+    <h1 class="title">Build your <span>plate</span>, Sam.</h1>
+    <p class="title-sub">Three meals to hit <span class="numerals">1,850</span> kcal · <span class="numerals">140</span>g protein.</p>
+
+    <p class="section-eyebrow">Today's three plates</p>
+
+    <!-- Meal 1 -->
+    <div class="card meal-card">
+      <div class="head">
+        <span class="icon-badge bg-amber">🌅</span>
+        <span class="name">Breakfast</span>
+        <span class="time">~30%</span>
+      </div>
+      <div class="macro-grid">
+        <div class="macro-cell"><div class="num">555</div><div class="lbl">Kcal</div></div>
+        <div class="macro-cell"><div class="num">42g</div><div class="lbl">Protein</div><div class="hand">1 palm</div></div>
+        <div class="macro-cell"><div class="num">54g</div><div class="lbl">Carbs</div><div class="hand">1 cup</div></div>
+        <div class="macro-cell"><div class="num">20g</div><div class="lbl">Fats</div><div class="hand">1 thumb</div></div>
+      </div>
+      <div class="suggestions">
+        <div class="label">Try one</div>
+        <div class="suggestion-row">
+          <div class="bold">Greek yogurt + oats + berries</div>
+          <div class="ingredients">200g yogurt · 60g oats · 100g berries · 1 tbsp almond butter</div>
+        </div>
+        <div class="suggestion-row">
+          <div class="bold">Eggs on wholegrain toast</div>
+          <div class="ingredients">3 eggs · 2 slices · ½ avocado · spinach</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Meal 2 -->
+    <div class="card meal-card">
+      <div class="head">
+        <span class="icon-badge bg-forest">☀️</span>
+        <span class="name">Lunch</span>
+        <span class="time">~35%</span>
+      </div>
+      <div class="macro-grid">
+        <div class="macro-cell"><div class="num">650</div><div class="lbl">Kcal</div></div>
+        <div class="macro-cell"><div class="num">49g</div><div class="lbl">Protein</div><div class="hand">1 palm</div></div>
+        <div class="macro-cell"><div class="num">63g</div><div class="lbl">Carbs</div><div class="hand">1 cup</div></div>
+        <div class="macro-cell"><div class="num">23g</div><div class="lbl">Fats</div><div class="hand">1 thumb</div></div>
+      </div>
+      <div class="suggestions">
+        <div class="label">Try one</div>
+        <div class="suggestion-row">
+          <div class="bold">Chicken &amp; rice bowl</div>
+          <div class="ingredients">150g chicken · 200g brown rice · 1 fist broccoli · 1 tbsp olive oil</div>
+        </div>
+        <div class="suggestion-row">
+          <div class="bold">Tuna &amp; sweet potato</div>
+          <div class="ingredients">1 tin tuna · 250g sweet potato · 2 fists spinach · ½ avocado</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Meal 3 -->
+    <div class="card meal-card">
+      <div class="head">
+        <span class="icon-badge bg-clay">🌙</span>
+        <span class="name">Dinner</span>
+        <span class="time">~35%</span>
+      </div>
+      <div class="macro-grid">
+        <div class="macro-cell"><div class="num">650</div><div class="lbl">Kcal</div></div>
+        <div class="macro-cell"><div class="num">49g</div><div class="lbl">Protein</div><div class="hand">1 palm</div></div>
+        <div class="macro-cell"><div class="num">63g</div><div class="lbl">Carbs</div><div class="hand">1 cup</div></div>
+        <div class="macro-cell"><div class="num">22g</div><div class="lbl">Fats</div><div class="hand">1 thumb</div></div>
+      </div>
+      <div class="suggestions">
+        <div class="label">Try one</div>
+        <div class="suggestion-row">
+          <div class="bold">Salmon &amp; veg</div>
+          <div class="ingredients">130g salmon · 1 fist broccoli · 200g sweet potato · ¼ avocado</div>
+        </div>
+        <div class="suggestion-row">
+          <div class="bold">Tofu stir-fry</div>
+          <div class="ingredients">200g tofu · 200g rice · 1 fist mixed veg · 1 tbsp olive oil</div>
+        </div>
+      </div>
+    </div>
+
+    <p class="section-eyebrow">Foods you've approved</p>
+    <div class="card">
+      <div class="row-between">
+        <div class="bold">22 foods on your list</div>
+        <a class="btn btn-ghost small" href="#" style="padding: 6px 12px;">Edit</a>
+      </div>
+      <div class="divider"></div>
+      <div class="foods-grid">
+        <div class="food-chip"><div class="head">Chicken breast</div><div class="sub">Protein · 1 palm</div></div>
+        <div class="food-chip"><div class="head">Greek yogurt</div><div class="sub">Protein · 1 cup</div></div>
+        <div class="food-chip"><div class="head">Eggs</div><div class="sub">Protein · 3 ea</div></div>
+        <div class="food-chip"><div class="head">Brown rice</div><div class="sub">Carbs · 1 cup</div></div>
+        <div class="food-chip"><div class="head">Sweet potato</div><div class="sub">Carbs · 1 fist</div></div>
+        <div class="food-chip"><div class="head">Oats</div><div class="sub">Carbs · ½ cup</div></div>
+        <div class="food-chip"><div class="head">Broccoli</div><div class="sub">Veg · 1 fist</div></div>
+        <div class="food-chip"><div class="head">Spinach</div><div class="sub">Veg · 2 fists</div></div>
+        <div class="food-chip"><div class="head">Avocado</div><div class="sub">Fat · ½ ea</div></div>
+        <div class="food-chip"><div class="head">Olive oil</div><div class="sub">Fat · 1 thumb</div></div>
+        <div class="food-chip"><div class="head">Almonds</div><div class="sub">Fat · 1 palm</div></div>
+        <div class="food-chip"><div class="head">+ 11 more</div><div class="sub">Tap edit to see all</div></div>
+      </div>
+    </div>
+
+    <p class="section-eyebrow">Make it a week</p>
+    <div class="card-tint">
+      <div class="row-between">
+        <div>
+          <div class="bold">Build my week</div>
+          <div class="small muted" style="margin-top:4px;">7 days of meals + grouped shopping list.</div>
+        </div>
+        <button class="btn btn-primary no-print">Generate</button>
+      </div>
+    </div>
+
+    <p class="small muted" style="text-align:center;margin-top:24px;">Plates are guides. Swap foods within the same colour as you like.</p>
+  </main>
+
+  <div class="sticky-bar no-print">
+    <button class="btn btn-ghost" onclick="window.print();return false;">🖨 PDF</button>
+    <a class="btn btn-ghost" href="#">✏️ Edit</a>
+    <button class="btn btn-primary">↻ Re-generate</button>
+  </div>
+</body>
+</html>

@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>D · Week — Pace</title>
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .phone { padding: 20px 16px 110px; }
+    .top-row { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+    .back { color: var(--muted); text-decoration: none; font-size: 14px; }
+
+    /* Week stepper */
+    .week-stepper {
+      margin-top: 14px;
+      padding: 12px 14px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(255,255,255,0.55);
+      border: 1px solid rgba(255,255,255,0.85);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-radius: 18px;
+    }
+    .week-stepper .arrow {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      background: white;
+      border: 1px solid var(--hairline);
+      display: grid; place-items: center;
+      font-size: 18px; cursor: pointer;
+      color: var(--ink);
+    }
+    .week-stepper .arrow:disabled { opacity: 0.3; cursor: default; }
+    .week-stepper .label-block { text-align: center; }
+    .week-stepper .label-block .name { font-weight: 600; font-size: 16px; }
+    .week-stepper .label-block .range { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .week-stepper .label-block .badge {
+      display: inline-block;
+      margin-top: 4px;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+    .badge.this-week { background: rgba(13,148,136,0.15); color: var(--forest); }
+    .badge.future    { background: rgba(2,132,199,0.15); color: var(--sky); }
+    .badge.past      { background: rgba(15,23,20,0.05); color: var(--muted); }
+
+    /* Day cards */
+    .day {
+      margin-top: 12px;
+      padding: 14px;
+      background: rgba(255,255,255,0.55);
+      border: 1px solid rgba(255,255,255,0.85);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-radius: 20px;
+    }
+    .day .head {
+      display: flex; align-items: baseline; justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .day .day-name { font-weight: 600; font-size: 16px; }
+    .day .day-num { font-size: 12px; color: var(--muted); }
+    .day .today-pill {
+      font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+      background: var(--forest); color: white;
+      padding: 2px 8px; border-radius: 999px; margin-left: 8px;
+    }
+
+    .meal-list { display: flex; flex-direction: column; gap: 8px; }
+    .meal {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.6);
+      border: 1px solid rgba(255,255,255,0.7);
+      border-radius: 14px;
+      cursor: pointer;
+      transition: transform 140ms cubic-bezier(.2,.8,.2,1);
+    }
+    .meal:active { transform: scale(0.98); }
+    .meal .ico { font-size: 24px; line-height: 1; }
+    .meal .body { flex: 1; min-width: 0; }
+    .meal .body .slot { font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+    .meal .body .name { font-weight: 500; font-size: 14px; margin-top: 1px; }
+    .meal .swap-hint { font-size: 11px; color: var(--forest); }
+
+    /* Shopping list section */
+    .shop-card {
+      margin-top: 22px;
+      background: rgba(186, 230, 253, 0.25);
+      border: 1px solid rgba(186, 230, 253, 0.4);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-radius: 22px;
+      padding: 18px;
+    }
+    .shop-card .head { display: flex; align-items: center; gap: 10px; }
+    .shop-card .head .emoji { font-size: 28px; }
+    .shop-card .head h3 { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -0.02em; }
+    .shop-card .head .meta { margin-left: auto; font-size: 12px; color: var(--muted); }
+
+    .shop-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+      margin-top: 12px;
+    }
+    .shop-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 10px;
+      background: rgba(255,255,255,0.7);
+      border-radius: 12px;
+      font-size: 13px;
+    }
+    .shop-item input { accent-color: var(--forest); }
+    .shop-item .qty { color: var(--muted); margin-left: auto; font-size: 11.5px; }
+
+    /* Modal — recipe view */
+    .modal-bg {
+      position: fixed; inset: 0;
+      background: rgba(15,23,20,0.45);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: flex-end;
+      z-index: 100;
+    }
+    .modal-bg.open { display: flex; }
+    .modal {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      max-height: 92vh;
+      overflow-y: auto;
+      background: white;
+      border-radius: 24px 24px 0 0;
+      padding: 18px 20px calc(22px + env(safe-area-inset-bottom, 0px));
+      animation: sheet-up 280ms cubic-bezier(.2,.8,.2,1);
+    }
+    @keyframes sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .modal .grab {
+      width: 40px; height: 4px; background: var(--hairline);
+      border-radius: 999px; margin: 0 auto 14px;
+    }
+    .modal .recipe-head {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .modal .recipe-head .ico { font-size: 44px; line-height: 1; }
+    .modal .recipe-head h3 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
+    .modal .recipe-head .meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    .recipe-stats {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+      margin-top: 14px;
+    }
+    .recipe-stats .stat {
+      background: rgba(13,148,136,0.06);
+      border: 1px solid rgba(13,148,136,0.15);
+      border-radius: 12px;
+      padding: 8px 6px;
+      text-align: center;
+    }
+    .recipe-stats .num { font-size: 16px; font-weight: 600; font-feature-settings: "tnum"; }
+    .recipe-stats .lbl { font-size: 9.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 2px; }
+
+    .recipe-section-title {
+      font-size: 11px; font-weight: 500; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--muted);
+      margin: 18px 0 8px;
+    }
+
+    .ingredient {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px;
+      background: rgba(255,255,255,0.7);
+      border: 1px solid var(--hairline);
+      border-radius: 12px;
+      margin-bottom: 6px;
+      font-size: 13.5px;
+    }
+    .ingredient .emoji { font-size: 18px; }
+    .ingredient .name { flex: 1; }
+    .ingredient .qty {
+      font-weight: 600; font-feature-settings: "tnum";
+      color: var(--forest);
+      font-size: 13px;
+    }
+
+    .step {
+      display: flex; gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--hairline);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .step:last-child { border-bottom: none; }
+    .step .n {
+      flex-shrink: 0;
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: var(--cream);
+      color: var(--forest);
+      display: grid; place-items: center;
+      font-size: 12px; font-weight: 700;
+    }
+
+    .modal .close-row { display: flex; gap: 10px; margin-top: 18px; }
+    .modal .close-row .btn { flex: 1; justify-content: center; }
+
+    /* Sticky bar */
+    .sticky-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border-top: 1px solid var(--hairline);
+      padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px));
+      display: flex;
+      gap: 10px;
+      z-index: 5;
+    }
+    .sticky-bar .btn { flex: 1; justify-content: center; }
+
+    /* Meals/day picker bubble */
+    .meals-toggle {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: white;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12.5px;
+      box-shadow: 0 4px 14px rgba(15,23,20,0.06);
+      cursor: pointer;
+      border: none;
+      font-family: inherit;
+      color: var(--ink);
+    }
+  </style>
+</head>
+<body>
+  <div class="preview-toolbar no-print">
+    <span><span class="label">Variant D</span> · Week (swap, plan ahead, history)</span>
+    <span><a href="variant-d-hub.html">← hub</a> &nbsp;·&nbsp; <a href="#" onclick="window.print();return false;">print preview</a></span>
+  </div>
+
+  <main class="phone">
+    <div class="top-row no-print">
+      <a class="back" href="variant-d-hub.html">‹ Back</a>
+    </div>
+
+    <p class="eyebrow">YOUR WEEK</p>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:4px;">
+      <h1 class="title" id="weekTitle">This <span>week</span>.</h1>
+      <button class="meals-toggle" onclick="alert('Pops a sheet — change meals/day (2/3/4/5). Macros re-balance.');">🍽️ 3/day ▾</button>
+    </div>
+
+    <!-- Stepper -->
+    <div class="week-stepper">
+      <button class="arrow" id="prevBtn" onclick="step(-1)">‹</button>
+      <div class="label-block">
+        <div class="name" id="weekName">This week</div>
+        <div class="range" id="weekRange">Apr 28 – May 4</div>
+        <span class="badge this-week" id="weekBadge">Current</span>
+      </div>
+      <button class="arrow" id="nextBtn" onclick="step(1)">›</button>
+    </div>
+
+    <!-- Days -->
+    <div id="dayList"></div>
+
+    <!-- Plan-ahead nudge (only shows on future weeks if not generated; mocked as always visible on next week) -->
+    <div id="generateCta" style="display:none;margin-top:14px;">
+      <div class="card-tint">
+        <div class="row-between">
+          <div>
+            <div class="bold">Nothing planned yet</div>
+            <div class="small muted" style="margin-top:4px;">Generate next week now, or wait — it'll auto-build on Sunday.</div>
+          </div>
+          <button class="btn btn-primary" onclick="loadWeek(weekIndex)">Plan it</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Shopping list -->
+    <div class="shop-card" id="shopCard">
+      <div class="head">
+        <span class="emoji">🛒</span>
+        <h3>Shopping list</h3>
+        <span class="meta">17 items</span>
+      </div>
+      <div class="shop-grid">
+        <label class="shop-item"><input type="checkbox" /> Chicken breast <span class="qty">600g</span></label>
+        <label class="shop-item"><input type="checkbox" /> Salmon <span class="qty">3 × 130g</span></label>
+        <label class="shop-item"><input type="checkbox" /> Tuna <span class="qty">2 tins</span></label>
+        <label class="shop-item"><input type="checkbox" /> Eggs <span class="qty">12</span></label>
+        <label class="shop-item"><input type="checkbox" /> Greek yogurt <span class="qty">1 kg</span></label>
+        <label class="shop-item"><input type="checkbox" /> Tofu <span class="qty">400g</span></label>
+        <label class="shop-item"><input type="checkbox" /> Brown rice <span class="qty">1 kg</span></label>
+        <label class="shop-item"><input type="checkbox" /> Oats <span class="qty">500g</span></label>
+        <label class="shop-item"><input type="checkbox" /> Sweet potato <span class="qty">1.2 kg</span></label>
+        <label class="shop-item"><input type="checkbox" /> Bread <span class="qty">1 loaf</span></label>
+        <label class="shop-item"><input type="checkbox" /> Broccoli <span class="qty">2 heads</span></label>
+        <label class="shop-item"><input type="checkbox" /> Spinach <span class="qty">300g</span></label>
+        <label class="shop-item"><input type="checkbox" /> Berries <span class="qty">500g</span></label>
+        <label class="shop-item"><input type="checkbox" /> Tomatoes <span class="qty">300g</span></label>
+        <label class="shop-item"><input type="checkbox" /> Avocado <span class="qty">3</span></label>
+        <label class="shop-item"><input type="checkbox" /> Olive oil <span class="qty">if low</span></label>
+        <label class="shop-item"><input type="checkbox" /> Almonds <span class="qty">100g</span></label>
+      </div>
+    </div>
+  </main>
+
+  <!-- Sticky bar -->
+  <div class="sticky-bar no-print">
+    <button class="btn btn-ghost" onclick="window.print();return false;">🖨 PDF</button>
+    <button class="btn btn-ghost" onclick="loadWeek(weekIndex)">↻ Re-roll</button>
+    <button class="btn btn-primary" onclick="alert('Generates next week ahead of time.')">Plan ahead</button>
+  </div>
+
+  <!-- Recipe modal -->
+  <div class="modal-bg" id="modal" onclick="if(event.target===this)closeModal()">
+    <div class="modal" id="modalContent">
+      <div class="grab"></div>
+      <div class="recipe-head">
+        <span class="ico" id="rIco">🍗</span>
+        <div>
+          <h3 id="rName">Chicken &amp; rice bowl</h3>
+          <div class="meta" id="rMeta">Mon · Lunch · ~25 min</div>
+        </div>
+      </div>
+
+      <div class="recipe-stats">
+        <div class="stat"><div class="num" id="rKcal">650</div><div class="lbl">Kcal</div></div>
+        <div class="stat"><div class="num" id="rP">49g</div><div class="lbl">Protein</div></div>
+        <div class="stat"><div class="num" id="rC">63g</div><div class="lbl">Carbs</div></div>
+        <div class="stat"><div class="num" id="rF">22g</div><div class="lbl">Fats</div></div>
+      </div>
+
+      <div class="recipe-section-title">Ingredients</div>
+      <div id="rIngredients"></div>
+
+      <div class="recipe-section-title">How to make it</div>
+      <div id="rSteps"></div>
+
+      <div class="close-row">
+        <button class="btn btn-ghost" onclick="closeModal()">Done</button>
+        <button class="btn btn-ghost" onclick="alert('Pops a swap sheet with 3 alternatives.')">↔ Swap meal</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Mock data: 3 weeks (last, current, next).
+    const weeks = [
+      {
+        name: "Last week",
+        range: "Apr 21 – Apr 27",
+        badge: "Past",
+        badgeClass: "past",
+        days: makeDays(),
+        showShop: true,
+      },
+      {
+        name: "This week",
+        range: "Apr 28 – May 4",
+        badge: "Current",
+        badgeClass: "this-week",
+        days: makeDays(),
+        showShop: true,
+      },
+      {
+        name: "Next week",
+        range: "May 5 – May 11",
+        badge: "Planned",
+        badgeClass: "future",
+        days: makeDays(),
+        showShop: false,
+      },
+    ];
+
+    // Recipe library — looked up by name when a meal is tapped.
+    const recipes = {
+      "Yogurt + oats + berries": {
+        kcal: 555, p: 42, c: 54, f: 20, time: "5 min",
+        ingredients: [
+          { e: "🥛", n: "Greek yogurt (0%)", q: "200g" },
+          { e: "🥣", n: "Rolled oats", q: "60g" },
+          { e: "🫐", n: "Mixed berries", q: "100g" },
+          { e: "🥜", n: "Almond butter", q: "1 tbsp" },
+          { e: "🍯", n: "Honey (optional)", q: "1 tsp" },
+        ],
+        steps: [
+          "Tip oats into a bowl.",
+          "Spoon yogurt over the oats and stir.",
+          "Top with berries and a drizzle of almond butter.",
+          "Add a teaspoon of honey if you want it sweeter.",
+        ],
+      },
+      "Eggs on toast": {
+        kcal: 540, p: 32, c: 48, f: 22, time: "10 min",
+        ingredients: [
+          { e: "🥚", n: "Eggs", q: "3" },
+          { e: "🍞", n: "Wholegrain bread", q: "2 slices" },
+          { e: "🥑", n: "Avocado", q: "½" },
+          { e: "🥬", n: "Spinach", q: "1 handful" },
+          { e: "🫒", n: "Olive oil", q: "1 tsp" },
+        ],
+        steps: [
+          "Toast the bread.",
+          "Heat oil in a non-stick pan, fry the eggs how you like them.",
+          "Mash the avocado on the toast, scatter spinach on top.",
+          "Slide the eggs onto the toast and season.",
+        ],
+      },
+      "Chicken & rice bowl": {
+        kcal: 650, p: 49, c: 63, f: 22, time: "25 min",
+        ingredients: [
+          { e: "🍗", n: "Chicken breast", q: "150g" },
+          { e: "🍚", n: "Brown rice (cooked)", q: "200g" },
+          { e: "🥦", n: "Broccoli", q: "1 fist" },
+          { e: "🫒", n: "Olive oil", q: "1 tbsp" },
+          { e: "🧂", n: "Salt, pepper, paprika", q: "to taste" },
+        ],
+        steps: [
+          "Cook the rice (or microwave a pouch).",
+          "Steam the broccoli for 4 min, set aside.",
+          "Slice chicken thin, season, sear in oil for 3 min each side.",
+          "Build the bowl: rice → broccoli → chicken → drizzle pan juices.",
+        ],
+      },
+      "Salmon & sweet potato": {
+        kcal: 660, p: 45, c: 58, f: 25, time: "30 min",
+        ingredients: [
+          { e: "🐟", n: "Salmon fillet", q: "130g" },
+          { e: "🍠", n: "Sweet potato", q: "250g" },
+          { e: "🥬", n: "Spinach", q: "2 fists" },
+          { e: "🫒", n: "Olive oil", q: "1 tbsp" },
+          { e: "🍋", n: "Lemon", q: "½" },
+        ],
+        steps: [
+          "Heat oven to 200°C. Cube the sweet potato, toss in oil, roast 25 min.",
+          "Pat salmon dry, season, add to the tray for the last 12 min.",
+          "Wilt spinach in a pan with a splash of water.",
+          "Plate everything, squeeze lemon over the salmon.",
+        ],
+      },
+      "Tofu stir-fry + rice": {
+        kcal: 620, p: 35, c: 70, f: 20, time: "20 min",
+        ingredients: [
+          { e: "🧈", n: "Firm tofu", q: "200g" },
+          { e: "🍚", n: "Brown rice", q: "200g" },
+          { e: "🥦", n: "Mixed veg (broccoli, peppers)", q: "2 fists" },
+          { e: "🫒", n: "Olive oil", q: "1 tbsp" },
+          { e: "🥢", n: "Soy sauce + garlic", q: "to taste" },
+        ],
+        steps: [
+          "Press tofu, cube it, toss in cornflour for crispness.",
+          "Heat oil hot, fry tofu until golden — about 6 min.",
+          "Add the veg and stir-fry 4 min, then garlic + soy.",
+          "Serve over rice.",
+        ],
+      },
+      "Tuna jacket potato": {
+        kcal: 580, p: 40, c: 70, f: 14, time: "8 min in microwave",
+        ingredients: [
+          { e: "🥔", n: "Large potato", q: "350g" },
+          { e: "🥫", n: "Tinned tuna (in water)", q: "1 tin" },
+          { e: "🥬", n: "Side salad", q: "2 handfuls" },
+          { e: "🥑", n: "Avocado or yogurt", q: "2 tbsp" },
+          { e: "🌽", n: "Sweetcorn (optional)", q: "2 tbsp" },
+        ],
+        steps: [
+          "Pierce the potato, microwave 8 min on high (or oven 1 hr).",
+          "Drain the tuna, mix with avocado/yogurt and corn.",
+          "Split the potato, fluff the inside, pile tuna on top.",
+          "Serve with the salad on the side.",
+        ],
+      },
+      "Chicken wrap + greens": {
+        kcal: 600, p: 45, c: 55, f: 20, time: "15 min",
+        ingredients: [
+          { e: "🍗", n: "Chicken breast", q: "150g" },
+          { e: "🌯", n: "Wholegrain wrap", q: "1" },
+          { e: "🥬", n: "Spinach + rocket", q: "2 handfuls" },
+          { e: "🍅", n: "Cherry tomatoes", q: "1 fist" },
+          { e: "🥑", n: "Avocado", q: "¼" },
+        ],
+        steps: [
+          "Slice chicken, season, pan-fry 3 min each side.",
+          "Warm the wrap for 20 sec.",
+          "Layer greens, tomatoes, avocado, then chicken.",
+          "Roll tight, slice in half.",
+        ],
+      },
+    };
+
+    function makeDays() {
+      const names = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+      const keys = Object.keys(recipes);
+      return names.map((n, i) => ({
+        name: n,
+        meals: [
+          { key: keys[i % keys.length] },
+          { key: keys[(i + 2) % keys.length] },
+          { key: keys[(i + 4) % keys.length] },
+        ],
+      }));
+    }
+
+    let weekIndex = 1; // start on "this week"
+    const todayIdx = 0; // mocked: Mon = today
+
+    function render() {
+      const w = weeks[weekIndex];
+      document.getElementById("weekName").textContent = w.name;
+      document.getElementById("weekRange").textContent = w.range;
+      const badge = document.getElementById("weekBadge");
+      badge.textContent = w.badge;
+      badge.className = "badge " + w.badgeClass;
+      document.getElementById("prevBtn").disabled = weekIndex === 0;
+      document.getElementById("nextBtn").disabled = weekIndex === weeks.length - 1;
+
+      const list = document.getElementById("dayList");
+      list.innerHTML = "";
+      const slotIcos = { Breakfast: "🥣", Lunch: "🍗", Dinner: "🐟" };
+      w.days.forEach((d, i) => {
+        const slots = ["Breakfast", "Lunch", "Dinner"];
+        const card = document.createElement("div");
+        card.className = "day";
+        const isToday = weekIndex === 1 && i === todayIdx;
+        const mealsHtml = d.meals.map((m, mi) => {
+          const r = recipes[m.key];
+          const ico = mealIcoFor(m.key);
+          const safeKey = m.key.replace(/`/g, "");
+          return `
+            <div class="meal" onclick="openRecipe('${d.name}', '${slots[mi]}', \`${safeKey}\`)">
+              <span class="ico">${ico}</span>
+              <div class="body"><div class="slot">${slots[mi]}</div><div class="name">${m.key}</div></div>
+              <span class="swap-hint">Recipe ›</span>
+            </div>
+          `;
+        }).join("");
+        card.innerHTML = `
+          <div class="head">
+            <div><span class="day-name">${d.name}</span>${isToday ? '<span class="today-pill">Today</span>' : ''}</div>
+            <span class="day-num">${slots.length} meals</span>
+          </div>
+          <div class="meal-list">${mealsHtml}</div>
+        `;
+        list.appendChild(card);
+      });
+
+      document.getElementById("shopCard").style.display = w.showShop ? "" : "none";
+      document.getElementById("generateCta").style.display = w.showShop ? "none" : "";
+    }
+
+    function step(dir) {
+      const next = weekIndex + dir;
+      if (next < 0 || next >= weeks.length) return;
+      weekIndex = next;
+      render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function loadWeek() { alert("Re-rolls week with fresh meals from your liked foods."); }
+
+    function mealIcoFor(key) {
+      if (key.toLowerCase().includes("yogurt")) return "🥣";
+      if (key.toLowerCase().includes("egg")) return "🍳";
+      if (key.toLowerCase().includes("tofu")) return "🥦";
+      if (key.toLowerCase().includes("salmon")) return "🐟";
+      if (key.toLowerCase().includes("tuna")) return "🥪";
+      if (key.toLowerCase().includes("wrap")) return "🌯";
+      return "🍗";
+    }
+
+    function openRecipe(day, slot, key) {
+      const r = recipes[key];
+      if (!r) return;
+      document.getElementById("rIco").textContent = mealIcoFor(key);
+      document.getElementById("rName").innerHTML = key;
+      document.getElementById("rMeta").textContent = `${day} · ${slot} · ${r.time}`;
+      document.getElementById("rKcal").textContent = r.kcal;
+      document.getElementById("rP").textContent = r.p + "g";
+      document.getElementById("rC").textContent = r.c + "g";
+      document.getElementById("rF").textContent = r.f + "g";
+
+      document.getElementById("rIngredients").innerHTML = r.ingredients.map(i => `
+        <div class="ingredient">
+          <span class="emoji">${i.e}</span>
+          <span class="name">${i.n}</span>
+          <span class="qty">${i.q}</span>
+        </div>
+      `).join("");
+
+      document.getElementById("rSteps").innerHTML = r.steps.map((s, i) => `
+        <div class="step"><span class="n">${i + 1}</span><span>${s}</span></div>
+      `).join("");
+
+      const modal = document.getElementById("modal");
+      modal.classList.add("open");
+      document.getElementById("modalContent").scrollTop = 0;
+    }
+
+    function closeModal() { document.getElementById("modal").classList.remove("open"); }
+
+    render();
+  </script>
+</body>
+</html>

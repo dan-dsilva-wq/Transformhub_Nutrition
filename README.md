@@ -25,6 +25,8 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 OPENAI_API_KEY=
 OPENAI_MODEL=gpt-5.4-mini
+FDC_API_KEY=DEMO_KEY
+NEXT_ALLOWED_DEV_ORIGINS=
 CAPACITOR_SERVER_URL=
 ```
 
@@ -40,10 +42,11 @@ The app supports:
 For Google login, enable Google as a provider in Supabase Auth and add this redirect URL:
 
 ```bash
-http://localhost:3100/auth/callback
+http://localhost:3000/auth/callback
+https://pace-nutrition.vercel.app/auth/callback
 ```
 
-Add the deployed callback URL later when the app has a production domain.
+If you run the dev server on another port, add that callback URL too.
 
 ## Supabase
 

@@ -12,13 +12,14 @@ function loadDotEnvFile(fileName: string) {
   const contents = readFileSync(filePath, "utf8");
 
   for (const line of contents.split(/\r?\n/)) {
-    const match = line.match(/^([^=]+)=(.*)$/);
+    const match = line.match(/^\s*([^#=\s]+)\s*=\s*(.*)\s*$/);
 
     if (!match || process.env[match[1]]) {
       continue;
     }
 
-    process.env[match[1]] = match[2];
+    const value = match[2].replace(/^["']|["']$/g, "");
+    process.env[match[1]] = value;
   }
 }
 
@@ -71,7 +72,6 @@ if (!KNOWN_PRODUCTION_HOSTS.has(serverHost) && !isLocalHost(serverHost)) {
   // Print a noisy warning so a typo or stale .env.local can't quietly point
   // a release build at a dead/old Vercel project — that exact mistake cost
   // us a debugging session before this guard existed.
-  // eslint-disable-next-line no-console
   console.warn(
     `\n⚠️  Capacitor server URL "${serverUrl}" is not in KNOWN_PRODUCTION_HOSTS ` +
       `(${[...KNOWN_PRODUCTION_HOSTS].join(", ")}).\n` +
@@ -80,7 +80,6 @@ if (!KNOWN_PRODUCTION_HOSTS.has(serverHost) && !isLocalHost(serverHost)) {
   );
 }
 
-// eslint-disable-next-line no-console
 console.log(`[capacitor.config] WebView will load: ${serverUrl}`);
 
 const allowNavigation = [serverHost];

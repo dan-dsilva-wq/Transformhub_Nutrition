@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const mealItemSchema = z.object({
+const mealItemSchema = z.object({
   name: z.string().min(1),
   portion: z.string().min(1),
   calories: z.number().nonnegative(),
@@ -77,7 +77,7 @@ export const recipeIdeasRequestSchema = z.object({
   }),
 });
 
-export const recipeIdeaSchema = z.object({
+const recipeIdeaSchema = z.object({
   name: z.string().min(1).max(60),
   parts: z.array(z.string().min(1)).min(2).max(6),
   calories: z.number().nonnegative(),
@@ -88,9 +88,6 @@ export const recipeIdeaSchema = z.object({
 export const recipeIdeasResponseSchema = z.object({
   recipes: z.array(recipeIdeaSchema).min(1).max(4),
 });
-
-export type RecipeIdea = z.infer<typeof recipeIdeaSchema>;
-export type RecipeIdeasResponse = z.infer<typeof recipeIdeasResponseSchema>;
 
 export const nutritionPlanRequestSchema = z.object({
   name: z.string().max(40).optional(),
@@ -137,14 +134,8 @@ export const nutritionPlanResponseSchema = z.object({
   timing: nutritionLessonCopySchema,
 });
 
-export type NutritionPlanRequest = z.infer<typeof nutritionPlanRequestSchema>;
-export type NutritionPlanResponse = z.infer<typeof nutritionPlanResponseSchema>;
 export type MealEstimate = z.infer<typeof mealEstimateSchema>;
 export type CoachResponse = z.infer<typeof coachResponseSchema>;
-
-export function parseMealEstimate(raw: unknown) {
-  return mealEstimateSchema.parse(raw);
-}
 
 export function getMealConfidenceLabel(confidence: number) {
   if (confidence >= 0.8) {

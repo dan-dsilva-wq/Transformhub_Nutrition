@@ -2,11 +2,11 @@
  * Full TransformHub 6-Week Challenge food list, tagged for diet filtering.
  * Tags: "meat" | "fish" | "dairy" | "egg" | "plant"
  */
-export type FoodTag = "meat" | "fish" | "dairy" | "egg" | "plant";
+type FoodTag = "meat" | "fish" | "dairy" | "egg" | "plant";
 
 export type FoodDietPref = "omnivore" | "pescatarian" | "vegetarian" | "vegan";
 
-export type FoodCatKey = "proteins" | "fats" | "carbs" | "fruit" | "veg";
+type FoodCatKey = "proteins" | "fats" | "carbs" | "fruit" | "veg";
 
 export interface FoodItem {
   e: string;

@@ -68,7 +68,7 @@ export type AuthStatus =
   | { kind: "signed-out" }
   | { kind: "signed-in"; userId: string; email: string | null };
 
-export type SubscriptionStatus = "none" | "trial" | "active" | "expired";
+type SubscriptionStatus = "none" | "trial" | "active" | "expired";
 
 export interface Subscription {
   status: SubscriptionStatus;
@@ -87,7 +87,7 @@ export type DietaryPref =
   | "halal"
   | "kosher";
 
-export interface NutritionLessonCopy {
+interface NutritionLessonCopy {
   headline: string;
   body: string;
   bullets: string[];
@@ -133,7 +133,7 @@ export interface OnboardingExtras {
   foodDiet?: "omnivore" | "pescatarian" | "vegetarian" | "vegan";
 }
 
-export interface AppState {
+interface AppState {
   /** Auth status. "demo" means Supabase is unconfigured or ?demo=1 was set. */
   auth: AuthStatus;
   /** True before profile/targets have been loaded for a real user. */

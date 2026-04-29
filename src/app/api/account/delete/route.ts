@@ -18,15 +18,16 @@ async function purgeUserStorage(
   for (const bucket of USER_FILE_BUCKETS) {
     let offset = 0;
     const pageSize = 1000;
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
+    let hasMore = true;
+
+    while (hasMore) {
       const { data, error } = await admin.storage
         .from(bucket)
         .list(userId, { limit: pageSize, offset });
       if (error || !data || data.length === 0) break;
       const paths = data.map((entry) => `${userId}/${entry.name}`);
       await admin.storage.from(bucket).remove(paths);
-      if (data.length < pageSize) break;
+      hasMore = data.length === pageSize;
       offset += pageSize;
     }
   }

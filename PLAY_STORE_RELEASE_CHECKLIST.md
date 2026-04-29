@@ -19,12 +19,8 @@ Current release permissions:
 
 - `android.permission.CAMERA`
 - `android.permission.INTERNET`
-- `android.permission.POST_NOTIFICATIONS`
-- `android.permission.RECEIVE_BOOT_COMPLETED`
-- `android.permission.WAKE_LOCK`
 - `android.permission.health.READ_STEPS`
 - `android.permission.health.READ_WEIGHT`
-- `com.leanlens.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`
 
 ## Health Connect Declaration (required for v1.1)
 
@@ -64,9 +60,9 @@ Use this as a starting point in Play Console. Final answers must match the produ
 
 - Mark data as encrypted in transit: yes, production uses HTTPS.
 - Account creation: yes.
-- Account deletion: provide the support/contact method from the Play listing until an in-app deletion flow is added.
+- Account deletion: in-app deletion is available from Settings, with `/account/delete` as a web fallback.
 - Data sale: no.
-- Optional permissions: camera and notifications are feature-triggered.
+- Optional permissions: camera is feature-triggered.
 
 ## App Access For Review
 

@@ -250,78 +250,6 @@ export function ProgressRing({
   );
 }
 
-/* ───────────────────────── ProgressBar ───────────────────────── */
-
-export function ProgressBar({
-  value,
-  className,
-  fillClassName,
-}: {
-  value: number; // 0..1
-  className?: string;
-  fillClassName?: string;
-}) {
-  const pct = Math.min(Math.max(value * 100, 0), 100);
-  return (
-    <div className={clsx("h-1.5 w-full rounded-full bg-stone-2 overflow-hidden", className)}>
-      <div
-        className={clsx("h-full rounded-full bg-forest transition-[width] duration-500", fillClassName)}
-        style={{ width: `${pct}%` }}
-      />
-    </div>
-  );
-}
-
-/* ───────────────────────── MacroPill ───────────────────────── */
-
-export function MacroPill({
-  label,
-  value,
-  target,
-  unit = "g",
-  tone = "default",
-}: {
-  label: string;
-  value: number;
-  target?: number;
-  unit?: string;
-  tone?: "default" | "muted";
-}) {
-  const ratio = target ? Math.min(value / target, 1) : 0;
-  return (
-    <div
-      className={clsx(
-        "rounded-2xl px-3 py-2.5 text-left transition",
-        tone === "muted"
-          ? "bg-stone/60"
-          : "bg-paper border border-hairline",
-      )}
-    >
-      <div className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted">
-        {label}
-      </div>
-      <div className="mt-0.5 flex items-baseline gap-1">
-        <span className="numerals text-lg leading-none text-ink-2">{Math.round(value)}</span>
-        {target ? (
-          <span className="text-xs text-muted">
-            / {Math.round(target)}
-            {unit}
-          </span>
-        ) : (
-          <span className="text-xs text-muted">{unit}</span>
-        )}
-      </div>
-      {target ? (
-        <ProgressBar
-          value={ratio}
-          className="mt-2 h-1"
-          fillClassName="bg-sage"
-        />
-      ) : null}
-    </div>
-  );
-}
-
 /* ───────────────────────── Stat ───────────────────────── */
 
 export function Stat({
@@ -445,12 +373,6 @@ export function IconBadge({
       {children}
     </span>
   );
-}
-
-/* ───────────────────────── Divider ───────────────────────── */
-
-export function Divider({ className }: { className?: string }) {
-  return <div className={clsx("h-px w-full bg-hairline", className)} />;
 }
 
 /* ───────────────────────── EmptyState ───────────────────────── */

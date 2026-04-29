@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { Capacitor } from "@capacitor/core";
 import { Mail, ArrowRight } from "lucide-react";
 import { Button, Field, Input, Wordmark } from "./primitives";
@@ -15,7 +15,7 @@ function authRedirect(): string {
 }
 
 export function AuthScreen() {
-  const supabase = getSupabase();
+  const supabase = useMemo(() => getSupabase(), []);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState<"sign-in" | "sign-up">("sign-in");

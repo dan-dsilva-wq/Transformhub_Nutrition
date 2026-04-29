@@ -11,10 +11,22 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Pace — your weight-loss partner",
+  metadataBase: new URL("https://pace-nutrition.vercel.app"),
+  title: "Pace - your weight-loss partner",
   description:
     "Pace is a calm, photo-first nutrition app for busy adults. Snap a meal, see the next good move, lose weight at your own pace.",
   applicationName: "Pace",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "Pace - your weight-loss partner",
+    description:
+      "Calm, photo-first nutrition tracking for busy adults losing weight at their own pace.",
+    url: "/",
+    siteName: "Pace",
+    type: "website",
+  },
   appleWebApp: {
     capable: true,
     title: "Pace",

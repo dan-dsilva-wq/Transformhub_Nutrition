@@ -34,19 +34,24 @@ function fmt(d: Date): string {
   return new Intl.DateTimeFormat("en-GB", { month: "short", day: "numeric" }).format(d);
 }
 
-function makeDays(seed: number): DayPlan[] {
+function mealSlotsFor(mealsPerDay: number): string[] {
+  if (mealsPerDay <= 2) return ["Breakfast", "Dinner"];
+  if (mealsPerDay >= 5) return ["Breakfast", "Mid-morning", "Lunch", "Afternoon", "Dinner"];
+  if (mealsPerDay === 4) return ["Breakfast", "Lunch", "Snack", "Dinner"];
+  return ["Breakfast", "Lunch", "Dinner"];
+}
+
+function makeDays(seed: number, slots: string[]): DayPlan[] {
   const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   return dayNames.map((n, i) => ({
     name: n,
-    meals: [
-      { key: recipeKeys[(i + seed) % recipeKeys.length] },
-      { key: recipeKeys[(i + seed + 2) % recipeKeys.length] },
-      { key: recipeKeys[(i + seed + 4) % recipeKeys.length] },
-    ],
+    meals: slots.map((_, slotIndex) => ({
+      key: recipeKeys[(i + seed + slotIndex * 2) % recipeKeys.length],
+    })),
   }));
 }
 
-function buildWeeks(): WeekPlan[] {
+function buildWeeks(seed: number, slots: string[]): WeekPlan[] {
   const last = weekStart(-1);
   const lastEnd = new Date(last);
   lastEnd.setDate(lastEnd.getDate() + 6);
@@ -63,7 +68,7 @@ function buildWeeks(): WeekPlan[] {
       range: `${fmt(last)} – ${fmt(lastEnd)}`,
       badge: "Past",
       badgeClass: "past",
-      days: makeDays(0),
+      days: makeDays(seed, slots),
       showShop: true,
     },
     {
@@ -71,7 +76,7 @@ function buildWeeks(): WeekPlan[] {
       range: `${fmt(cur)} – ${fmt(curEnd)}`,
       badge: "Current",
       badgeClass: "this-week",
-      days: makeDays(1),
+      days: makeDays(seed + 1, slots),
       showShop: true,
     },
     {
@@ -79,7 +84,7 @@ function buildWeeks(): WeekPlan[] {
       range: `${fmt(next)} – ${fmt(nextEnd)}`,
       badge: "Planned",
       badgeClass: "future",
-      days: makeDays(3),
+      days: makeDays(seed + 3, slots),
       showShop: false,
     },
   ];
@@ -94,7 +99,9 @@ const badgeTone: Record<WeekPlan["badgeClass"], string> = {
 export function FoodsWeekScreen() {
   const { onboardingExtras } = useAppState();
   const mealsPerDay = onboardingExtras.routine?.mealsPerDay ?? 3;
-  const weeks = useMemo(buildWeeks, []);
+  const [planSeed, setPlanSeed] = useState(0);
+  const slots = useMemo(() => mealSlotsFor(mealsPerDay), [mealsPerDay]);
+  const weeks = useMemo(() => buildWeeks(planSeed, slots), [planSeed, slots]);
   const [weekIndex, setWeekIndex] = useState<number>(1);
   const [openRecipe, setOpenRecipe] = useState<{
     day: string;
@@ -106,8 +113,6 @@ export function FoodsWeekScreen() {
   const week = weeks[weekIndex];
   const todayWeekday = new Date().getDay() || 7; // 1..7 (Mon..Sun)
   const todayIdx = todayWeekday - 1;
-
-  const slots = ["Breakfast", "Lunch", "Dinner"];
 
   function step(dir: number) {
     setWeekIndex((i) => Math.min(weeks.length - 1, Math.max(0, i + dir)));
@@ -200,7 +205,7 @@ export function FoodsWeekScreen() {
                     </span>
                   ) : null}
                 </div>
-                <span className="text-xs text-muted">{slots.length} meals</span>
+                <span className="text-xs text-muted">{d.meals.length} meals</span>
               </div>
               <div className="space-y-2">
                 {d.meals.map((m, mi) => (
@@ -251,7 +256,7 @@ export function FoodsWeekScreen() {
         <button
           type="button"
           data-tap
-          onClick={() => setWeekIndex((i) => i)}
+          onClick={() => setPlanSeed((seed) => seed + 1)}
           className="tap-bounce inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-full border border-stone-2 bg-paper text-xs"
         >
           <RefreshCw size={14} aria-hidden /> Re-roll

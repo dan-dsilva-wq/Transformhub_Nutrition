@@ -35,10 +35,3 @@ export const demoMeals = [
     fiberG: 8,
   },
 ];
-
-export const demoWeights = [
-  { date: "Apr 1", weightKg: 82.4 },
-  { date: "Apr 8", weightKg: 81.8 },
-  { date: "Apr 15", weightKg: 81.1 },
-  { date: "Apr 22", weightKg: 80.7 },
-];

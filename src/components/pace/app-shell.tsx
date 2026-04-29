@@ -13,6 +13,7 @@ import {
   Target,
   Dumbbell,
   Apple,
+  Salad,
   BellRing,
   Activity,
   Settings as SettingsIcon,
@@ -31,6 +32,7 @@ interface NavItem {
 
 const tabs: NavItem[] = [
   { href: "/today", label: "Today", icon: <Home size={20} aria-hidden /> },
+  { href: "/you/foods", label: "Food", icon: <Salad size={20} aria-hidden /> },
   { href: "/progress", label: "Progress", icon: <TrendingUp size={20} aria-hidden /> },
 ];
 
@@ -103,8 +105,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
         aria-label="Primary"
       >
-        <div className="relative mx-auto flex h-16 max-w-md items-end justify-between px-6">
+        <div className="relative mx-auto flex h-16 max-w-md items-end justify-around px-3">
           <NavTab item={tabs[0]} active={isActive(tabs[0].href)} />
+          <NavTab item={tabs[1]} active={isActive(tabs[1].href)} />
           <Link
             href="/log"
             data-tap
@@ -119,7 +122,8 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Plus size={26} strokeWidth={2.4} aria-hidden />
             </span>
           </Link>
-          <NavTab item={tabs[1]} active={isActive(tabs[1].href)} tourId="progress-tab" />
+          <span className="w-14" aria-hidden />
+          <NavTab item={tabs[2]} active={isActive(tabs[2].href)} tourId="progress-tab" />
         </div>
       </nav>
 
@@ -228,7 +232,7 @@ function NavTab({
       data-tour={tourId}
       aria-current={active ? "page" : undefined}
       className={clsx(
-        "flex w-20 flex-col items-center gap-1 pt-2 pb-1 text-[11px] font-medium tracking-tight",
+        "flex w-16 flex-col items-center gap-1 pt-2 pb-1 text-[11px] font-medium tracking-tight",
         active ? "text-ink-2" : "text-faint hover:text-muted",
       )}
     >

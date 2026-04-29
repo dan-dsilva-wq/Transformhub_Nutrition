@@ -13,7 +13,7 @@ export interface FoodSearchItem {
   source: "USDA FoodData Central";
 }
 
-export interface ParsedFoodSearchQuery {
+interface ParsedFoodSearchQuery {
   original: string;
   searchTerms: string;
   amount?: {

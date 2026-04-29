@@ -83,7 +83,7 @@ export function RemindersScreen() {
       </section>
 
       <p className="text-xs text-muted">
-        Reminders run on this device only and use your phone&apos;s local notifications. Nothing is scheduled to a server.
+        Reminders are saved on this device only. Nothing is scheduled to a server.
       </p>
     </div>
   );

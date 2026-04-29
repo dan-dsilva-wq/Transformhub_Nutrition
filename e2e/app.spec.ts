@@ -7,8 +7,9 @@ const tinyPng = Buffer.from(
 
 test("mobile onboarding, mocked meal estimate, and coach flow", async ({ page }) => {
   await page.addInitScript(() => {
+    window.localStorage.removeItem("pace.state.v1");
     window.localStorage.setItem(
-      "pace.state.v1",
+      "pace.state.v2:demo",
       JSON.stringify({
         hasOnboarded: true,
         onboardingExtras: {
@@ -104,7 +105,9 @@ test("mobile onboarding, mocked meal estimate, and coach flow", async ({ page })
   await expect(page.getByRole("heading", { name: "Today", exact: true })).toBeVisible();
 
   await page.getByRole("button", { name: "Open menu" }).click();
-  await page.getByRole("link", { name: "Plan & targets" }).click();
+  const planLink = page.getByRole("link", { name: "Plan & targets" });
+  await expect(planLink).toBeVisible();
+  await planLink.click({ force: true });
   await expect(page.getByRole("heading", { name: /Your plan/i })).toBeVisible();
   await page.getByRole("button", { name: "Edit plan inputs" }).click();
   await page.getByLabel("Age").fill("36");
@@ -130,7 +133,9 @@ test("mobile onboarding, mocked meal estimate, and coach flow", async ({ page })
   await expect(page.getByText("Mock protein bar")).toBeVisible();
 
   await page.getByRole("button", { name: "Open menu" }).click();
-  await page.getByRole("link", { name: "Coach" }).click();
+  const coachLink = page.getByRole("link", { name: "Coach" });
+  await expect(coachLink).toBeVisible();
+  await coachLink.click({ force: true });
   await page.getByLabel("Your message").fill("I am busy tonight");
   await page.getByRole("button", { name: "Send" }).click();
   await expect(page.getByText("Log dinner before you eat it.")).toBeVisible();

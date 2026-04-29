@@ -1,6 +1,6 @@
 import { Capacitor, registerPlugin } from "@capacitor/core";
 
-export interface HealthConnectPlugin {
+interface HealthConnectPlugin {
   isAvailable(): Promise<{ available: boolean; status: string }>;
   hasPermissions(): Promise<{ granted: boolean }>;
   requestHealthPermissions(): Promise<{ granted: boolean }>;

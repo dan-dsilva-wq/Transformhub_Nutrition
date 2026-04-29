@@ -50,7 +50,7 @@ export const featureCopy: Record<
   },
 };
 
-export type Verdict =
+type Verdict =
   | { allowed: true; via: "free" | "trial" | "active" }
   | {
       allowed: false;
@@ -122,8 +122,3 @@ export function trialDaysLeft(trialEndsAtIso?: string): number | null {
   if (Number.isNaN(ms)) return null;
   return Math.max(0, Math.ceil(ms / (24 * 60 * 60 * 1000)));
 }
-
-export const FREE_TIER_CAPS = {
-  aiPhotoPerDay: FREE_TIER_AI_PHOTO_PER_DAY,
-  coachPerWeek: FREE_TIER_COACH_PER_WEEK,
-};

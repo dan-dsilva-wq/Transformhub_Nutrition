@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Pace — food guide visibility mockups</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root {
+    --forest: #1f5f4a;
+    --cream: #f6f1e7;
+    --paper: #fbf7ee;
+    --ink-2: #18241f;
+    --ink: #2c3a33;
+    --muted: #6c7a73;
+    --faint: #9aa69e;
+    --hairline: #e6dfcf;
+    --sage: #8aa896;
+    --amber: #c98a3a;
+    --clay: #b86a4a;
+  }
+  body { background: #efe8d6; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; color: var(--ink); }
+  .font-display { font-family: "Fraunces", "Georgia", serif; font-weight: 600; letter-spacing: -0.01em; }
+  .text-forest { color: var(--forest); }
+  .bg-forest { background: var(--forest); }
+  .text-ink-2 { color: var(--ink-2); }
+  .text-ink { color: var(--ink); }
+  .text-muted { color: var(--muted); }
+  .text-faint { color: var(--faint); }
+  .bg-paper { background: var(--paper); }
+  .bg-cream { background: var(--cream); }
+  .border-hairline { border-color: var(--hairline); }
+  .shadow-card { box-shadow: 0 8px 28px -16px rgba(24,36,31,.18), 0 2px 6px -2px rgba(24,36,31,.06); }
+  .shadow-elevated { box-shadow: 0 24px 50px -22px rgba(24,36,31,.32), 0 6px 12px -4px rgba(24,36,31,.10); }
+  .glass { background: rgba(255,255,255,.55); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,.7); }
+  .glass-strong { background: rgba(255,255,255,.7); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,.75); }
+  .phone {
+    width: 380px; min-height: 760px; border-radius: 44px; padding: 10px;
+    background: linear-gradient(180deg,#222 0%,#111 100%);
+    box-shadow: 0 50px 80px -30px rgba(0,0,0,.35);
+  }
+  .phone-screen {
+    border-radius: 36px; overflow: hidden; height: 740px; position: relative;
+    background:
+      radial-gradient(120% 80% at 0% 0%, rgba(167,243,208,.45) 0%, transparent 55%),
+      radial-gradient(120% 80% at 100% 100%, rgba(186,230,253,.45) 0%, transparent 55%),
+      var(--paper);
+  }
+  .label-eyebrow { font-size: 10.5px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); }
+  .pill { border-radius: 999px; padding: 4px 10px; font-size: 11px; font-weight: 500; }
+  .nav-icon { width: 22px; height: 22px; stroke-width: 1.8; }
+</style>
+</head>
+<body class="min-h-screen">
+
+<div class="max-w-[1700px] mx-auto px-8 py-10">
+  <header class="mb-8">
+    <div class="label-eyebrow">Pace · UX exploration</div>
+    <h1 class="font-display text-4xl text-ink-2 mt-1">Making the food guide visible</h1>
+    <p class="text-muted text-sm mt-2 max-w-2xl">
+      Today the food guide is buried two taps deep in the &ldquo;You&rdquo; drawer. Below are four directions
+      for promoting it &mdash; from light (a Today hero card) to bold (a dedicated bottom-nav tab).
+      Variant <b class="text-ink-2">B</b> is the strongest balance of visibility + simplicity.
+    </p>
+  </header>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-8">
+
+    <!-- ============== A: Hero card on Today ============== -->
+    <section>
+      <div class="mb-3">
+        <div class="label-eyebrow">Variant A</div>
+        <h2 class="font-display text-xl text-ink-2">Hero card on Today</h2>
+        <p class="text-muted text-xs mt-1">Lightest touch. A featured card pinned near the top of Today.</p>
+      </div>
+      <div class="phone">
+        <div class="phone-screen">
+          <!-- header -->
+          <div class="px-5 pt-4 pb-2 flex items-center justify-between">
+            <div class="font-display text-2xl text-ink-2">Pace</div>
+            <div class="w-9 h-9 rounded-full glass grid place-items-center text-xs font-display">P</div>
+          </div>
+          <div class="px-5 mt-2 space-y-3">
+            <div>
+              <div class="label-eyebrow">Today · Tue 29</div>
+              <h2 class="font-display text-2xl text-ink-2 mt-1">Hi Daniel.</h2>
+            </div>
+            <!-- HERO FOOD CARD -->
+            <a class="block rounded-3xl p-4 shadow-card relative overflow-hidden"
+               style="background: linear-gradient(135deg, rgba(167,243,208,.55), rgba(186,230,253,.55));">
+              <div class="flex items-start gap-3">
+                <div class="text-4xl leading-none">🥗</div>
+                <div class="flex-1">
+                  <div class="label-eyebrow">Your food guide</div>
+                  <div class="font-display text-lg text-ink-2 mt-0.5">Tonight: Salmon &amp; sweet potato</div>
+                  <div class="text-xs text-muted mt-0.5">540 kcal · 38g protein · 12 min prep</div>
+                </div>
+              </div>
+              <div class="mt-3 flex items-center gap-2">
+                <span class="pill bg-white/70 text-ink-2">View recipe</span>
+                <span class="pill bg-white/70 text-ink-2">See week →</span>
+              </div>
+            </a>
+            <!-- macro ring summary (existing) -->
+            <div class="rounded-3xl glass p-4">
+              <div class="label-eyebrow">Today's targets</div>
+              <div class="mt-2 flex items-baseline gap-2">
+                <span class="font-display text-2xl text-ink-2">1,420</span>
+                <span class="text-xs text-muted">/ 2,100 kcal</span>
+              </div>
+              <div class="mt-2 h-1.5 rounded-full bg-white/60 overflow-hidden">
+                <div class="h-full bg-forest" style="width:67%"></div>
+              </div>
+            </div>
+            <div class="rounded-3xl glass p-4">
+              <div class="label-eyebrow">Steps</div>
+              <div class="mt-1 font-display text-xl text-ink-2">6,402</div>
+            </div>
+          </div>
+          <!-- bottom nav -->
+          <div class="absolute inset-x-0 bottom-0 glass-strong h-16 flex items-end justify-around px-6 pb-2">
+            <div class="flex flex-col items-center text-[11px] text-ink-2"><div class="text-forest">●</div>Today</div>
+            <div class="-mt-5 w-14 h-14 rounded-full bg-forest grid place-items-center text-white shadow-elevated">＋</div>
+            <div class="flex flex-col items-center text-[11px] text-faint"><div>○</div>Progress</div>
+          </div>
+        </div>
+      </div>
+      <p class="text-xs text-muted mt-3">
+        <b class="text-ink-2">Pros:</b> minimal nav change, contextual.
+        <b class="text-ink-2">Cons:</b> still hidden once the user scrolls.
+      </p>
+    </section>
+
+    <!-- ============== B: Food tab in bottom nav ============== -->
+    <section>
+      <div class="mb-3">
+        <div class="label-eyebrow">Variant B · recommended</div>
+        <h2 class="font-display text-xl text-ink-2">Dedicated &ldquo;Food&rdquo; tab</h2>
+        <p class="text-muted text-xs mt-1">Adds Food as a primary destination next to Today and Progress.</p>
+      </div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="px-5 pt-4 pb-2 flex items-center justify-between">
+            <div class="font-display text-2xl text-ink-2">Pace</div>
+            <div class="w-9 h-9 rounded-full glass grid place-items-center text-xs font-display">P</div>
+          </div>
+          <!-- food hub content -->
+          <div class="px-5 mt-2 space-y-4">
+            <div>
+              <div class="label-eyebrow">Food</div>
+              <h2 class="font-display text-3xl text-ink-2 leading-tight mt-1">Your food, <span class="text-forest">your way.</span></h2>
+              <p class="text-xs text-muted mt-1">Pick what you eat. We&rsquo;ll plan the week from it.</p>
+            </div>
+            <div class="rounded-2xl glass px-4 py-3">
+              <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm">
+                <span class="font-display text-lg text-ink-2">2,100 kcal</span>
+                <span class="text-muted">·</span>
+                <span class="text-ink">142g protein</span>
+                <span class="text-muted">·</span>
+                <span class="text-ink">3 meals/day</span>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="aspect-square rounded-3xl p-4 flex flex-col justify-between shadow-card"
+                   style="background: rgba(167,243,208,.45); border:1px solid rgba(255,255,255,.7);">
+                <div class="text-5xl">🥗</div>
+                <div>
+                  <div class="font-display text-lg text-ink-2">Your foods</div>
+                  <div class="text-xs text-muted">142 liked</div>
+                </div>
+              </div>
+              <div class="aspect-square rounded-3xl p-4 flex flex-col justify-between shadow-card"
+                   style="background: rgba(186,230,253,.45); border:1px solid rgba(255,255,255,.7);">
+                <div class="text-5xl">📅</div>
+                <div>
+                  <div class="font-display text-lg text-ink-2">Your week</div>
+                  <div class="text-xs text-muted">7-day plan</div>
+                </div>
+              </div>
+            </div>
+            <div class="rounded-2xl glass p-3 flex items-center gap-3">
+              <div class="text-2xl">🍽</div>
+              <div class="flex-1">
+                <div class="text-[11px] text-muted uppercase tracking-wider">Up next</div>
+                <div class="text-sm text-ink-2 font-medium">Lunch · Chicken &amp; rice bowl</div>
+              </div>
+              <div class="text-faint">›</div>
+            </div>
+          </div>
+          <!-- bottom nav with Food tab -->
+          <div class="absolute inset-x-0 bottom-0 glass-strong h-16 flex items-end justify-around px-4 pb-2">
+            <div class="flex flex-col items-center text-[11px] text-faint"><div>○</div>Today</div>
+            <div class="flex flex-col items-center text-[11px] text-ink-2"><div class="text-forest">🥗</div>Food</div>
+            <div class="-mt-5 w-14 h-14 rounded-full bg-forest grid place-items-center text-white shadow-elevated">＋</div>
+            <div class="flex flex-col items-center text-[11px] text-faint"><div>○</div>Progress</div>
+            <div class="flex flex-col items-center text-[11px] text-faint"><div>○</div>You</div>
+          </div>
+        </div>
+      </div>
+      <p class="text-xs text-muted mt-3">
+        <b class="text-ink-2">Pros:</b> always one tap away, sets food as a pillar of the app.
+        <b class="text-ink-2">Cons:</b> 5 nav items is the upper limit &mdash; needs a tighter &ldquo;You&rdquo;.
+      </p>
+    </section>
+
+    <!-- ============== C: Top tabs (Today / Food split) ============== -->
+    <section>
+      <div class="mb-3">
+        <div class="label-eyebrow">Variant C</div>
+        <h2 class="font-display text-xl text-ink-2">Segmented top tabs</h2>
+        <p class="text-muted text-xs mt-1">Today screen splits into Today / Food / Move segments.</p>
+      </div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="px-5 pt-4 pb-2 flex items-center justify-between">
+            <div class="font-display text-2xl text-ink-2">Pace</div>
+            <div class="w-9 h-9 rounded-full glass grid place-items-center text-xs font-display">P</div>
+          </div>
+          <!-- segmented tabs -->
+          <div class="px-5 mt-2">
+            <div class="rounded-full glass p-1 flex text-xs font-medium">
+              <div class="flex-1 text-center py-2 rounded-full text-muted">Today</div>
+              <div class="flex-1 text-center py-2 rounded-full bg-forest text-white shadow">Food</div>
+              <div class="flex-1 text-center py-2 rounded-full text-muted">Move</div>
+            </div>
+          </div>
+          <div class="px-5 mt-4 space-y-3">
+            <div class="rounded-3xl glass p-4">
+              <div class="label-eyebrow">Today &middot; lunch</div>
+              <div class="mt-1 flex items-center gap-3">
+                <div class="text-3xl">🍱</div>
+                <div class="flex-1">
+                  <div class="font-display text-lg text-ink-2">Chicken &amp; rice bowl</div>
+                  <div class="text-xs text-muted">620 kcal · 48g protein</div>
+                </div>
+                <span class="pill bg-forest text-white">Cook</span>
+              </div>
+            </div>
+            <div class="rounded-3xl glass p-4">
+              <div class="label-eyebrow">Tonight</div>
+              <div class="mt-1 flex items-center gap-3">
+                <div class="text-3xl">🐟</div>
+                <div class="flex-1">
+                  <div class="font-display text-lg text-ink-2">Salmon &amp; sweet potato</div>
+                  <div class="text-xs text-muted">540 kcal · 38g protein</div>
+                </div>
+                <span class="pill bg-white/70 text-ink-2">Swap</span>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="rounded-2xl p-3 shadow-card text-sm" style="background:rgba(167,243,208,.45)">
+                <div class="text-xl">🥗</div>
+                <div class="font-display text-base text-ink-2">Your foods</div>
+              </div>
+              <div class="rounded-2xl p-3 shadow-card text-sm" style="background:rgba(186,230,253,.45)">
+                <div class="text-xl">📅</div>
+                <div class="font-display text-base text-ink-2">Full week</div>
+              </div>
+            </div>
+          </div>
+          <div class="absolute inset-x-0 bottom-0 glass-strong h-16 flex items-end justify-around px-6 pb-2">
+            <div class="flex flex-col items-center text-[11px] text-ink-2"><div class="text-forest">●</div>Today</div>
+            <div class="-mt-5 w-14 h-14 rounded-full bg-forest grid place-items-center text-white shadow-elevated">＋</div>
+            <div class="flex flex-col items-center text-[11px] text-faint"><div>○</div>Progress</div>
+          </div>
+        </div>
+      </div>
+      <p class="text-xs text-muted mt-3">
+        <b class="text-ink-2">Pros:</b> keeps 3-tab nav, surfaces food per-meal.
+        <b class="text-ink-2">Cons:</b> top tabs compete with the page header.
+      </p>
+    </section>
+
+    <!-- ============== D: Plate FAB + Today widgets ============== -->
+    <section>
+      <div class="mb-3">
+        <div class="label-eyebrow">Variant D</div>
+        <h2 class="font-display text-xl text-ink-2">Long-press the &ldquo;+&rdquo; for plan</h2>
+        <p class="text-muted text-xs mt-1">FAB expands into Log / Plan a meal / This week. Plus a meal-strip widget on Today.</p>
+      </div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="px-5 pt-4 pb-2 flex items-center justify-between">
+            <div class="font-display text-2xl text-ink-2">Pace</div>
+            <div class="w-9 h-9 rounded-full glass grid place-items-center text-xs font-display">P</div>
+          </div>
+          <div class="px-5 mt-2 space-y-3">
+            <div>
+              <div class="label-eyebrow">Today · Tue 29</div>
+              <h2 class="font-display text-2xl text-ink-2 mt-1">Hi Daniel.</h2>
+            </div>
+            <!-- meal strip -->
+            <div class="rounded-3xl glass p-3">
+              <div class="flex items-center justify-between mb-2">
+                <div class="label-eyebrow">Today's plate</div>
+                <span class="text-xs text-forest font-medium">See week →</span>
+              </div>
+              <div class="grid grid-cols-3 gap-2">
+                <div class="rounded-2xl p-2 text-center" style="background:rgba(167,243,208,.45)">
+                  <div class="text-2xl">🥣</div>
+                  <div class="text-[11px] text-muted mt-1">Breakfast</div>
+                  <div class="text-xs font-medium text-ink-2 leading-tight">Yogurt &amp; oats</div>
+                </div>
+                <div class="rounded-2xl p-2 text-center ring-2 ring-forest" style="background:rgba(255,255,255,.7)">
+                  <div class="text-2xl">🍱</div>
+                  <div class="text-[11px] text-forest mt-1 font-medium">Lunch · now</div>
+                  <div class="text-xs font-medium text-ink-2 leading-tight">Chicken &amp; rice</div>
+                </div>
+                <div class="rounded-2xl p-2 text-center" style="background:rgba(186,230,253,.45)">
+                  <div class="text-2xl">🐟</div>
+                  <div class="text-[11px] text-muted mt-1">Dinner</div>
+                  <div class="text-xs font-medium text-ink-2 leading-tight">Salmon &amp; sweet potato</div>
+                </div>
+              </div>
+            </div>
+            <div class="rounded-3xl glass p-4">
+              <div class="label-eyebrow">Macros</div>
+              <div class="mt-2 flex items-baseline gap-2">
+                <span class="font-display text-2xl text-ink-2">1,420</span>
+                <span class="text-xs text-muted">/ 2,100 kcal</span>
+              </div>
+              <div class="mt-2 h-1.5 rounded-full bg-white/60 overflow-hidden">
+                <div class="h-full bg-forest" style="width:67%"></div>
+              </div>
+            </div>
+          </div>
+          <!-- expanded FAB menu -->
+          <div class="absolute left-1/2 -translate-x-1/2 bottom-24 w-56 glass-strong rounded-2xl shadow-elevated p-2 text-sm">
+            <div class="flex items-center gap-3 px-3 py-2 rounded-xl bg-white/60">
+              <span class="text-lg">📷</span><span class="text-ink-2">Log a meal</span>
+            </div>
+            <div class="flex items-center gap-3 px-3 py-2 rounded-xl">
+              <span class="text-lg">🥗</span><span class="text-ink-2">Plan a meal</span>
+            </div>
+            <div class="flex items-center gap-3 px-3 py-2 rounded-xl">
+              <span class="text-lg">📅</span><span class="text-ink-2">This week</span>
+            </div>
+          </div>
+          <div class="absolute inset-x-0 bottom-0 glass-strong h-16 flex items-end justify-around px-6 pb-2">
+            <div class="flex flex-col items-center text-[11px] text-ink-2"><div class="text-forest">●</div>Today</div>
+            <div class="-mt-5 w-14 h-14 rounded-full bg-forest grid place-items-center text-white shadow-elevated text-2xl">＋</div>
+            <div class="flex flex-col items-center text-[11px] text-faint"><div>○</div>Progress</div>
+          </div>
+        </div>
+      </div>
+      <p class="text-xs text-muted mt-3">
+        <b class="text-ink-2">Pros:</b> reuses the FAB, contextual meal strip on Today.
+        <b class="text-ink-2">Cons:</b> long-press is undiscoverable; meal strip needs maintenance.
+      </p>
+    </section>
+
+  </div>
+
+  <footer class="mt-12 text-xs text-muted">
+    Recommendation: ship <b class="text-ink-2">B</b> (Food tab) as the structural change, plus the
+    <b class="text-ink-2">today's plate strip</b> from D. Together they make food unmissable on
+    every visit and one tap away from anywhere in the app.
+  </footer>
+</div>
+
+</body>
+</html>

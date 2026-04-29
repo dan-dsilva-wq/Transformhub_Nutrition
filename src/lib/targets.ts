@@ -12,7 +12,7 @@ export type AccountabilityStyle = "gentle" | "firm" | "tough";
 
 export type EquipmentPreference = "none" | "bands" | "dumbbells" | "gym";
 
-export interface ProfileGuardrailInput {
+interface ProfileGuardrailInput {
   age: number;
   pregnant?: boolean;
   eatingDisorderRecovery?: boolean;
@@ -94,7 +94,7 @@ export function checkProfileGuardrails(input: ProfileGuardrailInput) {
   };
 }
 
-export function calculateRmr(profile: Pick<TargetProfile, "sexForCalories" | "heightCm" | "currentWeightKg" | "age">) {
+function calculateRmr(profile: Pick<TargetProfile, "sexForCalories" | "heightCm" | "currentWeightKg" | "age">) {
   const sexAdjustment = profile.sexForCalories === "male" ? 5 : -161;
 
   return Math.round(

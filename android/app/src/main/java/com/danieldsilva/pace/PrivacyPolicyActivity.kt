@@ -13,7 +13,7 @@ import android.os.Bundle
 class PrivacyPolicyActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val url = "https://pace-nutrition.vercel.app/privacypolicy.html"
+        val url = getString(R.string.health_connect_privacy_policy_url)
         try {
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

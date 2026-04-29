@@ -16,6 +16,7 @@ import {
   Salad,
   BellRing,
   Activity,
+  Menu,
   Settings as SettingsIcon,
   LogOut,
 } from "lucide-react";
@@ -105,9 +106,17 @@ export function AppShell({ children }: { children: ReactNode }) {
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
         aria-label="Primary"
       >
-        <div className="relative mx-auto flex h-16 max-w-md items-end justify-around px-3">
+        <div className="relative mx-auto grid h-16 max-w-md grid-cols-5 items-end">
           <NavTab item={tabs[0]} active={isActive(tabs[0].href)} />
           <NavTab item={tabs[1]} active={isActive(tabs[1].href)} />
+          <span aria-hidden />
+          <NavTab item={tabs[2]} active={isActive(tabs[2].href)} tourId="progress-tab" />
+          <NavButton
+            label="You"
+            icon={<Menu size={20} aria-hidden />}
+            onClick={() => setDrawerOpen(true)}
+            active={drawerOpen}
+          />
           <Link
             href="/log"
             data-tap
@@ -122,8 +131,6 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Plus size={26} strokeWidth={2.4} aria-hidden />
             </span>
           </Link>
-          <span className="w-14" aria-hidden />
-          <NavTab item={tabs[2]} active={isActive(tabs[2].href)} tourId="progress-tab" />
         </div>
       </nav>
 
@@ -232,7 +239,7 @@ function NavTab({
       data-tour={tourId}
       aria-current={active ? "page" : undefined}
       className={clsx(
-        "flex w-16 flex-col items-center gap-1 pt-2 pb-1 text-[11px] font-medium tracking-tight",
+        "flex flex-col items-center gap-1 pt-2 pb-1 text-[11px] font-medium tracking-tight",
         active ? "text-ink-2" : "text-faint hover:text-muted",
       )}
     >
@@ -246,5 +253,39 @@ function NavTab({
       </span>
       <span>{item.label}</span>
     </Link>
+  );
+}
+
+function NavButton({
+  label,
+  icon,
+  onClick,
+  active,
+}: {
+  label: string;
+  icon: ReactNode;
+  onClick: () => void;
+  active: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      data-tap
+      onClick={onClick}
+      className={clsx(
+        "flex flex-col items-center gap-1 pt-2 pb-1 text-[11px] font-medium tracking-tight",
+        active ? "text-ink-2" : "text-faint hover:text-muted",
+      )}
+    >
+      <span
+        className={clsx(
+          "transition-transform duration-300",
+          active ? "text-forest scale-110" : "scale-100",
+        )}
+      >
+        {icon}
+      </span>
+      <span>{label}</span>
+    </button>
   );
 }

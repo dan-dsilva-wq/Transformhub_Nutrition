@@ -1,5 +1,7 @@
 package com.danieldsilva.pace
 
+import android.content.Intent
+import android.util.Log
 import androidx.activity.result.ActivityResult
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.PermissionController
@@ -75,13 +77,30 @@ class HealthConnectPlugin : Plugin() {
 
     @PluginMethod
     fun requestHealthPermissions(call: PluginCall) {
+        Log.i("HealthConnectPlugin", "requestHealthPermissions called")
         if (clientOrNull() == null) {
-            call.reject("Health Connect is not available on this device")
+            call.reject("Health Connect not available (provider missing)")
             return
         }
-        val intent = PermissionController.createRequestPermissionResultContract()
-            .createIntent(context, permissions)
-        startActivityForResult(call, intent, "permissionResult")
+        try {
+            val intent = PermissionController.createRequestPermissionResultContract()
+                .createIntent(context, permissions)
+            Log.i("HealthConnectPlugin", "Launching permission intent: $intent")
+            startActivityForResult(call, intent, "permissionResult")
+        } catch (e: Exception) {
+            Log.e("HealthConnectPlugin", "Permission intent failed, opening settings", e)
+            try {
+                val fallback = Intent("androidx.health.ACTION_HEALTH_CONNECT_SETTINGS")
+                fallback.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                context.startActivity(fallback)
+                val ret = JSObject()
+                ret.put("granted", false)
+                ret.put("opened", "settings")
+                call.resolve(ret)
+            } catch (e2: Exception) {
+                call.reject("Could not launch Health Connect: ${e.message}", e)
+            }
+        }
     }
 
     @ActivityCallback

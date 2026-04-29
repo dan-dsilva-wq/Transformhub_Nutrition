@@ -75,15 +75,16 @@ export function IntegrationsScreen() {
     setBusy(true);
     setError(null);
     try {
-      const { granted } = await HealthConnect.requestHealthPermissions();
-      if (granted) {
+      setError("DEBUG: calling requestHealthPermissions...");
+      const result = await HealthConnect.requestHealthPermissions();
+      setError(`DEBUG: returned granted=${result.granted}`);
+      if (result.granted) {
         setHealthStatus("connected");
         await syncOnce();
-      } else {
-        setError("Permission denied. Open Health Connect to grant access.");
+        setError(null);
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not connect");
+      setError(`DEBUG ERROR: ${e instanceof Error ? e.message : String(e)}`);
     } finally {
       setBusy(false);
     }

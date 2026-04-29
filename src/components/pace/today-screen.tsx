@@ -117,7 +117,7 @@ export function TodayScreen() {
     if (lastUsed && lastUsed !== ymd) {
       const seenKey = `pace.reviewSeen.${userId}.${lastUsed}`;
       if (!window.localStorage.getItem(seenKey)) {
-        setReviewDay(lastUsed);
+        window.setTimeout(() => setReviewDay(lastUsed), 0);
       }
     }
     window.localStorage.setItem(lastKey, ymd);

@@ -15,7 +15,7 @@ import {
   getMealConfidenceLabel,
   type MealEstimate,
 } from "@/lib/ai/schemas";
-import { parseFoodSearchQuery, type FoodSearchItem } from "@/lib/food-search";
+import { isPieceLikeUnit, parseFoodSearchQuery, type FoodSearchItem } from "@/lib/food-search";
 import type { BarcodeProduct } from "@/lib/barcode-product";
 import { useAppState, useTodayMeals } from "@/lib/state/app-state";
 import {
@@ -667,7 +667,7 @@ function SearchFlow() {
   function pickFood(food: FoodSearchItem) {
     const requested = parseFoodSearchQuery(query).amount;
     const requestedGrams = requested
-      ? requested.unit === "serving" || requested.unit === "egg" || requested.unit === "eggs"
+      ? isPieceLikeUnit(requested.unit)
         ? requested.quantity * food.servingGrams
         : requested.grams
       : food.servingGrams;

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import {
+  commonWholeFoodSearchItem,
   databaseRowToFoodSearchItem,
   foodSearchItemToDatabaseRow,
   normaliseUsdaFood,
@@ -69,10 +70,14 @@ export async function GET(request: Request) {
 
   const foodQuery = parseFoodSearchQuery(parsed.data);
   const searchTerms = foodQuery.searchTerms || parsed.data;
+  const commonFood = commonWholeFoodSearchItem(searchTerms);
   const cachedFoods = rankFoodSearchItems(searchTerms, await searchCachedFoods(searchTerms));
+  const cachedWithCommon = commonFood
+    ? [commonFood, ...cachedFoods.filter((food) => food.id !== commonFood.id)]
+    : cachedFoods;
 
-  if (cachedFoods.length >= 4) {
-    return NextResponse.json({ foods: cachedFoods.slice(0, 8), source: "cache" });
+  if (cachedWithCommon.length >= 4) {
+    return NextResponse.json({ foods: cachedWithCommon.slice(0, 8), source: "cache" });
   }
 
   const apiKey = process.env.FDC_API_KEY || "DEMO_KEY";
@@ -104,13 +109,16 @@ export async function GET(request: Request) {
       .map(normaliseUsdaFood)
       .filter((food) => food.caloriesPer100g || food.proteinPer100g || food.carbsPer100g || food.fatPer100g);
     const rankedFoods = rankFoodSearchItems(searchTerms, foods);
+    const rankedWithCommon = commonFood
+      ? [commonFood, ...rankedFoods.filter((food) => food.id !== commonFood.id)]
+      : rankedFoods;
 
-    await cacheFoods(rankedFoods);
+    await cacheFoods(rankedWithCommon);
 
-    return NextResponse.json({ foods: rankedFoods.slice(0, 8), source: "usda" });
+    return NextResponse.json({ foods: rankedWithCommon.slice(0, 8), source: "usda" });
   } catch {
-    if (cachedFoods.length) {
-      return NextResponse.json({ foods: cachedFoods, source: "cache" });
+    if (cachedWithCommon.length) {
+      return NextResponse.json({ foods: cachedWithCommon, source: "cache" });
     }
 
     return NextResponse.json({ error: "Could not search foods." }, { status: 502 });

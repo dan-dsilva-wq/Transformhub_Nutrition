@@ -109,7 +109,87 @@ const pieceLikeUnits = new Set<string>([
   "bananas",
   "apple",
   "apples",
+  "orange",
+  "oranges",
+  "pear",
+  "pears",
+  "kiwi",
+  "kiwis",
+  "avocado",
+  "avocados",
 ]);
+
+const commonWholeFoods: Record<
+  string,
+  Omit<FoodSearchItem, "id" | "source">
+> = {
+  banana: {
+    name: "Banana",
+    category: "Fruit",
+    servingText: "1 medium banana",
+    servingGrams: 118,
+    caloriesPer100g: 89,
+    proteinPer100g: 1.1,
+    carbsPer100g: 22.8,
+    fatPer100g: 0.3,
+    fiberPer100g: 2.6,
+  },
+  apple: {
+    name: "Apple",
+    category: "Fruit",
+    servingText: "1 medium apple",
+    servingGrams: 182,
+    caloriesPer100g: 52,
+    proteinPer100g: 0.3,
+    carbsPer100g: 13.8,
+    fatPer100g: 0.2,
+    fiberPer100g: 2.4,
+  },
+  orange: {
+    name: "Orange",
+    category: "Fruit",
+    servingText: "1 medium orange",
+    servingGrams: 131,
+    caloriesPer100g: 47,
+    proteinPer100g: 0.9,
+    carbsPer100g: 11.8,
+    fatPer100g: 0.1,
+    fiberPer100g: 2.4,
+  },
+  pear: {
+    name: "Pear",
+    category: "Fruit",
+    servingText: "1 medium pear",
+    servingGrams: 178,
+    caloriesPer100g: 57,
+    proteinPer100g: 0.4,
+    carbsPer100g: 15.2,
+    fatPer100g: 0.1,
+    fiberPer100g: 3.1,
+  },
+  kiwi: {
+    name: "Kiwi",
+    category: "Fruit",
+    servingText: "1 kiwi",
+    servingGrams: 75,
+    caloriesPer100g: 61,
+    proteinPer100g: 1.1,
+    carbsPer100g: 14.7,
+    fatPer100g: 0.5,
+    fiberPer100g: 3,
+  },
+  avocado: {
+    name: "Avocado",
+    category: "Fruit",
+    servingText: "1 medium avocado",
+    servingGrams: 150,
+    caloriesPer100g: 160,
+    proteinPer100g: 2,
+    carbsPer100g: 8.5,
+    fatPer100g: 14.7,
+    fiberPer100g: 6.7,
+  },
+};
 
 const wholeEggExclusions = [
   "white",
@@ -147,6 +227,34 @@ const noisyEggWords = [
   "substitute",
   "liquid",
 ];
+
+const noisyProduceWords = [
+  "baby",
+  "bar",
+  "bread",
+  "cake",
+  "candy",
+  "chips",
+  "cookie",
+  "dried",
+  "drink",
+  "flavor",
+  "flavored",
+  "frozen",
+  "juice",
+  "muffin",
+  "pie",
+  "powder",
+  "pudding",
+  "sauce",
+  "smoothie",
+  "snack",
+  "yogurt",
+];
+
+export function isPieceLikeUnit(unit: string) {
+  return pieceLikeUnits.has(unit.toLowerCase());
+}
 
 export function parseFoodSearchQuery(query: string): ParsedFoodSearchQuery {
   const original = query.trim().replace(/\s+/g, " ");
@@ -210,6 +318,27 @@ function isWholeEggFood(name: string) {
   return !wholeEggExclusions.some((word) => nameTokens.includes(word));
 }
 
+function normaliseCommonFoodKey(value: string) {
+  const [firstToken] = tokens(value);
+  if (!firstToken) return null;
+  if (firstToken.endsWith("s")) {
+    const singular = firstToken.slice(0, -1);
+    if (commonWholeFoods[singular]) return singular;
+  }
+  return commonWholeFoods[firstToken] ? firstToken : null;
+}
+
+export function commonWholeFoodSearchItem(query: string): FoodSearchItem | null {
+  const key = normaliseCommonFoodKey(query);
+  if (!key) return null;
+  const food = commonWholeFoods[key];
+  return {
+    ...food,
+    id: `common-${key}`,
+    source: "USDA FoodData Central",
+  };
+}
+
 function servingForFood(food: Pick<FoodSearchItem, "name" | "servingText" | "servingGrams">) {
   if (
     isWholeEggFood(food.name) &&
@@ -217,6 +346,16 @@ function servingForFood(food: Pick<FoodSearchItem, "name" | "servingText" | "ser
     /^(?:100\s*g|100\s*grams?)$/i.test(food.servingText.trim())
   ) {
     return { servingText: "1 large egg", servingGrams: 50 };
+  }
+
+  const commonKey = normaliseCommonFoodKey(food.name);
+  if (
+    commonKey &&
+    food.servingGrams >= 95 &&
+    /^(?:100\s*g|100\s*grams?)$/i.test(food.servingText.trim())
+  ) {
+    const common = commonWholeFoods[commonKey];
+    return { servingText: common.servingText, servingGrams: common.servingGrams };
   }
 
   return { servingText: food.servingText, servingGrams: food.servingGrams };
@@ -275,6 +414,7 @@ export function rankFoodSearchItems(query: string, foods: FoodSearchItem[]) {
   const parsed = parseFoodSearchQuery(query);
   const queryTokens = tokens(parsed.searchTerms || query);
   const isEggQuery = queryTokens.length === 1 && (queryTokens[0] === "egg" || queryTokens[0] === "eggs");
+  const commonKey = normaliseCommonFoodKey(parsed.searchTerms || query);
 
   return [...foods]
     .map((food, index) => {
@@ -295,6 +435,20 @@ export function rankFoodSearchItems(query: string, foods: FoodSearchItem[]) {
         if (food.servingText.toLowerCase().includes("egg")) score += 25;
         if (food.brand) score -= 30;
         if (noisyEggWords.some((word) => nameTokens.includes(word))) score -= 120;
+      }
+
+      if (commonKey) {
+        const isPlainProduce =
+          nameTokens.length <= 3 &&
+          nameTokens.includes(commonKey) &&
+          !food.brand &&
+          !noisyProduceWords.some((word) => nameTokens.includes(word));
+        if (isPlainProduce) score += 100;
+        if (food.name.toLowerCase() === commonWholeFoods[commonKey].name.toLowerCase()) {
+          score += 80;
+        }
+        if (food.brand) score -= 35;
+        if (noisyProduceWords.some((word) => nameTokens.includes(word))) score -= 90;
       }
 
       return { food, index, score };

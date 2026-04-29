@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  commonWholeFoodSearchItem,
   databaseRowToFoodSearchItem,
+  isPieceLikeUnit,
   normaliseUsdaFood,
   parseFoodSearchQuery,
   rankFoodSearchItems,
@@ -13,6 +15,11 @@ describe("food search helpers", () => {
       searchTerms: "egg",
       amount: { quantity: 1, unit: "egg" },
     });
+    expect(parseFoodSearchQuery("1 banana")).toMatchObject({
+      searchTerms: "banana",
+      amount: { quantity: 1, unit: "banana" },
+    });
+    expect(isPieceLikeUnit("banana")).toBe(true);
   });
 
   it("turns common volume amounts into gram-equivalent amounts", () => {
@@ -99,5 +106,45 @@ describe("food search helpers", () => {
 
     expect(foods.map((food) => food.id)).toEqual(["grade-a", "just"]);
     expect(foods[0]).toMatchObject({ servingText: "1 large egg", servingGrams: 50 });
+  });
+
+  it("provides basic whole-fruit servings for common searches", () => {
+    expect(commonWholeFoodSearchItem("banana")).toMatchObject({
+      id: "common-banana",
+      name: "Banana",
+      servingText: "1 medium banana",
+      servingGrams: 118,
+    });
+    expect(commonWholeFoodSearchItem("apples")).toMatchObject({
+      id: "common-apple",
+      name: "Apple",
+      servingText: "1 medium apple",
+    });
+  });
+
+  it("ranks simple produce above noisy banana matches", () => {
+    const base = {
+      id: "x",
+      servingText: "100 g",
+      servingGrams: 100,
+      caloriesPer100g: 89,
+      proteinPer100g: 1,
+      carbsPer100g: 23,
+      fatPer100g: 0,
+      fiberPer100g: 3,
+      source: "USDA FoodData Central",
+    } satisfies Omit<FoodSearchItem, "name">;
+
+    const foods = rankFoodSearchItems("banana", [
+      { ...base, id: "chips", name: "Banana chips", brand: "Snack Co" },
+      { ...base, id: "plain", name: "Banana" },
+      { ...base, id: "smoothie", name: "Banana smoothie drink" },
+    ]);
+
+    expect(foods.map((food) => food.id)).toEqual(["plain"]);
+    expect(foods[0]).toMatchObject({
+      servingText: "1 medium banana",
+      servingGrams: 118,
+    });
   });
 });

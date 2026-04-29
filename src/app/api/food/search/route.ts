@@ -5,6 +5,7 @@ import {
   foodSearchItemToDatabaseRow,
   normaliseUsdaFood,
   parseFoodSearchQuery,
+  rankFoodSearchItems,
   type FoodDatabaseRow,
   type UsdaSearchResponse,
 } from "@/lib/food-search";
@@ -68,10 +69,10 @@ export async function GET(request: Request) {
 
   const foodQuery = parseFoodSearchQuery(parsed.data);
   const searchTerms = foodQuery.searchTerms || parsed.data;
-  const cachedFoods = await searchCachedFoods(searchTerms);
+  const cachedFoods = rankFoodSearchItems(searchTerms, await searchCachedFoods(searchTerms));
 
   if (cachedFoods.length >= 4) {
-    return NextResponse.json({ foods: cachedFoods, source: "cache" });
+    return NextResponse.json({ foods: cachedFoods.slice(0, 8), source: "cache" });
   }
 
   const apiKey = process.env.FDC_API_KEY || "DEMO_KEY";
@@ -87,7 +88,7 @@ export async function GET(request: Request) {
       },
       body: JSON.stringify({
         query: searchTerms,
-        pageSize: 8,
+        pageSize: 20,
         pageNumber: 1,
         dataType: ["Foundation", "SR Legacy", "Survey (FNDDS)", "Branded"],
       }),
@@ -102,10 +103,11 @@ export async function GET(request: Request) {
     const foods = (payload.foods ?? [])
       .map(normaliseUsdaFood)
       .filter((food) => food.caloriesPer100g || food.proteinPer100g || food.carbsPer100g || food.fatPer100g);
+    const rankedFoods = rankFoodSearchItems(searchTerms, foods);
 
-    await cacheFoods(foods);
+    await cacheFoods(rankedFoods);
 
-    return NextResponse.json({ foods, source: "usda" });
+    return NextResponse.json({ foods: rankedFoods.slice(0, 8), source: "usda" });
   } catch {
     if (cachedFoods.length) {
       return NextResponse.json({ foods: cachedFoods, source: "cache" });

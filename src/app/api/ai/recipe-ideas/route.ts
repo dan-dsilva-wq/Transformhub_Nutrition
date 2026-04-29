@@ -1,5 +1,6 @@
 import { zodTextFormat } from "openai/helpers/zod";
 import { NextResponse } from "next/server";
+import { requireSignedInUser } from "@/lib/api/auth";
 import { recipeIdeasInstructions } from "@/lib/ai/prompts";
 import { getOpenAIClient, openAiModel } from "@/lib/ai/openai";
 import {
@@ -14,6 +15,9 @@ function errorResponse(message: string, status: number) {
 }
 
 export async function POST(request: Request) {
+  const authError = await requireSignedInUser();
+  if (authError) return authError;
+
   const client = getOpenAIClient();
 
   if (!client) {

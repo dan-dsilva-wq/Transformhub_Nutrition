@@ -1,4 +1,4 @@
-package com.leanlens.app;
+package com.danieldsilva.pace;
 
 import com.getcapacitor.BridgeActivity;
 

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import {
   Camera,
+  ChevronDown,
+  ChevronRight,
   Droplets,
   Edit3,
   Footprints,
@@ -41,13 +43,62 @@ function todayLine() {
     .toUpperCase();
 }
 
+function todayIsoKey() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function mealTotals(meals: MealLog[]) {
+  return meals.reduce(
+    (acc, meal) => ({
+      calories: acc.calories + meal.calories,
+      proteinG: acc.proteinG + meal.proteinG,
+      carbsG: acc.carbsG + meal.carbsG,
+      fatG: acc.fatG + meal.fatG,
+      fiberG: acc.fiberG + meal.fiberG,
+    }),
+    { calories: 0, proteinG: 0, carbsG: 0, fatG: 0, fiberG: 0 },
+  );
+}
+
+function groupMealsByDay(meals: MealLog[], todayKey: string) {
+  const groups = new Map<string, MealLog[]>();
+
+  for (const meal of meals) {
+    const dayKey = meal.loggedAt.slice(0, 10);
+    if (dayKey === todayKey) continue;
+    groups.set(dayKey, [...(groups.get(dayKey) ?? []), meal]);
+  }
+
+  return [...groups.entries()]
+    .sort(([a], [b]) => b.localeCompare(a))
+    .map(([dayKey, dayMeals]) => {
+      const sortedMeals = [...dayMeals].sort((a, b) => Date.parse(b.loggedAt) - Date.parse(a.loggedAt));
+      return {
+        dayKey,
+        meals: sortedMeals,
+        totals: mealTotals(sortedMeals),
+      };
+    });
+}
+
+function formatHistoryDay(dayKey: string) {
+  return new Intl.DateTimeFormat("en-GB", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  }).format(new Date(`${dayKey}T12:00:00`));
+}
+
 export function TodayScreen() {
-  const { profile, targets, weights, waterMl, steps, actions } = useAppState();
+  const { profile, targets, meals: allMeals, weights, waterMl, steps, actions } = useAppState();
   const totals = useDayTotals();
   const meals = useTodayMeals();
   const [isEditingSteps, setIsEditingSteps] = useState(false);
   const [stepsDraft, setStepsDraft] = useState(String(steps));
   const [editingMealId, setEditingMealId] = useState<string | null>(null);
+  const [expandedHistoryDays, setExpandedHistoryDays] = useState<Set<string>>(
+    () => new Set(),
+  );
 
   const calorieRatio = Math.min(totals.calories / Math.max(targets.calories, 1), 1);
   const remaining = Math.max(targets.calories - totals.calories, 0);
@@ -90,7 +141,8 @@ export function TodayScreen() {
     return { label: "Log a snack", body: "Even a small one keeps the day honest.", icon: "camera" };
   }, [meals.length, waterMl, targets.waterMl, overshoot]);
 
-  const editingMeal = meals.find((meal) => meal.id === editingMealId) ?? null;
+  const historyDays = useMemo(() => groupMealsByDay(allMeals, todayIsoKey()), [allMeals]);
+  const editingMeal = allMeals.find((meal) => meal.id === editingMealId) ?? null;
 
   function openStepsEditor() {
     setStepsDraft(String(steps));
@@ -100,6 +152,18 @@ export function TodayScreen() {
   function saveSteps() {
     actions.setSteps(Math.max(0, Math.round(Number(stepsDraft) || 0)));
     setIsEditingSteps(false);
+  }
+
+  function toggleHistoryDay(dayKey: string) {
+    setExpandedHistoryDays((prev) => {
+      const next = new Set(prev);
+      if (next.has(dayKey)) {
+        next.delete(dayKey);
+      } else {
+        next.add(dayKey);
+      }
+      return next;
+    });
   }
 
   void profile;
@@ -280,6 +344,55 @@ export function TodayScreen() {
         </section>
       ) : null}
 
+      <section className="pt-2">
+        <SectionHeader eyebrow="History" title="Past days" />
+        {historyDays.length > 0 ? (
+          <ul className="space-y-2">
+            {historyDays.map((day) => {
+              const isExpanded = expandedHistoryDays.has(day.dayKey);
+              return (
+                <li key={day.dayKey} className="card-flat overflow-hidden">
+                  <button
+                    type="button"
+                    data-tap
+                    onClick={() => toggleHistoryDay(day.dayKey)}
+                    className="flex w-full items-center gap-3 px-4 py-3 text-left"
+                    aria-expanded={isExpanded}
+                  >
+                    <span className="grid h-9 w-9 place-items-center rounded-full bg-white/60 text-muted border border-white/70">
+                      {isExpanded ? <ChevronDown size={16} aria-hidden /> : <ChevronRight size={16} aria-hidden />}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-medium text-ink-2">{formatHistoryDay(day.dayKey)}</div>
+                      <div className="text-xs text-muted">
+                        {day.meals.length} meal{day.meals.length === 1 ? "" : "s"} · {Math.round(day.totals.proteinG)}g protein
+                      </div>
+                    </div>
+                    <div className="numerals text-base text-ink-2">{Math.round(day.totals.calories)}</div>
+                  </button>
+                  {isExpanded ? (
+                    <ul className="space-y-2 border-t border-white/60 px-3 py-3">
+                      {day.meals.map((meal) => (
+                        <MealListItem
+                          key={meal.id}
+                          meal={meal}
+                          onEdit={() => setEditingMealId(meal.id)}
+                          onDelete={() => actions.removeMeal(meal.id)}
+                        />
+                      ))}
+                    </ul>
+                  ) : null}
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <Card className="!p-4">
+            <p className="text-sm text-muted">Past meals will appear here after you log across more than one day.</p>
+          </Card>
+        )}
+      </section>
+
       <Sheet
         open={isEditingSteps}
         onClose={() => setIsEditingSteps(false)}
@@ -354,6 +467,62 @@ function MealEditSheet({
         />
       ) : null}
     </Sheet>
+  );
+}
+
+function MealListItem({
+  meal,
+  onEdit,
+  onDelete,
+}: {
+  meal: MealLog;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  return (
+    <li className="card-flat flex items-center gap-3.5 px-4 py-3">
+      {meal.imageUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={meal.imageUrl}
+          alt=""
+          className="h-11 w-11 rounded-xl object-cover"
+        />
+      ) : (
+        <div className="grid h-11 w-11 place-items-center rounded-xl bg-white/60 text-muted border border-white/70">
+          <Camera size={15} aria-hidden />
+        </div>
+      )}
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-sm font-medium text-ink-2">{meal.name}</div>
+        <div className="text-xs text-muted">
+          {new Intl.DateTimeFormat("en-GB", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }).format(new Date(meal.loggedAt))}{" "}
+          · {meal.proteinG}g protein
+        </div>
+      </div>
+      <div className="numerals text-base text-ink-2">{meal.calories}</div>
+      <button
+        type="button"
+        data-tap
+        onClick={onEdit}
+        aria-label={`Edit ${meal.name}`}
+        className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted hover:text-ink"
+      >
+        <Edit3 size={14} aria-hidden />
+      </button>
+      <button
+        type="button"
+        data-tap
+        onClick={onDelete}
+        aria-label={`Delete ${meal.name}`}
+        className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted hover:text-clay"
+      >
+        <Trash2 size={14} aria-hidden />
+      </button>
+    </li>
   );
 }
 

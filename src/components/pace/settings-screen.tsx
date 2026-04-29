@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { LogOut, Sparkles, Trash2 } from "lucide-react";
+import { LogOut, Sparkles, Trash2, AlertTriangle } from "lucide-react";
 import { useAppState } from "@/lib/state/app-state";
 import { Button, Card, IconBadge, SectionHeader, Stat } from "./primitives";
 import { trialDaysLeft } from "@/lib/entitlement";
@@ -10,6 +11,8 @@ export function SettingsScreen() {
   const router = useRouter();
   const { auth, profile, targets, subscription, actions } = useAppState();
   const daysLeft = trialDaysLeft(subscription.trialEndsAtIso);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   async function clearLocal() {
     if (typeof window === "undefined") return;
@@ -17,12 +20,48 @@ export function SettingsScreen() {
       "Clear all locally stored data on this device? Your account stays signed in.",
     );
     if (!ok) return;
-    window.localStorage.removeItem("pace.state.v1");
+    // Wipe the legacy unscoped key plus every per-user namespaced blob so no
+    // cached account data is left behind on this device.
+    try {
+      window.localStorage.removeItem("pace.state.v1");
+      const toRemove: string[] = [];
+      for (let i = 0; i < window.localStorage.length; i++) {
+        const k = window.localStorage.key(i);
+        if (k && k.startsWith("pace.state.v2:")) toRemove.push(k);
+      }
+      toRemove.forEach((k) => window.localStorage.removeItem(k));
+    } catch {
+      /* ignore */
+    }
     window.location.reload();
   }
 
   async function signOut() {
     await actions.signOut();
+    router.push("/");
+  }
+
+  async function deleteAccount() {
+    if (auth.kind !== "signed-in") return;
+    const confirmed = window.confirm(
+      "Permanently delete your account?\n\nThis erases your profile, meals, weights, check-ins, photos, and chat history. This cannot be undone.",
+    );
+    if (!confirmed) return;
+    const typed = window.prompt(
+      "Type DELETE to confirm permanent account deletion.",
+    );
+    if (typed?.trim().toUpperCase() !== "DELETE") {
+      setDeleteError("Deletion cancelled — confirmation text did not match.");
+      return;
+    }
+    setDeleting(true);
+    setDeleteError(null);
+    const result = await actions.deleteAccount();
+    setDeleting(false);
+    if (!result.ok) {
+      setDeleteError(result.error);
+      return;
+    }
     router.push("/");
   }
 
@@ -110,6 +149,52 @@ export function SettingsScreen() {
           </Button>
         </div>
       </Card>
+
+      {auth.kind === "signed-in" ? (
+        <Card>
+          <SectionHeader eyebrow="Account" title="Delete account" />
+          <div className="flex items-start gap-3">
+            <IconBadge tone="clay">
+              <AlertTriangle size={16} aria-hidden />
+            </IconBadge>
+            <p className="text-sm text-ink-2">
+              Permanently delete your account and all associated data — profile, meals, weights, check-ins, photos, and chat history. This cannot be undone.
+            </p>
+          </div>
+          {deleteError ? (
+            <p className="mt-3 text-sm text-clay" role="alert">
+              {deleteError}
+            </p>
+          ) : null}
+          <div className="mt-4 flex gap-3">
+            <Button
+              variant="secondary"
+              onClick={deleteAccount}
+              disabled={deleting}
+            >
+              <Trash2 size={16} aria-hidden />
+              {deleting ? "Deleting…" : "Delete account"}
+            </Button>
+          </div>
+          <p className="mt-3 text-xs text-faint">
+            Trouble deleting in-app? Visit{" "}
+            <a
+              className="underline-offset-4 hover:underline"
+              href="/account/delete"
+            >
+              the account deletion page
+            </a>{" "}
+            or email{" "}
+            <a
+              className="underline-offset-4 hover:underline"
+              href="mailto:vxvo.admin@gmail.com"
+            >
+              vxvo.admin@gmail.com
+            </a>
+            .
+          </p>
+        </Card>
+      ) : null}
 
       <button
         type="button"

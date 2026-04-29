@@ -1,5 +1,6 @@
 import { zodTextFormat } from "openai/helpers/zod";
 import { NextResponse } from "next/server";
+import { requireSignedInUser } from "@/lib/api/auth";
 import { mealEstimateInstructions } from "@/lib/ai/prompts";
 import { getOpenAIClient, openAiModel } from "@/lib/ai/openai";
 import {
@@ -70,6 +71,9 @@ async function resolveImageUrl(input: {
 }
 
 export async function POST(request: Request) {
+  const authError = await requireSignedInUser();
+  if (authError) return authError;
+
   const client = getOpenAIClient();
 
   if (!client) {

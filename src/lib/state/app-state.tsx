@@ -42,7 +42,20 @@ import type {
   WeightEntry,
 } from "./types";
 
-const LOCAL_STATE_KEY = "pace.state.v1";
+/**
+ * Legacy unscoped key. Pre-fix builds wrote everything here, which leaked one
+ * account's cached profile/meals into the next account that signed in on the
+ * same device. We migrate it into the first signed-in user's namespace and
+ * then delete it.
+ */
+const LEGACY_STATE_KEY = "pace.state.v1";
+const STATE_KEY_PREFIX = "pace.state.v2:";
+const GUEST_SCOPE = "guest";
+const DEMO_SCOPE = "demo";
+
+function scopedKey(scope: string) {
+  return `${STATE_KEY_PREFIX}${scope}`;
+}
 
 const greetMessage =
   "I keep this practical. Show me the messy bits of the day and I'll help you make the next good move.";
@@ -134,22 +147,61 @@ interface PersistedShape {
   dayKey?: string;
 }
 
-function loadPersisted(): PersistedShape | null {
+function loadPersisted(scope: string): PersistedShape | null {
   if (typeof window === "undefined") return null;
   try {
-    const raw = window.localStorage.getItem(LOCAL_STATE_KEY);
+    const raw = window.localStorage.getItem(scopedKey(scope));
     return raw ? (JSON.parse(raw) as PersistedShape) : null;
   } catch {
     return null;
   }
 }
 
-function persist(state: PersistedShape) {
+function persist(scope: string, state: PersistedShape) {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(LOCAL_STATE_KEY, JSON.stringify(state));
+    window.localStorage.setItem(scopedKey(scope), JSON.stringify(state));
   } catch {
     /* quota or private mode — ignore */
+  }
+}
+
+function clearPersisted(scope: string) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(scopedKey(scope));
+  } catch {
+    /* ignore */
+  }
+}
+
+function clearLegacy() {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(LEGACY_STATE_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+/**
+ * One-shot migration: if a legacy unscoped blob exists and the target user
+ * has no namespaced blob yet, adopt the legacy blob into their namespace.
+ * Always deletes the legacy key afterwards so subsequent sign-ins can't
+ * inherit it.
+ */
+function migrateLegacyInto(scope: string) {
+  if (typeof window === "undefined") return;
+  try {
+    const legacy = window.localStorage.getItem(LEGACY_STATE_KEY);
+    if (!legacy) return;
+    const existing = window.localStorage.getItem(scopedKey(scope));
+    if (!existing) {
+      window.localStorage.setItem(scopedKey(scope), legacy);
+    }
+    window.localStorage.removeItem(LEGACY_STATE_KEY);
+  } catch {
+    /* ignore */
   }
 }
 
@@ -185,6 +237,14 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [auth, setAuth] = useState<AuthStatus>(() =>
     supabase ? { kind: "signed-out" } : { kind: "demo" },
   );
+
+  // Storage scope: which localStorage namespace to read/write from. Null while
+  // we're still waiting for Supabase to tell us who's signed in. In demo mode
+  // (no Supabase) we know the scope up front.
+  const [storageScope, setStorageScope] = useState<string | null>(
+    supabase ? null : DEMO_SCOPE,
+  );
+  const [hasHydrated, setHasHydrated] = useState<boolean>(false);
 
   const [isHydrating, setIsHydrating] = useState<boolean>(Boolean(supabase));
   const [hasOnboarded, setHasOnboarded] = useState<boolean>(false);
@@ -225,12 +285,56 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
   const dayKeyRef = useRef<string>(todayDayKey());
 
-  // Hydrate from localStorage on first paint (demo mode + offline cache).
-  // Reading localStorage is an external-system subscription on mount, so the
-  // setState calls below are intentional.
+  // Hydrate from localStorage whenever the storage scope resolves or changes
+  // (e.g. user signs in / signs out / switches accounts). We reset every
+  // piece of state to its default first so a previous user's cached data
+  // can't leak into the next account.
   useEffect(() => {
-    const persisted = loadPersisted();
-    if (!persisted) return;
+    if (!storageScope) return;
+
+    setHasHydrated(false);
+
+    // Reset to defaults before reading from this scope's blob.
+    setProfile(demoProfile);
+    setDraft(profileToDraft(demoProfile));
+    setTargets(demoTargets);
+    setWorkoutPlan(demoWorkoutPlan);
+    setMeals(
+      demoMeals.map((meal, index) => ({
+        id: `demo-${index}`,
+        name: meal.name,
+        loggedAt: new Date().toISOString().slice(0, 10) + `T${meal.time}:00`,
+        calories: meal.calories,
+        proteinG: meal.proteinG,
+        carbsG: meal.carbsG,
+        fatG: meal.fatG,
+        fiberG: meal.fiberG,
+      })),
+    );
+    setWaterMl(1450);
+    setStepsState(6200);
+    setWeights([]);
+    setCheckIns([]);
+    setChat(defaultChat);
+    setApprovedFoodsState(defaultApprovedFoods);
+    setReminderStateState("off");
+    setHasOnboarded(false);
+    setSubscriptionState(defaultSubscription);
+    setOnboardingExtrasState(defaultOnboardingExtras);
+
+    if (storageScope === GUEST_SCOPE || storageScope === DEMO_SCOPE) {
+      // Don't let unscoped legacy data leak into a signed-out / demo session.
+      clearLegacy();
+    } else {
+      // Real user — adopt any pre-fix legacy blob into their namespace once.
+      migrateLegacyInto(storageScope);
+    }
+
+    const persisted = loadPersisted(storageScope);
+    if (!persisted) {
+      setHasHydrated(true);
+      return;
+    }
 
     const today = todayDayKey();
     const wasToday = persisted.dayKey === today;
@@ -276,11 +380,14 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     }
 
     dayKeyRef.current = today;
-  }, []);
+    setHasHydrated(true);
+  }, [storageScope]);
 
-  // Persist on changes.
+  // Persist on changes — only after hydration into the current scope is
+  // complete, so we never overwrite a user's blob with reset defaults.
   useEffect(() => {
-    persist({
+    if (!storageScope || !hasHydrated) return;
+    persist(storageScope, {
       profile,
       draft,
       meals,
@@ -297,6 +404,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       dayKey: dayKeyRef.current,
     });
   }, [
+    storageScope,
+    hasHydrated,
     profile,
     draft,
     meals,
@@ -322,29 +431,32 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       setAuth((current) =>
         current.kind === "signed-in" ? current : { kind: "signed-out" },
       );
+      setStorageScope((prev) => prev ?? GUEST_SCOPE);
       setIsHydrating(false);
     }, 5000);
+
+    const applyUser = (u: { id: string; email: string | null } | null) => {
+      if (u) {
+        setAuth({ kind: "signed-in", userId: u.id, email: u.email });
+        setStorageScope((prev) => (prev === u.id ? prev : u.id));
+      } else {
+        setAuth({ kind: "signed-out" });
+        setStorageScope((prev) => (prev === GUEST_SCOPE ? prev : GUEST_SCOPE));
+      }
+    };
 
     void supabase.auth.getUser().then(({ data }) => {
       if (!mounted) return;
       window.clearTimeout(hydrationTimeout);
       const u = data.user;
-      if (u) {
-        setAuth({ kind: "signed-in", userId: u.id, email: u.email ?? null });
-      } else {
-        setAuth({ kind: "signed-out" });
-      }
+      applyUser(u ? { id: u.id, email: u.email ?? null } : null);
       setIsHydrating(false);
     });
 
     const { data } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!mounted) return;
       const u = session?.user;
-      if (u) {
-        setAuth({ kind: "signed-in", userId: u.id, email: u.email ?? null });
-      } else {
-        setAuth({ kind: "signed-out" });
-      }
+      applyUser(u ? { id: u.id, email: u.email ?? null } : null);
       setIsHydrating(false);
     });
 
@@ -471,10 +583,55 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     if (supabase) {
       await supabase.auth.signOut();
     }
-    if (typeof window !== "undefined") {
-      window.localStorage.removeItem(LOCAL_STATE_KEY);
+    // Wipe the just-signed-out user's namespaced blob so it can't be re-read
+    // if anyone signs back in on this device. The auth listener will flip
+    // storageScope to GUEST and reset in-memory state.
+    if (storageScope && storageScope !== GUEST_SCOPE && storageScope !== DEMO_SCOPE) {
+      clearPersisted(storageScope);
     }
-  }, [supabase]);
+    clearLegacy();
+  }, [supabase, storageScope]);
+
+  const deleteAccount = useCallback<AppActions["deleteAccount"]>(async () => {
+    try {
+      const res = await fetch("/api/account/delete", {
+        method: "POST",
+        credentials: "include",
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        return {
+          ok: false,
+          error:
+            (body as { error?: string }).error ??
+            "Could not delete account. Please try again.",
+        };
+      }
+    } catch {
+      return {
+        ok: false,
+        error: "Network error. Please check your connection and try again.",
+      };
+    }
+
+    // Server already cleared the Supabase session cookie. Wipe local cached
+    // state for this user, plus the legacy key, so nothing of theirs lingers.
+    if (storageScope && storageScope !== GUEST_SCOPE && storageScope !== DEMO_SCOPE) {
+      clearPersisted(storageScope);
+    }
+    clearLegacy();
+
+    // Belt-and-braces — also tell the browser client to drop the session.
+    if (supabase) {
+      try {
+        await supabase.auth.signOut();
+      } catch {
+        /* ignore — server already deleted the user */
+      }
+    }
+
+    return { ok: true };
+  }, [supabase, storageScope]);
 
   const startTrial = useCallback<AppActions["startTrial"]>(() => {
     const now = new Date();
@@ -570,6 +727,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       setApprovedFoods,
       setReminderState,
       signOut,
+      deleteAccount,
       setNotice,
       startTrial,
       cancelTrial,
@@ -597,6 +755,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       setApprovedFoods,
       setReminderState,
       signOut,
+      deleteAccount,
       startTrial,
       cancelTrial,
       expireTrial,

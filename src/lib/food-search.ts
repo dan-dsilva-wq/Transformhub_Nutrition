@@ -96,7 +96,7 @@ const unitToGrams: Record<string, number> = {
   pounds: 453.6,
 };
 
-const pieceLikeUnits = new Set([
+const pieceLikeUnits = new Set<string>([
   "egg",
   "eggs",
   "slice",
@@ -110,6 +110,43 @@ const pieceLikeUnits = new Set([
   "apple",
   "apples",
 ]);
+
+const wholeEggExclusions = [
+  "white",
+  "whites",
+  "substitute",
+  "liquid",
+  "powder",
+  "dried",
+  "frozen",
+  "omelet",
+  "omelette",
+  "salad",
+  "sandwich",
+  "noodle",
+  "nog",
+  "roll",
+  "custard",
+  "just",
+  "snickers",
+  "galarie",
+];
+
+const noisyEggWords = [
+  "snickers",
+  "galarie",
+  "candy",
+  "cookie",
+  "cake",
+  "chocolate",
+  "noodle",
+  "nog",
+  "roll",
+  "sandwich",
+  "salad",
+  "substitute",
+  "liquid",
+];
 
 export function parseFoodSearchQuery(query: string): ParsedFoodSearchQuery {
   const original = query.trim().replace(/\s+/g, " ");
@@ -159,6 +196,32 @@ export function parseFoodSearchQuery(query: string): ParsedFoodSearchQuery {
   };
 }
 
+function tokens(value: string) {
+  return value.toLowerCase().match(/[a-z0-9]+/g) ?? ([] as string[]);
+}
+
+function isWholeEggFood(name: string) {
+  const nameTokens = tokens(name);
+
+  if (!nameTokens.some((token) => token === "egg" || token === "eggs")) {
+    return false;
+  }
+
+  return !wholeEggExclusions.some((word) => nameTokens.includes(word));
+}
+
+function servingForFood(food: Pick<FoodSearchItem, "name" | "servingText" | "servingGrams">) {
+  if (
+    isWholeEggFood(food.name) &&
+    food.servingGrams >= 95 &&
+    /^(?:100\s*g|100\s*grams?)$/i.test(food.servingText.trim())
+  ) {
+    return { servingText: "1 large egg", servingGrams: 50 };
+  }
+
+  return { servingText: food.servingText, servingGrams: food.servingGrams };
+}
+
 function nutrientValue(food: UsdaFoodSearchResult, id: number) {
   return food.foodNutrients?.find((nutrient) => nutrient.nutrientId === id)?.value ?? 0;
 }
@@ -183,12 +246,18 @@ function normaliseServingGrams(food: UsdaFoodSearchResult) {
 }
 
 export function normaliseUsdaFood(food: UsdaFoodSearchResult): FoodSearchItem {
-  const servingGrams = normaliseServingGrams(food);
-  const servingText = food.householdServingFullText || `${Math.round(servingGrams)} g`;
+  const rawServingGrams = normaliseServingGrams(food);
+  const rawServingText = food.householdServingFullText || `${Math.round(rawServingGrams)} g`;
+  const name = food.description || `USDA food ${food.fdcId}`;
+  const { servingText, servingGrams } = servingForFood({
+    name,
+    servingText: rawServingText,
+    servingGrams: rawServingGrams,
+  });
 
   return {
     id: String(food.fdcId),
-    name: food.description || `USDA food ${food.fdcId}`,
+    name,
     brand: food.brandName || food.brandOwner || undefined,
     category: food.foodCategory || undefined,
     servingText,
@@ -200,6 +269,42 @@ export function normaliseUsdaFood(food: UsdaFoodSearchResult): FoodSearchItem {
     fiberPer100g: nutrientValue(food, nutrientIds.fiber),
     source: "USDA FoodData Central",
   };
+}
+
+export function rankFoodSearchItems(query: string, foods: FoodSearchItem[]) {
+  const parsed = parseFoodSearchQuery(query);
+  const queryTokens = tokens(parsed.searchTerms || query);
+  const isEggQuery = queryTokens.length === 1 && (queryTokens[0] === "egg" || queryTokens[0] === "eggs");
+
+  return [...foods]
+    .map((food, index) => {
+      const nameTokens = tokens(food.name);
+      const categoryTokens = tokens(food.category ?? "");
+      const joinedName = food.name.toLowerCase();
+      let score = 0;
+
+      for (const token of queryTokens) {
+        if (nameTokens.includes(token)) score += 40;
+        if (joinedName.startsWith(token)) score += 20;
+        if (categoryTokens.includes(token)) score += 8;
+      }
+
+      if (isEggQuery) {
+        if (isWholeEggFood(food.name)) score += 80;
+        if (!food.brand) score += 20;
+        if (food.servingText.toLowerCase().includes("egg")) score += 25;
+        if (food.brand) score -= 30;
+        if (noisyEggWords.some((word) => nameTokens.includes(word))) score -= 120;
+      }
+
+      return { food, index, score };
+    })
+    .filter(({ score }) => score > 0)
+    .sort((a, b) => b.score - a.score || a.index - b.index)
+    .map(({ food }) => {
+      const serving = servingForFood(food);
+      return { ...food, ...serving };
+    });
 }
 
 export function foodSearchItemToDatabaseRow(food: FoodSearchItem): FoodDatabaseRow {
@@ -220,13 +325,20 @@ export function foodSearchItemToDatabaseRow(food: FoodSearchItem): FoodDatabaseR
 }
 
 export function databaseRowToFoodSearchItem(row: FoodDatabaseRow): FoodSearchItem {
-  return {
-    id: row.source_id,
-    name: row.name,
-    brand: row.brand ?? undefined,
-    category: row.category ?? undefined,
+  const name = row.name;
+  const serving = servingForFood({
+    name,
     servingText: row.serving_text,
     servingGrams: Number(row.serving_grams),
+  });
+
+  return {
+    id: row.source_id,
+    name,
+    brand: row.brand ?? undefined,
+    category: row.category ?? undefined,
+    servingText: serving.servingText,
+    servingGrams: serving.servingGrams,
     caloriesPer100g: Number(row.calories_per_100g),
     proteinPer100g: Number(row.protein_per_100g),
     carbsPer100g: Number(row.carbs_per_100g),

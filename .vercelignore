@@ -1,0 +1,12 @@
+.env*
+.git
+.next
+node_modules
+coverage
+playwright-report
+test-results
+android
+e2e
+dev-*.log
+dev-server*.log
+*.tsbuildinfo

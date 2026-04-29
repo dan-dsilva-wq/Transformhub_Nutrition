@@ -328,6 +328,29 @@ function EstimateEditor({
     onChange({ ...estimate, items, totals: sumItems(items) });
   }
 
+  function updateItemCalories(idx: number, calories: number) {
+    const item = estimate.items[idx];
+    if (!item) return;
+    const nextCalories = Math.max(calories, 0);
+    const factor = item.calories > 0 ? nextCalories / item.calories : 1;
+
+    updateItem(idx, {
+      calories: Math.round(nextCalories),
+      proteinG: scaleMacro(item.proteinG, factor),
+      carbsG: scaleMacro(item.carbsG, factor),
+      fatG: scaleMacro(item.fatG, factor),
+      fiberG: scaleMacro(item.fiberG, factor),
+    });
+  }
+
+  function updateTotalCalories(calories: number) {
+    const nextCalories = Math.max(calories, 0);
+    const factor = estimate.totals.calories > 0 ? nextCalories / estimate.totals.calories : 1;
+    const items = scaleItems(estimate.items, factor, nextCalories);
+
+    onChange({ ...estimate, items, totals: sumItems(items) });
+  }
+
   function applyMilkVariant(idx: number, variant: (typeof milkVariants)[number]) {
     const item = estimate.items[idx];
     if (!item) return;
@@ -376,7 +399,7 @@ function EstimateEditor({
                 <input
                   type="number"
                   value={item.calories}
-                  onChange={(e) => updateItem(idx, { calories: Number(e.target.value) || 0 })}
+                  onChange={(e) => updateItemCalories(idx, Number(e.target.value) || 0)}
                   className="w-16 bg-transparent text-right outline-none"
                 />
               </span>
@@ -409,12 +432,23 @@ function EstimateEditor({
 
       <div className="mt-4 rounded-2xl border border-white/70 bg-white/60 p-4 backdrop-blur-xl">
         <div className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted">Total</div>
-        <div className="mt-1 flex items-baseline justify-between">
-          <span className="numerals text-3xl text-ink-2">{Math.round(estimate.totals.calories)}</span>
+        <div className="mt-1 flex items-baseline justify-between gap-3">
+          <label className="flex items-baseline gap-2">
+            <input
+              type="number"
+              inputMode="decimal"
+              value={Math.round(estimate.totals.calories)}
+              onChange={(e) => updateTotalCalories(Number(e.target.value) || 0)}
+              aria-label="Total calories"
+              className="numerals w-24 bg-transparent text-3xl text-ink-2 outline-none"
+            />
+            <span className="text-sm text-muted">kcal</span>
+          </label>
           <span className="text-sm text-muted">
             {Math.round(estimate.totals.proteinG)}g P · {Math.round(estimate.totals.carbsG)}g C · {Math.round(estimate.totals.fatG)}g F
           </span>
         </div>
+        <p className="mt-1 text-xs text-muted">Edit calories and the macros scale to match.</p>
         <div className="mt-3 grid grid-cols-4 gap-3">
           <TotalBar letter="P" value={estimate.totals.proteinG} colorVar="--color-forest" />
           <TotalBar letter="C" value={estimate.totals.carbsG} colorVar="--color-sky" />
@@ -498,6 +532,32 @@ function sumItems(items: MealEstimate["items"]): MealEstimate["totals"] {
 }
 
 /* ───────────────────────── Search flow ───────────────────────── */
+
+function scaleMacro(value: number, factor: number) {
+  return Number(Math.max(value * factor, 0).toFixed(1));
+}
+
+function scaleItems(items: MealEstimate["items"], factor: number, targetCalories: number) {
+  let caloriesAssigned = 0;
+
+  return items.map((item, index) => {
+    const isLast = index === items.length - 1;
+    const calories = isLast
+      ? Math.max(Math.round(targetCalories) - caloriesAssigned, 0)
+      : Math.max(Math.round(item.calories * factor), 0);
+
+    caloriesAssigned += calories;
+
+    return {
+      ...item,
+      calories,
+      proteinG: scaleMacro(item.proteinG, factor),
+      carbsG: scaleMacro(item.carbsG, factor),
+      fatG: scaleMacro(item.fatG, factor),
+      fiberG: scaleMacro(item.fiberG, factor),
+    };
+  });
+}
 
 const milkVariants = [
   { label: "Full fat", calories: 64, proteinG: 3.3, carbsG: 4.7, fatG: 3.6, fiberG: 0 },

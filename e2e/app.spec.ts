@@ -6,6 +6,19 @@ const tinyPng = Buffer.from(
 );
 
 test("mobile onboarding, mocked meal estimate, and coach flow", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.localStorage.setItem(
+      "pace.state.v1",
+      JSON.stringify({
+        hasOnboarded: true,
+        onboardingExtras: {
+          commitments: { steps: false, water: false, nutrition: false },
+          hasSeenTour: true,
+        },
+      }),
+    );
+  });
+
   await page.route("**/api/ai/meal-estimate", async (route) => {
     await route.fulfill({
       contentType: "application/json",
@@ -90,32 +103,35 @@ test("mobile onboarding, mocked meal estimate, and coach flow", async ({ page })
   await page.goto("/?demo=1");
   await expect(page.getByRole("heading", { name: "Today", exact: true })).toBeVisible();
 
-  await page.getByRole("button", { name: "Set up" }).click();
-  await expect(page.getByRole("heading", { name: "Plan", exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "Recalculate plan" }).click();
-  await expect(page.getByText("Profile live")).toBeVisible();
+  await page.getByRole("button", { name: "Open menu" }).click();
+  await page.getByRole("link", { name: "Plan & targets" }).click();
+  await expect(page.getByRole("heading", { name: /Your plan/i })).toBeVisible();
+  await page.getByRole("button", { name: "Edit plan inputs" }).click();
+  await page.getByLabel("Age").fill("36");
+  await page.getByRole("button", { name: "Save plan" }).click();
+  await expect(page.getByText("What we're aiming at")).toBeVisible();
 
-  await page.getByRole("button", { name: "Food", exact: true }).click();
+  await page.getByRole("link", { name: "Log a meal" }).click();
   await page.locator('input[type="file"]').first().setInputFiles({
     name: "meal.png",
     mimeType: "image/png",
     buffer: tinyPng,
   });
-  await page.getByRole("button", { name: "Estimate macros" }).click();
   await expect(page.getByText("Mock chicken rice bowl")).toBeVisible();
-  await page.getByRole("button", { name: "Confirm and save" }).click();
+  await page.getByRole("button", { name: "Save meal" }).click();
   await expect(page.getByText("Mock chicken rice bowl")).toBeVisible();
 
-  await page.getByRole("button", { name: "Food", exact: true }).click();
-  await page.getByRole("textbox", { name: "Barcode" }).fill("1234567890123");
+  await page.getByRole("button", { name: "Barcode" }).click();
+  await page.getByPlaceholder("e.g. 5057545012345").fill("1234567890123");
   await page.getByRole("button", { name: "Look up" }).click();
   await expect(page.getByText("Mock protein bar")).toBeVisible();
   await page.getByLabel("Servings").fill("2");
-  await page.getByRole("button", { name: "Log packaged food" }).click();
+  await page.getByRole("button", { name: "Add to today" }).click();
   await expect(page.getByText("Mock protein bar")).toBeVisible();
 
-  await page.getByRole("button", { name: "Coach", exact: true }).click();
-  await page.getByPlaceholder("Ask about hunger, workouts, meals...").fill("I am busy tonight");
-  await page.getByRole("button", { name: "Send coach message" }).click();
+  await page.getByRole("button", { name: "Open menu" }).click();
+  await page.getByRole("link", { name: "Coach" }).click();
+  await page.getByLabel("Your message").fill("I am busy tonight");
+  await page.getByRole("button", { name: "Send" }).click();
   await expect(page.getByText("Log dinner before you eat it.")).toBeVisible();
 });

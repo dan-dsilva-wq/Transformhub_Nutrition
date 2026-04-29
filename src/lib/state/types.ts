@@ -185,6 +185,7 @@ export interface AppActions {
   setReminderState(state: "off" | "on"): void;
 
   signOut(): Promise<void>;
+  deleteAccount(): Promise<{ ok: true } | { ok: false; error: string }>;
   setNotice(notice: string | null): void;
 
   startTrial(): void;

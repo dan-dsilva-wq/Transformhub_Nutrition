@@ -11,6 +11,12 @@ const eslintConfig = defineConfig([
     ".next/**",
     "out/**",
     "build/**",
+    "coverage/**",
+    "playwright-report/**",
+    "test-results/**",
+    "android/**/build/**",
+    "android/.gradle/**",
+    "capacitor-web/**",
     "next-env.d.ts",
   ]),
 ]);

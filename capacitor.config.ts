@@ -37,7 +37,7 @@ const serverUrl = normaliseUrl(process.env.CAPACITOR_SERVER_URL);
 const allowNavigation = serverUrl ? [new URL(serverUrl).host] : undefined;
 
 const config: CapacitorConfig = {
-  appId: "com.leanlens.app",
+  appId: "com.danieldsilva.pace",
   appName: "Pace",
   webDir: "capacitor-web",
   backgroundColor: "#fbfaf6",

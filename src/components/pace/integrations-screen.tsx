@@ -31,20 +31,19 @@ export function IntegrationsScreen() {
   useEffect(() => {
     let cancelled = false;
     async function check() {
-      if (!isHealthConnectPlatform()) {
-        if (!cancelled) setHealthStatus("unsupported");
-        return;
-      }
       try {
-        const { available } = await HealthConnect.isAvailable();
-        if (!available) {
+        const platform = isHealthConnectPlatform();
+        const avail = await HealthConnect.isAvailable();
+        setError(`DEBUG: platform=${platform} available=${avail.available} status=${avail.status}`);
+        if (!avail.available) {
           if (!cancelled) setHealthStatus("unsupported");
           return;
         }
         const { granted } = await HealthConnect.hasPermissions();
         if (cancelled) return;
         setHealthStatus(granted ? "connected" : "available");
-      } catch {
+      } catch (e) {
+        setError(`DEBUG check error: ${e instanceof Error ? e.message : String(e)}`);
         if (!cancelled) setHealthStatus("unsupported");
       }
     }

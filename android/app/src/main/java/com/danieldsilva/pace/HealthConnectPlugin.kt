@@ -40,6 +40,7 @@ class HealthConnectPlugin : Plugin() {
     @PluginMethod
     fun isAvailable(call: PluginCall) {
         val status = HealthConnectClient.getSdkStatus(context)
+        Log.i("HealthConnectPlugin", "getSdkStatus returned $status (AVAILABLE=${HealthConnectClient.SDK_AVAILABLE}, UNAVAILABLE=${HealthConnectClient.SDK_UNAVAILABLE}, UPDATE_REQUIRED=${HealthConnectClient.SDK_UNAVAILABLE_PROVIDER_UPDATE_REQUIRED})")
         val ret = JSObject()
         ret.put("available", status == HealthConnectClient.SDK_AVAILABLE)
         ret.put(

@@ -18,6 +18,7 @@ import { clsx } from "clsx";
 import { useAppState } from "@/lib/state/app-state";
 import { LockedState } from "./paywall-sheet";
 import { mealIcoFor, recipeKeys, recipes, type Recipe } from "./foods/food-data";
+import { trackTesterEvent } from "@/lib/tester/track";
 
 interface DayPlan {
   name: string;
@@ -195,6 +196,7 @@ export function FoodsWeekScreen() {
     const positionKey = `${weekIndex}|${dayIdx}|${slotIdx}`;
     const next = { ...overrides, [positionKey]: newKey };
     actions.setOnboardingExtras({ weekSwaps: next });
+    trackTesterEvent("meal_swapped", { newKey });
   }
 
   function banRecipe(key: string) {
@@ -208,6 +210,7 @@ export function FoodsWeekScreen() {
       bannedRecipes: nextBanned,
       weekSwaps: cleaned,
     });
+    trackTesterEvent("meal_banned", { recipe: key });
   }
 
   function setMealsPerDay(nextMealsPerDay: number) {
@@ -230,7 +233,10 @@ export function FoodsWeekScreen() {
             recipeKeys.length - (onboardingExtras.bannedRecipes?.length ?? 0),
             0,
           )}
-          onDone={() => actions.setOnboardingExtras({ weekGenerated: true })}
+          onDone={() => {
+            actions.setOnboardingExtras({ weekGenerated: true });
+            trackTesterEvent("week_generated", { mealsPerDay });
+          }}
         />
       </LockedState>
     );

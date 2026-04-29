@@ -30,6 +30,7 @@ import {
 } from "@/lib/targets";
 import type { CoachResponse, MealEstimate } from "@/lib/ai/schemas";
 import { createStorageObjectId } from "@/lib/storage-id";
+import { trackTesterEvent } from "@/lib/tester/track";
 import type {
   AppActions,
   AppContextValue,
@@ -541,6 +542,11 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     }
     setWorkoutPlan(createBusyHomeWorkoutPlan(draft.equipment));
     setHasOnboarded(true);
+    trackTesterEvent("onboarding_completed", {
+      currentWeightKg: next.currentWeightKg,
+      goalWeightKg: next.goalWeightKg,
+      activityLevel: next.activityLevel,
+    });
   }, [draft]);
 
   const addMeal = useCallback<AppActions["addMeal"]>((meal) => {
@@ -548,6 +554,12 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     const loggedAt = meal.loggedAt ?? new Date().toISOString();
     const next: MealLog = { id, loggedAt, ...meal };
     setMeals((prev) => [next, ...prev]);
+    trackTesterEvent("meal_logged", {
+      name: next.name,
+      calories: next.calories,
+      proteinG: next.proteinG,
+      source: "manual",
+    });
     return next;
   }, []);
 
@@ -566,6 +578,12 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
         imageUrl: opts?.imageUrl,
       };
       setMeals((prev) => [next, ...prev]);
+      trackTesterEvent("meal_logged", {
+        name: next.name,
+        calories: next.calories,
+        proteinG: next.proteinG,
+        source: "ai-photo",
+      });
       return next;
     },
     [],
@@ -600,6 +618,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       isoDate: todayIsoDate(),
       weightKg: Math.round(weightKg * 10) / 10,
     };
+    trackTesterEvent("weight_logged", { weightKg: entry.weightKg });
     const nextProfile = { ...profile, currentWeightKg: entry.weightKg };
     setWeights((prev) => [...prev, entry]);
     setProfile(nextProfile);

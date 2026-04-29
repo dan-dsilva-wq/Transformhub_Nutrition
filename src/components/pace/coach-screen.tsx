@@ -13,6 +13,7 @@ import {
 } from "./primitives";
 import { useEntitlement } from "@/lib/entitlement";
 import { PaywallSheet } from "./paywall-sheet";
+import { trackTesterEvent } from "@/lib/tester/track";
 
 export function CoachScreen() {
   const {
@@ -62,6 +63,7 @@ export function CoachScreen() {
     }
 
     actions.appendChat({ role: "user", content: message });
+    trackTesterEvent("coach_message_sent", { length: message.length });
     setInput("");
     setBusy(true);
     setError(null);

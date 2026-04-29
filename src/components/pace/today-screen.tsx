@@ -30,6 +30,7 @@ import {
   Sheet,
 } from "./primitives";
 import { DailyReviewSheet } from "./daily-review-sheet";
+import { trackTesterEvent } from "@/lib/tester/track";
 
 function greet() {
   const h = new Date().getHours();
@@ -121,6 +122,7 @@ export function TodayScreen() {
       }
     }
     window.localStorage.setItem(lastKey, ymd);
+    trackTesterEvent("app_open", undefined, { onceForKey: `app_open:${ymd}` });
   }, [auth]);
 
   function dismissReview(submitted: boolean) {
@@ -128,6 +130,7 @@ export function TodayScreen() {
       const seenKey = `pace.reviewSeen.${auth.userId}.${reviewDay}`;
       window.localStorage.setItem(seenKey, submitted ? "submitted" : "skipped");
     }
+    if (submitted) trackTesterEvent("review_submitted", { day: reviewDay });
     setReviewDay(null);
   }
 

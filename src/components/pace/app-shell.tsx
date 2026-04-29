@@ -16,7 +16,6 @@ import {
   Salad,
   BellRing,
   Activity,
-  Menu,
   Settings as SettingsIcon,
   LogOut,
 } from "lucide-react";
@@ -106,31 +105,26 @@ export function AppShell({ children }: { children: ReactNode }) {
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
         aria-label="Primary"
       >
-        <div className="relative mx-auto grid h-16 max-w-md grid-cols-5 items-end">
+        <div className="relative mx-auto grid h-16 max-w-md grid-cols-4 items-end">
           <NavTab item={tabs[0]} active={isActive(tabs[0].href)} />
           <NavTab item={tabs[1]} active={isActive(tabs[1].href)} />
-          <span aria-hidden />
+          <div className="relative h-full">
+            <Link
+              href="/log"
+              data-tap
+              data-tour="log-button"
+              aria-label="Log a meal"
+              className={clsx(
+                "absolute left-1/2 -top-5 grid h-14 w-14 -translate-x-1/2 place-items-center rounded-full",
+                isActive("/log") && "ring-4 ring-forest/15",
+              )}
+            >
+              <span className="tap-bounce cta-glow grid h-14 w-14 place-items-center rounded-full bg-forest text-white shadow-elevated transition">
+                <Plus size={26} strokeWidth={2.4} aria-hidden />
+              </span>
+            </Link>
+          </div>
           <NavTab item={tabs[2]} active={isActive(tabs[2].href)} tourId="progress-tab" />
-          <NavButton
-            label="You"
-            icon={<Menu size={20} aria-hidden />}
-            onClick={() => setDrawerOpen(true)}
-            active={drawerOpen}
-          />
-          <Link
-            href="/log"
-            data-tap
-            data-tour="log-button"
-            aria-label="Log a meal"
-            className={clsx(
-              "absolute left-1/2 -top-5 grid h-14 w-14 -translate-x-1/2 place-items-center rounded-full",
-              isActive("/log") && "ring-4 ring-forest/15",
-            )}
-          >
-            <span className="tap-bounce cta-glow grid h-14 w-14 place-items-center rounded-full bg-forest text-white shadow-elevated transition">
-              <Plus size={26} strokeWidth={2.4} aria-hidden />
-            </span>
-          </Link>
         </div>
       </nav>
 
@@ -256,36 +250,3 @@ function NavTab({
   );
 }
 
-function NavButton({
-  label,
-  icon,
-  onClick,
-  active,
-}: {
-  label: string;
-  icon: ReactNode;
-  onClick: () => void;
-  active: boolean;
-}) {
-  return (
-    <button
-      type="button"
-      data-tap
-      onClick={onClick}
-      className={clsx(
-        "flex flex-col items-center gap-1 pt-2 pb-1 text-[11px] font-medium tracking-tight",
-        active ? "text-ink-2" : "text-faint hover:text-muted",
-      )}
-    >
-      <span
-        className={clsx(
-          "transition-transform duration-300",
-          active ? "text-forest scale-110" : "scale-100",
-        )}
-      >
-        {icon}
-      </span>
-      <span>{label}</span>
-    </button>
-  );
-}

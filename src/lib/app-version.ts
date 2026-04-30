@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { App as CapacitorApp } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
 
-const WEB_FALLBACK = "1.3";
+const WEB_FALLBACK = "1.4";
 
 /**
  * Returns the current app version. On native (Capacitor) this reads the real

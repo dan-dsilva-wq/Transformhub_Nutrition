@@ -43,21 +43,33 @@ export function OnboardingFlow() {
   const { hasOnboarded, actions } = useAppState();
   const router = useRouter();
 
-  const [step, setStep] = useState<number>(() => {
-    if (typeof window === "undefined") return 0;
+  const [step, setStep] = useState(0);
+  const [hasLoadedStep, setHasLoadedStep] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
     const raw = window.localStorage.getItem(STORAGE_KEY);
     const n = raw ? Number(raw) : 0;
-    return Number.isFinite(n) && n >= 0 && n < TOTAL ? n : 0;
-  });
+    const restoredStep = Number.isFinite(n) && n >= 0 && n < TOTAL ? n : 0;
+    let cancelled = false;
+    window.queueMicrotask(() => {
+      if (cancelled) return;
+      setStep(restoredStep);
+      setHasLoadedStep(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (hasOnboarded) router.replace("/today");
   }, [hasOnboarded, router]);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (!hasLoadedStep || typeof window === "undefined") return;
     window.localStorage.setItem(STORAGE_KEY, String(step));
-  }, [step]);
+  }, [hasLoadedStep, step]);
 
   const onNext = () => {
     if (step >= TOTAL - 1) {

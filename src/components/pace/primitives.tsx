@@ -43,6 +43,7 @@ export function Button({
 }: ButtonProps) {
   return (
     <button
+      type="button"
       data-tap
       disabled={disabled || loading}
       className={clsx(

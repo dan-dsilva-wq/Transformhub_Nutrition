@@ -9,10 +9,21 @@ export function MotivationStep({ onNext }: { onNext: () => void }) {
   const { onboardingExtras, actions } = useAppState();
   const [text, setText] = useState(onboardingExtras.motivation ?? "");
 
-  function submit() {
-    const trimmed = text.trim();
-    actions.setOnboardingExtras({ motivation: trimmed || undefined });
+  function continueWith(motivation?: string) {
+    actions.setOnboardingExtras({ motivation });
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
     onNext();
+  }
+
+  function submit() {
+    continueWith(text.trim() || undefined);
+  }
+
+  function skip() {
+    setText("");
+    continueWith(undefined);
   }
 
   return (
@@ -43,7 +54,7 @@ export function MotivationStep({ onNext }: { onNext: () => void }) {
         </Button>
         <button
           type="button"
-          onClick={submit}
+          onClick={skip}
           className="text-xs text-muted hover:text-ink"
         >
           Skip

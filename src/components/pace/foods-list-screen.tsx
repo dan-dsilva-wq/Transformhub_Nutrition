@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { ArrowLeft, Heart } from "lucide-react";
 import { clsx } from "clsx";
 import { useAppState } from "@/lib/state/app-state";
+import { resolveGoalIntent } from "@/lib/targets";
 import { LockedState } from "./paywall-sheet";
 import {
   foodGroups,
@@ -38,12 +39,9 @@ export function FoodsListScreen() {
   );
   const mealsPerDay = onboardingExtras.routine?.mealsPerDay ?? 3;
   const name = onboardingExtras.name ?? "you";
+  const goalIntent = resolveGoalIntent(profile);
   const goal: "cut" | "maintain" | "gain" =
-    profile.currentWeightKg > profile.goalWeightKg
-      ? "cut"
-      : profile.currentWeightKg < profile.goalWeightKg
-        ? "gain"
-        : "maintain";
+    goalIntent === "lose" ? "cut" : goalIntent === "gain" ? "gain" : "maintain";
 
   function toggle(itemName: string) {
     const next = new Set(unliked);
@@ -238,7 +236,7 @@ export function FoodsListScreen() {
         })}
 
         <section className="rounded-3xl border border-white/85 bg-white/55 p-4 backdrop-blur-xl">
-          <h3 className="text-sm font-semibold">🆓 Free — anytime, any amount</h3>
+          <h3 className="text-sm font-semibold">Free anytime, any amount</h3>
           <FreeGroup
             label="Condiments"
             items={[
@@ -295,7 +293,7 @@ export function FoodsListScreen() {
             ok ? "bg-forest text-white" : "bg-stone-2 text-faint pointer-events-none",
           )}
         >
-          Generate week ›
+          Generate week
         </Link>
       </div>
     </LockedState>

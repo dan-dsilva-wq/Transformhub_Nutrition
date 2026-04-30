@@ -10,6 +10,8 @@ const recalculateTargetsSchema = z.object({
   heightCm: z.number().min(120).max(230),
   currentWeightKg: z.number().min(35).max(300),
   goalWeightKg: z.number().min(35).max(300),
+  goalIntent: z.enum(["lose", "maintain", "gain", "build-muscle"]).optional(),
+  weeklyRateKg: z.number().min(0).max(1.2).optional(),
   activityLevel: z.enum(["sedentary", "light", "moderate", "active"]),
   baselineSteps: z.number().min(0).max(50000).optional(),
   workoutsPerWeek: z.number().int().min(0).max(7).optional(),

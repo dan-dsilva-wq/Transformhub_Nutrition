@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Send, Sparkles } from "lucide-react";
-import type { CoachResponse } from "@/lib/ai/schemas";
+import type { CoachDraftMeal, CoachResponse } from "@/lib/ai/schemas";
 import { useAppState, useDayTotals, useTodayMeals } from "@/lib/state/app-state";
 import {
   Button,
@@ -31,12 +31,14 @@ export function CoachScreen() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [paywallOpen, setPaywallOpen] = useState(false);
+  const [hiddenDrafts, setHiddenDrafts] = useState<Set<number>>(() => new Set());
+  const [addedDrafts, setAddedDrafts] = useState<Set<number>>(() => new Set());
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const verdict = useEntitlement("coach-unlimited");
 
   const profileSummary = useMemo(
     () =>
-      `Female-tuned target. Age ${profile.age}, ${profile.heightCm} cm, currently ${profile.currentWeightKg} kg, goal ${profile.goalWeightKg} kg. Activity: ${profile.activityLevel}.`,
+      `${profile.sexForCalories}-tuned target. Age ${profile.age}, ${profile.heightCm} cm, currently ${profile.currentWeightKg} kg, goal ${profile.goalWeightKg} kg. Goal intent: ${profile.goalIntent ?? "auto"}. Activity: ${profile.activityLevel}.`,
     [profile],
   );
 
@@ -83,6 +85,7 @@ export function CoachScreen() {
           role: "assistant",
           content: coach.reply,
           actions: coach.suggestedActions,
+          draftMeal: coach.draftMeal,
         });
       } else if (res.status === 503) {
         actions.appendChat({
@@ -121,10 +124,31 @@ export function CoachScreen() {
         className="space-y-3 max-h-[55vh] overflow-y-auto pr-1"
       >
         {chat.map((m, i) => (
-          <Bubble key={i} role={m.role} content={m.content} actions={m.actions} />
+          <Bubble
+            key={i}
+            role={m.role}
+            content={m.content}
+            actions={m.actions}
+            draftMeal={m.draftMeal}
+            draftHidden={hiddenDrafts.has(i)}
+            draftAdded={addedDrafts.has(i)}
+            onAddDraft={(draft) => {
+              actions.addMeal({
+                name: draft.name,
+                calories: Math.round(draft.calories),
+                proteinG: Number(draft.proteinG.toFixed(1)),
+                carbsG: Number(draft.carbsG.toFixed(1)),
+                fatG: Number(draft.fatG.toFixed(1)),
+                fiberG: Number(draft.fiberG.toFixed(1)),
+                source: "coach",
+              });
+              setAddedDrafts((prev) => new Set(prev).add(i));
+            }}
+            onHideDraft={() => setHiddenDrafts((prev) => new Set(prev).add(i))}
+          />
         ))}
         {busy ? (
-          <div className="text-xs text-muted">Coach is thinking…</div>
+          <div className="text-xs text-muted">Coach is thinking...</div>
         ) : null}
       </div>
 
@@ -135,7 +159,7 @@ export function CoachScreen() {
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Hard day, easy day, off-plan, on-plan — just write."
+            placeholder="Hard day, easy day, off-plan, on-plan. Just write."
             onKeyDown={(e) => {
               if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
                 e.preventDefault();
@@ -168,10 +192,20 @@ function Bubble({
   role,
   content,
   actions,
+  draftMeal,
+  draftHidden,
+  draftAdded,
+  onAddDraft,
+  onHideDraft,
 }: {
   role: "user" | "assistant";
   content: string;
   actions?: string[];
+  draftMeal?: CoachDraftMeal;
+  draftHidden?: boolean;
+  draftAdded?: boolean;
+  onAddDraft?: (draft: CoachDraftMeal) => void;
+  onHideDraft?: () => void;
 }) {
   if (role === "user") {
     return (
@@ -189,6 +223,14 @@ function Bubble({
       </IconBadge>
       <div className="max-w-[85%] rounded-2xl rounded-bl-md border border-white/70 bg-white/65 backdrop-blur-xl px-4 py-2.5 text-sm text-ink-2">
         <p className="whitespace-pre-wrap">{content}</p>
+        {draftMeal && !draftHidden ? (
+          <DraftMealCard
+            draftMeal={draftMeal}
+            added={Boolean(draftAdded)}
+            onAdd={onAddDraft}
+            onDiscard={onHideDraft}
+          />
+        ) : null}
         {actions && actions.length > 0 ? (
           <ul className="mt-2 flex flex-wrap gap-1.5">
             {actions.map((a, i) => (
@@ -203,5 +245,151 @@ function Bubble({
         ) : null}
       </div>
     </div>
+  );
+}
+
+function DraftMealCard({
+  draftMeal,
+  added,
+  onAdd,
+  onDiscard,
+}: {
+  draftMeal: CoachDraftMeal;
+  added: boolean;
+  onAdd?: (draft: CoachDraftMeal) => void;
+  onDiscard?: () => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState({
+    name: draftMeal.name,
+    portion: draftMeal.portion ?? "1 serving",
+    calories: String(Math.round(draftMeal.calories)),
+    proteinG: String(Math.round(draftMeal.proteinG)),
+    carbsG: String(Math.round(draftMeal.carbsG)),
+    fatG: String(Math.round(draftMeal.fatG)),
+    fiberG: String(Math.round(draftMeal.fiberG)),
+  });
+
+  const parsed: CoachDraftMeal = {
+    name: draft.name.trim() || draftMeal.name,
+    portion: draft.portion.trim() || "1 serving",
+    calories: Math.max(Number(draft.calories) || 0, 0),
+    proteinG: Math.max(Number(draft.proteinG) || 0, 0),
+    carbsG: Math.max(Number(draft.carbsG) || 0, 0),
+    fatG: Math.max(Number(draft.fatG) || 0, 0),
+    fiberG: Math.max(Number(draft.fiberG) || 0, 0),
+    confidence: draftMeal.confidence,
+  };
+
+  return (
+    <div className="mt-3 rounded-2xl border border-white/70 bg-white/75 p-3">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          {editing ? (
+            <input
+              value={draft.name}
+              onChange={(e) => setDraft((prev) => ({ ...prev, name: e.target.value }))}
+              className="w-full bg-transparent text-sm font-semibold text-ink-2 outline-none"
+              aria-label="Draft food name"
+            />
+          ) : (
+            <div className="text-sm font-semibold text-ink-2">{parsed.name}</div>
+          )}
+          <div className="mt-0.5 text-xs text-muted">
+            Estimated at {Math.round(parsed.calories)} kcal, {Math.round(parsed.proteinG)}g protein
+          </div>
+        </div>
+        <span className="rounded-full bg-cream px-2 py-1 text-[10px] font-medium text-forest">
+          Draft
+        </span>
+      </div>
+
+      {editing ? (
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <DraftInput
+            label="Serving"
+            value={draft.portion}
+            onChange={(v) => setDraft((prev) => ({ ...prev, portion: v }))}
+          />
+          <DraftInput
+            label="Calories"
+            value={draft.calories}
+            onChange={(v) => setDraft((prev) => ({ ...prev, calories: v }))}
+          />
+          <DraftInput
+            label="Protein"
+            value={draft.proteinG}
+            onChange={(v) => setDraft((prev) => ({ ...prev, proteinG: v }))}
+          />
+          <DraftInput
+            label="Carbs"
+            value={draft.carbsG}
+            onChange={(v) => setDraft((prev) => ({ ...prev, carbsG: v }))}
+          />
+          <DraftInput
+            label="Fat"
+            value={draft.fatG}
+            onChange={(v) => setDraft((prev) => ({ ...prev, fatG: v }))}
+          />
+          <DraftInput
+            label="Fiber"
+            value={draft.fiberG}
+            onChange={(v) => setDraft((prev) => ({ ...prev, fiberG: v }))}
+          />
+        </div>
+      ) : null}
+
+      <div className="mt-3 flex flex-wrap gap-2">
+        <button
+          type="button"
+          data-tap
+          onClick={() => onAdd?.(parsed)}
+          disabled={added}
+          className="rounded-full bg-forest px-3 py-1.5 text-xs font-medium text-white disabled:bg-stone-2 disabled:text-faint"
+        >
+          {added ? "Added" : "Add to today"}
+        </button>
+        <button
+          type="button"
+          data-tap
+          onClick={() => setEditing((prev) => !prev)}
+          className="rounded-full border border-white/70 bg-white/80 px-3 py-1.5 text-xs font-medium text-ink-2"
+        >
+          {editing ? "Done editing" : "Edit first"}
+        </button>
+        <button
+          type="button"
+          data-tap
+          onClick={onDiscard}
+          className="rounded-full px-3 py-1.5 text-xs font-medium text-muted"
+        >
+          Discard
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function DraftInput({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const numeric = label !== "Serving";
+  return (
+    <label className="rounded-xl border border-white/70 bg-white/70 px-2 py-1.5">
+      <span className="block text-[10px] uppercase tracking-[0.14em] text-faint">{label}</span>
+      <input
+        type={numeric ? "number" : "text"}
+        inputMode={numeric ? "decimal" : undefined}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="mt-0.5 w-full bg-transparent text-xs text-ink-2 outline-none"
+      />
+    </label>
   );
 }

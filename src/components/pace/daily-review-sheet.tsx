@@ -147,7 +147,7 @@ export function DailyReviewSheet({
           <textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            placeholder="Bugs, ideas, what felt great or annoying…"
+            placeholder="Bugs, ideas, what felt great or annoying..."
             rows={3}
             maxLength={2000}
             className="mt-1.5 w-full resize-none rounded-2xl border border-hairline bg-paper px-3 py-2.5 text-sm text-ink placeholder:text-faint focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20"
@@ -183,7 +183,7 @@ export function DailyReviewSheet({
             )}
           >
             {submitting
-              ? "Sending…"
+              ? "Sending..."
               : ratedCount >= items.length
                 ? "Send"
                 : `Send (${ratedCount}/${items.length})`}

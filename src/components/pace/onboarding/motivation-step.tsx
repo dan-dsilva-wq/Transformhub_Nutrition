@@ -31,7 +31,7 @@ export function MotivationStep({ onNext }: { onNext: () => void }) {
           <Textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Optional — but powerful when written down."
+            placeholder="Optional, but powerful when written down."
             rows={4}
             maxLength={400}
           />

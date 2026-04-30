@@ -1,6 +1,11 @@
 import { zodTextFormat } from "openai/helpers/zod";
 import { NextResponse } from "next/server";
 import { requireSignedInUser } from "@/lib/api/auth";
+import {
+  guardrailCoachResponse,
+  inferDraftMealFromMessage,
+  sanitizeCoachResponse,
+} from "@/lib/ai/coach";
 import { coachInstructions } from "@/lib/ai/prompts";
 import { getOpenAIClient, openAiModel } from "@/lib/ai/openai";
 import { coachRequestSchema, coachResponseSchema } from "@/lib/ai/schemas";
@@ -15,17 +20,22 @@ export async function POST(request: Request) {
   const authError = await requireSignedInUser();
   if (authError) return authError;
 
-  const client = getOpenAIClient();
-
-  if (!client) {
-    return errorResponse("OPENAI_API_KEY is required for the AI coach.", 503);
-  }
-
   const body = await request.json().catch(() => null);
   const parsed = coachRequestSchema.safeParse(body);
 
   if (!parsed.success) {
     return errorResponse(parsed.error.issues[0]?.message ?? "Invalid coach request.", 400);
+  }
+
+  const guardrail = guardrailCoachResponse(parsed.data.message);
+  if (guardrail) {
+    return NextResponse.json({ coach: sanitizeCoachResponse(guardrail) });
+  }
+
+  const client = getOpenAIClient();
+
+  if (!client) {
+    return errorResponse("OPENAI_API_KEY is required for the AI coach.", 503);
   }
 
   try {
@@ -47,10 +57,13 @@ ${parsed.data.message}
       },
     });
 
-    const coach = coachResponseSchema.parse(JSON.parse(response.output_text));
+    const coach = sanitizeCoachResponse(
+      coachResponseSchema.parse(JSON.parse(response.output_text)),
+    );
+    const draftMeal = coach.draftMeal ?? inferDraftMealFromMessage(parsed.data.message) ?? undefined;
 
     return NextResponse.json({
-      coach,
+      coach: draftMeal ? { ...coach, draftMeal } : coach,
       model: openAiModel,
     });
   } catch (error) {

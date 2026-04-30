@@ -146,7 +146,7 @@ for (const size of SIZES) {
       try {
         await screen.navigate(page);
       } catch (err) {
-        // Some routes may not exist or may be reached differently — log and
+        // Some routes may not exist or may be reached differently  -  log and
         // skip rather than fail the whole capture run.
         console.warn(`[${size.name}] could not navigate to ${screen.slug}:`, err);
         continue;

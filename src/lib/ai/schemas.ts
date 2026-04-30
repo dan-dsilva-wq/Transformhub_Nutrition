@@ -44,12 +44,24 @@ export const coachRequestSchema = z.object({
   recentSummary: z.string().max(2000).optional(),
 });
 
+export const coachDraftMealSchema = z.object({
+  name: z.string().min(1).max(100),
+  portion: z.string().min(1).max(80).optional(),
+  calories: z.number().nonnegative(),
+  proteinG: z.number().nonnegative(),
+  carbsG: z.number().nonnegative(),
+  fatG: z.number().nonnegative(),
+  fiberG: z.number().nonnegative(),
+  confidence: z.number().min(0).max(1),
+});
+
 export const coachResponseSchema = z.object({
   reply: z.string().min(1),
   tone: z.enum(["firm_supportive", "gentle_supportive"]),
   suggestedActions: z.array(z.string()).max(4),
   checkInQuestion: z.string().min(1),
   riskFlag: z.enum(["none", "medical", "disordered_eating", "injury"]).default("none"),
+  draftMeal: coachDraftMealSchema.optional(),
 });
 
 export const recipeIdeasRequestSchema = z.object({
@@ -136,6 +148,7 @@ export const nutritionPlanResponseSchema = z.object({
 
 export type MealEstimate = z.infer<typeof mealEstimateSchema>;
 export type CoachResponse = z.infer<typeof coachResponseSchema>;
+export type CoachDraftMeal = z.infer<typeof coachDraftMealSchema>;
 
 export function getMealConfidenceLabel(confidence: number) {
   if (confidence >= 0.8) {

@@ -108,7 +108,7 @@ export function DeleteAccountForm() {
         <form onSubmit={handleSignIn} className="space-y-4">
           <div>
             <h2 className="text-base font-semibold text-ink">
-              Step 1 — Verify it&apos;s you
+              Step 1: Verify it&apos;s you
             </h2>
             <p className="mt-1 text-sm text-muted">
               Sign in with the email and password you used to create your Pace
@@ -159,7 +159,7 @@ export function DeleteAccountForm() {
         <form onSubmit={handleDelete} className="space-y-4">
           <div>
             <h2 className="text-base font-semibold text-ink">
-              Step 2 — Confirm permanent deletion
+              Step 2: Confirm permanent deletion
             </h2>
             <p className="mt-1 text-sm text-muted">
               Type <strong>DELETE</strong> below to permanently remove your
@@ -190,7 +190,7 @@ export function DeleteAccountForm() {
             disabled={stage === "deleting"}
             className="w-full rounded-full bg-clay px-4 py-2.5 text-sm font-medium text-white hover:opacity-90 disabled:opacity-60"
           >
-            {stage === "deleting" ? "Deleting…" : "Permanently delete account"}
+            {stage === "deleting" ? "Deleting..." : "Permanently delete account"}
           </button>
         </form>
       ) : null}

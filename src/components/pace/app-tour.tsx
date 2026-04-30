@@ -14,13 +14,13 @@ const steps: TourStep[] = [
   {
     selector: "[data-tour='today-header']",
     title: "Your day at a glance",
-    body: "Calories, protein, water and steps — only what matters today.",
+    body: "Calories, protein, water and steps, only what matters today.",
     placement: "below",
   },
   {
     selector: "[data-tour='log-button']",
-    title: "Snap or search to log a meal",
-    body: "Tap the green + any time. Photo, search, or barcode.",
+    title: "Snap or type to log a meal",
+    body: "Tap the green + any time. Photo, typed food, or barcode.",
     placement: "above",
   },
   {
@@ -101,7 +101,7 @@ export function AppTour() {
     actions.completeTour();
   }
 
-  // Tooltip positioning — defaults to centered if no rect.
+  // Tooltip positioning  -  defaults to centered if no rect.
   const padding = 8;
   const tooltipTop = !rect
     ? typeof window !== "undefined"

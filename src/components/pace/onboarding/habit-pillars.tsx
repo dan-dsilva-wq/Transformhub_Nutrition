@@ -20,7 +20,7 @@ const pillars: {
     icon: Footprints,
     eyebrow: "Move",
     title: "10,000 steps a day",
-    body: "Walking is the most under-rated weight-loss tool — 200–400 kcal of effortless burn without driving hunger.",
+    body: "Walking is the most under-rated weight-loss tool. It can add 200-400 kcal of easy burn without driving hunger.",
     accent: "linear-gradient(135deg,#a7f3d0,#0d9488)",
   },
   {

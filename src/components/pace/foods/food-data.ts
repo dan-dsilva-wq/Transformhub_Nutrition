@@ -351,7 +351,7 @@ export const recipes: Record<string, Recipe> = {
     ],
     steps: [
       "Press tofu, cube it, toss in cornflour for crispness.",
-      "Heat oil hot, fry tofu until golden — about 6 min.",
+      "Heat oil hot, fry tofu until golden, about 6 min.",
       "Add the veg and stir-fry 4 min, then garlic + soy.",
       "Serve over rice.",
     ],
@@ -403,7 +403,7 @@ export function mealIcoFor(key: string): string {
   return "🍗";
 }
 
-/** All known food names — used to seed "all liked" defaults. */
+/** All known food names  -  used to seed "all liked" defaults. */
 export const allFoodNames: string[] = foodGroups.flatMap((g) =>
   g.items.map((it) => it.n),
 );

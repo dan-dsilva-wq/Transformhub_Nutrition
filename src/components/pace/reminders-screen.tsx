@@ -5,12 +5,12 @@ import { useAppState } from "@/lib/state/app-state";
 import { Card, IconBadge, SectionHeader } from "./primitives";
 
 const schedule: { time: string; label: string; icon: React.ReactNode; tone: "amber" | "sage" | "forest" }[] = [
-  { time: "07:30", label: "Big breakfast — protein first", icon: <Sun size={16} aria-hidden />, tone: "amber" },
-  { time: "11:00", label: "Water check — half a litre by lunch", icon: <Droplets size={16} aria-hidden />, tone: "sage" },
+  { time: "07:30", label: "Big breakfast, protein first", icon: <Sun size={16} aria-hidden />, tone: "amber" },
+  { time: "11:00", label: "Water check, half a litre by lunch", icon: <Droplets size={16} aria-hidden />, tone: "sage" },
   { time: "12:30", label: "Lunch from the list", icon: <Utensils size={16} aria-hidden />, tone: "forest" },
   { time: "15:30", label: "Afternoon coffee + walk", icon: <Coffee size={16} aria-hidden />, tone: "amber" },
-  { time: "19:00", label: "Dinner — keep it boring", icon: <Utensils size={16} aria-hidden />, tone: "forest" },
-  { time: "21:30", label: "Wind down — log the day", icon: <Moon size={16} aria-hidden />, tone: "sage" },
+  { time: "19:00", label: "Dinner, keep it boring", icon: <Utensils size={16} aria-hidden />, tone: "forest" },
+  { time: "21:30", label: "Wind down, log the day", icon: <Moon size={16} aria-hidden />, tone: "sage" },
 ];
 
 export function RemindersScreen() {
@@ -41,7 +41,7 @@ export function RemindersScreen() {
               Daily nudges
             </h2>
             <p className="text-xs text-muted">
-              {on ? "On — six gentle prompts a day." : "Off — turn on to follow the rhythm."}
+              {on ? "On. Six gentle prompts a day." : "Off. Turn on to follow the rhythm."}
             </p>
           </div>
           <button

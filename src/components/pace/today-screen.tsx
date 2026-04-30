@@ -156,10 +156,10 @@ export function TodayScreen() {
   }>(() => {
     const h = new Date().getHours();
     if (meals.length === 0 && h < 11) {
-      return { label: "Log breakfast", body: "Snap a photo — under 10 seconds.", icon: "camera" };
+      return { label: "Log breakfast", body: "Snap a photo or type it in.", icon: "camera" };
     }
     if (meals.length < 2 && h >= 11 && h < 15) {
-      return { label: "Time for lunch", body: "One photo gets it logged in seconds.", icon: "camera" };
+      return { label: "Time for lunch", body: "Photo or typed food both work.", icon: "camera" };
     }
     if (meals.length < 3 && h >= 17) {
       return { label: "Log dinner", body: "Keep it boring, keep it on plan.", icon: "camera" };
@@ -194,7 +194,7 @@ export function TodayScreen() {
           actions.setSteps(stepCount);
         }
       } catch {
-        /* Health Connect unavailable or denied — silent */
+        /* Health Connect unavailable or denied  -  silent */
       }
     }
     void pullFromHealthConnect();
@@ -251,7 +251,7 @@ export function TodayScreen() {
         </h1>
       </header>
 
-      {/* Hero card — calorie ring + 4-col macro grid */}
+      {/* Hero card  -  calorie ring + 4-col macro grid */}
       <Card className="!p-6 text-center">
         <div className="inline-flex">
           <ProgressRing value={calorieRatio} size={196} stroke={12} ariaLabel="Calorie progress">

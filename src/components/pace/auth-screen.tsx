@@ -23,7 +23,7 @@ export function AuthScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!supabase) {
-    // Should not normally render — when supabase is unconfigured, auth.kind is "demo".
+    // Should not normally render  -  when supabase is unconfigured, auth.kind is "demo".
     return null;
   }
 

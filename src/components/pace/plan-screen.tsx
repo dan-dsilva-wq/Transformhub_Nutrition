@@ -4,7 +4,9 @@ import { useMemo, useState } from "react";
 import { Check, Pencil } from "lucide-react";
 import {
   calculateDailyTargets,
+  suggestedGoalWeightKg,
   type ActivityLevel,
+  type GoalIntent,
   type SexForCalories,
 } from "@/lib/targets";
 import { useAppState } from "@/lib/state/app-state";
@@ -20,15 +22,30 @@ import {
 
 const activityLabels: Record<ActivityLevel, string> = {
   sedentary: "Mostly sitting",
-  light: "Light — some walking",
-  moderate: "Moderate — daily activity",
-  active: "Active — regular hard work",
+  light: "Light, some walking",
+  moderate: "Moderate, daily activity",
+  active: "Active, regular hard work",
 };
 
 const sexLabels: Record<SexForCalories, string> = {
   female: "Female",
   male: "Male",
 };
+
+const goalIntentLabels: Record<GoalIntent, string> = {
+  lose: "Lose weight",
+  maintain: "Maintain weight",
+  gain: "Gain weight",
+  "build-muscle": "Build muscle",
+};
+
+function paceValue(weeklyWeightChangeKg: number) {
+  if (weeklyWeightChangeKg === 0) return "Hold";
+  if (weeklyWeightChangeKg < 0) {
+    return `${Math.abs(weeklyWeightChangeKg).toFixed(2)}kg/wk loss`;
+  }
+  return `${weeklyWeightChangeKg.toFixed(2)}kg/wk gain`;
+}
 
 export function PlanScreen() {
   const { profile, targets, draft, actions } = useAppState();
@@ -44,6 +61,8 @@ export function PlanScreen() {
         currentWeightKg:
           Number(draft.currentWeightKg) || profile.currentWeightKg,
         goalWeightKg: Number(draft.goalWeightKg) || profile.goalWeightKg,
+        goalIntent: draft.goalIntent,
+        weeklyRateKg: Number(draft.weeklyRateKg) || profile.weeklyRateKg,
         activityLevel: draft.activityLevel,
         baselineSteps: Number(draft.baselineSteps) || profile.baselineSteps,
         workoutsPerWeek:
@@ -59,6 +78,18 @@ export function PlanScreen() {
     setEditing(false);
   }
 
+  function setGoalIntent(goalIntent: GoalIntent) {
+    const currentWeightKg =
+      Number(draft.currentWeightKg) || profile.currentWeightKg;
+    actions.setDraft({
+      ...draft,
+      goalIntent,
+      goalWeightKg: String(suggestedGoalWeightKg(currentWeightKg, goalIntent)),
+      weeklyRateKg:
+        goalIntent === "lose" ? "0.5" : goalIntent === "gain" ? "0.25" : "0",
+    });
+  }
+
   return (
     <div className="stagger-up space-y-6">
       <header>
@@ -69,8 +100,7 @@ export function PlanScreen() {
           You &amp; your <span className="text-forest">targets.</span>
         </h1>
         <p className="mt-2 text-sm text-muted">
-          Update your basics &mdash; height, weight, goal &mdash; and we&rsquo;ll
-          recalculate the maths behind your day.
+          Update height, weight, goal, and pace. We will recalculate the maths behind your day.
         </p>
       </header>
 
@@ -84,7 +114,7 @@ export function PlanScreen() {
           <Stat label="Fiber" value={`${previewTargets.fiberG}g`} />
           <Stat label="Water" value={`${(previewTargets.waterMl / 1000).toFixed(1)}L`} />
           <Stat label="Steps" value={previewTargets.steps.toLocaleString()} />
-          <Stat label="Pace" value={`${previewTargets.weeklyLossKg.toFixed(2)}kg/wk`} />
+          <Stat label="Pace" value={paceValue(previewTargets.weeklyWeightChangeKg)} />
         </div>
         {previewTargets.notes.length > 0 ? (
           <ul className="mt-4 space-y-1 text-xs text-muted">
@@ -184,6 +214,20 @@ export function PlanScreen() {
                   }
                 />
               </Field>
+              <Field label="Goal">
+                <Select
+                  value={draft.goalIntent}
+                  onChange={(e) => setGoalIntent(e.target.value as GoalIntent)}
+                >
+                  {Object.entries(goalIntentLabels).map(([k, v]) => (
+                    <option key={k} value={k}>
+                      {v}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
               <Field label="Goal weight (kg)">
                 <Input
                   type="number"
@@ -194,6 +238,30 @@ export function PlanScreen() {
                     actions.setDraft({
                       ...draft,
                       goalWeightKg: e.target.value,
+                    })
+                  }
+                />
+              </Field>
+              <Field
+                label="Weekly pace"
+                hint={
+                  draft.goalIntent === "lose"
+                    ? "0.1 to 1.2 kg/week."
+                    : "Used for weight gain only when gain is selected."
+                }
+              >
+                <Input
+                  type="number"
+                  inputMode="decimal"
+                  step="0.05"
+                  min={draft.goalIntent === "lose" ? "0.1" : "0"}
+                  max={draft.goalIntent === "lose" ? "1.2" : "0.5"}
+                  value={draft.weeklyRateKg}
+                  disabled={draft.goalIntent === "maintain" || draft.goalIntent === "build-muscle"}
+                  onChange={(e) =>
+                    actions.setDraft({
+                      ...draft,
+                      weeklyRateKg: e.target.value,
                     })
                   }
                 />
@@ -230,10 +298,7 @@ export function PlanScreen() {
           </div>
 
           <div className="mt-4 flex gap-3">
-            <Button
-              variant="ghost"
-              onClick={() => setEditing(false)}
-            >
+            <Button variant="ghost" onClick={() => setEditing(false)}>
               Cancel
             </Button>
             <Button onClick={save} fullWidth>

@@ -50,7 +50,7 @@ Slot targets (per meal): ${slotTargets.calories} kcal · ${slotTargets.proteinG}
 
 Dietary preferences: ${dietaryPreferences.length ? dietaryPreferences.join(", ") : "omnivore"}
 
-Approved foods (use these): ${approvedFoods.length ? approvedFoods.join(", ") : "none — pick simple staples"}
+Approved foods (use these): ${approvedFoods.length ? approvedFoods.join(", ") : "none. Pick simple staples"}
 
 Return exactly 3 recipes.
 `,

@@ -96,7 +96,7 @@ export function IntegrationsScreen() {
         ? "Pull steps and weight from Health Connect automatically."
         : healthStatus === "unsupported"
           ? "Available on Android only. Install Health Connect from the Play Store to enable."
-          : "Checking availability…";
+          : "Checking availability...";
 
   const healthAction =
     healthStatus === "connected" ? (
@@ -107,12 +107,12 @@ export function IntegrationsScreen() {
       </div>
     ) : healthStatus === "available" ? (
       <Button size="sm" variant="secondary" onClick={connect} disabled={busy}>
-        {busy ? "Connecting…" : "Connect"}
+        {busy ? "Connecting..." : "Connect"}
       </Button>
     ) : healthStatus === "unsupported" ? (
       <span className="text-xs text-muted">Not available on this device</span>
     ) : (
-      <span className="text-xs text-muted">Checking…</span>
+      <span className="text-xs text-muted">Checking...</span>
     );
 
   const integrations: Integration[] = [

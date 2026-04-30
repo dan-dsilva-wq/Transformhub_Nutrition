@@ -3,6 +3,7 @@
 import { ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAppState } from "@/lib/state/app-state";
+import { resolveGoalIntent } from "@/lib/targets";
 import { Button, ProgressRing } from "../primitives";
 
 function formatGoalDate(iso?: string) {
@@ -37,6 +38,14 @@ export function PlanReveal({ onNext }: { onNext: () => void }) {
 
   const name = onboardingExtras.name;
   const goalDate = formatGoalDate(onboardingExtras.goalDateIso);
+  const goalIntent = resolveGoalIntent(profile);
+  const weeklyChange = targets.weeklyWeightChangeKg;
+  const paceLabel =
+    weeklyChange === 0
+      ? "Hold steady"
+      : weeklyChange < 0
+        ? `${Math.abs(weeklyChange).toFixed(2)} kg / week loss`
+        : `${weeklyChange.toFixed(2)} kg / week gain`;
   const macroTotal = Math.max(
     targets.proteinG + targets.carbsG + targets.fatG,
     1,
@@ -69,30 +78,10 @@ export function PlanReveal({ onNext }: { onNext: () => void }) {
       </div>
 
       <div className="mt-7 grid grid-cols-4 gap-2">
-        <MacroBar
-          tone="forest"
-          label="Protein"
-          value={targets.proteinG}
-          total={macroTotal}
-        />
-        <MacroBar
-          tone="sky"
-          label="Carbs"
-          value={targets.carbsG}
-          total={macroTotal}
-        />
-        <MacroBar
-          tone="clay"
-          label="Fats"
-          value={targets.fatG}
-          total={macroTotal}
-        />
-        <MacroBar
-          tone="sage"
-          label="Fiber"
-          value={targets.fiberG}
-          total={Math.max(targets.fiberG, 1)}
-        />
+        <MacroBar tone="forest" label="Protein" value={targets.proteinG} total={macroTotal} />
+        <MacroBar tone="sky" label="Carbs" value={targets.carbsG} total={macroTotal} />
+        <MacroBar tone="clay" label="Fats" value={targets.fatG} total={macroTotal} />
+        <MacroBar tone="sage" label="Fiber" value={targets.fiberG} total={Math.max(targets.fiberG, 1)} />
       </div>
 
       <div className="mt-6 rounded-2xl border border-white/70 bg-white/55 p-4 backdrop-blur-xl">
@@ -100,19 +89,22 @@ export function PlanReveal({ onNext }: { onNext: () => void }) {
           <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted">
             Pace
           </span>
-          <span className="text-xs text-muted">
-            {targets.weeklyLossKg.toFixed(1)} kg / week
-          </span>
+          <span className="text-xs text-muted">{paceLabel}</span>
         </div>
         <div className="mt-1 text-sm text-ink-2">
-          You&apos;d reach{" "}
-          <span className="numerals">{profile.goalWeightKg} kg</span>{" "}
-          {goalDate ? (
-            <>
-              around <span className="text-forest">{goalDate}</span>.
-            </>
+          {goalIntent === "maintain" || goalIntent === "build-muscle" ? (
+            "Your plan keeps weight steady while your habits do the work."
           ) : (
-            "at this pace."
+            <>
+              You&apos;d reach <span className="numerals">{profile.goalWeightKg} kg</span>{" "}
+              {goalDate ? (
+                <>
+                  around <span className="text-forest">{goalDate}</span>.
+                </>
+              ) : (
+                "at this pace."
+              )}
+            </>
           )}
         </div>
       </div>
@@ -127,12 +119,14 @@ export function PlanReveal({ onNext }: { onNext: () => void }) {
       {expanded ? (
         <ul className="mt-2 space-y-1 text-xs text-muted">
           {targets.notes.map((n) => (
-            <li key={n}>· {n}</li>
+            <li key={n}>- {n}</li>
           ))}
-          <li>
-            · A {Math.round(targets.deficit)} kcal daily deficit is the largest
-            we&apos;ll allow without burning through lean muscle.
-          </li>
+          {targets.deficit > 0 ? (
+            <li>
+              - A {Math.round(targets.deficit)} kcal daily deficit is the largest
+              we&apos;ll allow without dropping below the calorie floor.
+            </li>
+          ) : null}
         </ul>
       ) : null}
 

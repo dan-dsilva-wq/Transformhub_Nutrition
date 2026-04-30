@@ -62,12 +62,12 @@ export async function POST() {
     );
   }
 
-  // Storage objects don't cascade with auth.users — purge them explicitly.
+  // Storage objects don't cascade with auth.users  -  purge them explicitly.
   // DB rows for this user cascade automatically via FK on auth.users.
   try {
     await purgeUserStorage(admin, user.id);
   } catch {
-    /* best effort — proceed to auth deletion regardless */
+    /* best effort  -  proceed to auth deletion regardless */
   }
 
   const { error: deleteError } = await admin.auth.admin.deleteUser(user.id);

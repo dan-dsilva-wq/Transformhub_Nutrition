@@ -6,6 +6,8 @@ export type ActivityLevel =
   | "moderate"
   | "active";
 
+export type GoalIntent = "lose" | "maintain" | "gain" | "build-muscle";
+
 export type UnitSystem = "metric" | "imperial";
 
 export type AccountabilityStyle = "gentle" | "firm" | "tough";
@@ -24,6 +26,8 @@ export interface TargetProfile extends ProfileGuardrailInput {
   heightCm: number;
   currentWeightKg: number;
   goalWeightKg: number;
+  goalIntent?: GoalIntent;
+  weeklyRateKg?: number;
   activityLevel: ActivityLevel;
   baselineSteps?: number;
   workoutsPerWeek?: number;
@@ -40,6 +44,7 @@ export interface DailyTargets {
   rmr: number;
   tdee: number;
   deficit: number;
+  weeklyWeightChangeKg: number;
   weeklyLossKg: number;
   workoutsPerWeek: number;
   exerciseMinutesPerWeek: number;
@@ -60,6 +65,28 @@ const activityMultipliers: Record<ActivityLevel, number> = {
   moderate: 1.55,
   active: 1.725,
 };
+
+export const MAX_WEEKLY_LOSS_KG = 1.2;
+export const HIGH_WEEKLY_LOSS_KG = 1.0;
+
+const defaultWeeklyRateKg: Record<GoalIntent, number> = {
+  lose: 0.5,
+  maintain: 0,
+  gain: 0.25,
+  "build-muscle": 0,
+};
+
+export function suggestedGoalWeightKg(currentWeightKg: number, goalIntent: GoalIntent) {
+  if (goalIntent === "lose") {
+    return Number((currentWeightKg * 0.95).toFixed(1));
+  }
+
+  if (goalIntent === "gain") {
+    return Number((currentWeightKg + 3).toFixed(1));
+  }
+
+  return Number(currentWeightKg.toFixed(1));
+}
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
@@ -102,6 +129,31 @@ function calculateRmr(profile: Pick<TargetProfile, "sexForCalories" | "heightCm"
   );
 }
 
+export function resolveGoalIntent(profile: Pick<TargetProfile, "goalIntent" | "currentWeightKg" | "goalWeightKg">): GoalIntent {
+  if (profile.goalIntent) return profile.goalIntent;
+
+  if (profile.goalWeightKg < profile.currentWeightKg) return "lose";
+  if (profile.goalWeightKg > profile.currentWeightKg) return "gain";
+  return "maintain";
+}
+
+export function resolveWeeklyRateKg(
+  profile: Pick<TargetProfile, "weeklyRateKg">,
+  goalIntent: GoalIntent,
+) {
+  const raw = profile.weeklyRateKg ?? defaultWeeklyRateKg[goalIntent];
+
+  if (goalIntent === "lose") {
+    return clamp(raw, 0.1, MAX_WEEKLY_LOSS_KG);
+  }
+
+  if (goalIntent === "gain") {
+    return clamp(raw, 0.1, 0.5);
+  }
+
+  return 0;
+}
+
 export function calculateStepTarget({
   baselineSteps,
   recentAverageSteps,
@@ -142,12 +194,26 @@ export function calculateDailyTargets(profile: TargetProfile): DailyTargets {
 
   const rmr = calculateRmr(profile);
   const tdee = Math.round(rmr * activityMultipliers[profile.activityLevel]);
-  const wantsWeightLoss = profile.goalWeightKg < profile.currentWeightKg;
-  const rawDeficit = wantsWeightLoss ? clamp(tdee * 0.2, 300, 750) : 250;
+  const goalIntent = resolveGoalIntent(profile);
+  const weeklyRateKg = resolveWeeklyRateKg(profile, goalIntent);
   const calorieFloor = profile.sexForCalories === "male" ? 1500 : 1200;
-  const calories = roundTo(Math.max(tdee - rawDeficit, calorieFloor), 25);
-  const deficit = Math.max(tdee - calories, 0);
-  const weeklyLossKg = Number(((deficit * 7) / 7700).toFixed(2));
+  let calories = roundTo(tdee, 25);
+  let deficit = 0;
+  let weeklyWeightChangeKg = 0;
+
+  if (goalIntent === "lose") {
+    const requestedDeficit = (weeklyRateKg * 7700) / 7;
+    calories = roundTo(Math.max(tdee - requestedDeficit, calorieFloor), 25);
+    deficit = Math.max(tdee - calories, 0);
+    weeklyWeightChangeKg = Number((-(deficit * 7) / 7700).toFixed(2));
+  } else if (goalIntent === "gain") {
+    const requestedSurplus = (weeklyRateKg * 7700) / 7;
+    calories = roundTo(tdee + requestedSurplus, 25);
+    deficit = tdee - calories;
+    weeklyWeightChangeKg = Number(((calories - tdee) * 7 / 7700).toFixed(2));
+  }
+
+  const weeklyLossKg = Math.max(-weeklyWeightChangeKg, 0);
 
   const proteinG = roundTo(clamp(profile.currentWeightKg * 1.8, 95, 210), 5);
   const fatG = roundTo(clamp((calories * 0.28) / 9, 45, 95), 5);
@@ -155,13 +221,25 @@ export function calculateDailyTargets(profile: TargetProfile): DailyTargets {
   const fiberG = roundTo(clamp((calories / 1000) * 14, 25, 42), 1);
   const workoutsPerWeek = clamp(profile.workoutsPerWeek ?? 3, 2, 5);
 
-  const notes = [
-    "Targets are adjustable and designed for gradual weight loss.",
-    "Photo estimates should be confirmed before they count.",
-  ];
+  const notes = ["Photo estimates should be confirmed before they count."];
 
-  if (weeklyLossKg > 0.9) {
-    notes.push("If hunger, fatigue, or dizziness shows up, raise calories and check in with a professional.");
+  if (goalIntent === "lose") {
+    notes.unshift("Targets are adjustable, and calorie floors may slow aggressive targets.");
+    if (weeklyRateKg > HIGH_WEEKLY_LOSS_KG) {
+      notes.push("1.2 kg/week is aggressive. Public health guidance usually points to about 0.5 to 1.0 kg/week.");
+    }
+    if (weeklyLossKg + 0.05 < weeklyRateKg) {
+      notes.push("Your requested pace is clamped by the calorie floor, so the actual pace may be slower.");
+    }
+    if (weeklyLossKg > 0.9) {
+      notes.push("If hunger, fatigue, or dizziness shows up, raise calories and check in with a professional.");
+    }
+  } else if (goalIntent === "gain") {
+    notes.unshift("A modest surplus supports steady gain without pushing calories too sharply.");
+  } else if (goalIntent === "build-muscle") {
+    notes.unshift("Build muscle mode holds weight steady while keeping protein high.");
+  } else {
+    notes.unshift("Maintain mode keeps calories close to your estimated daily burn.");
   }
 
   return {
@@ -175,6 +253,7 @@ export function calculateDailyTargets(profile: TargetProfile): DailyTargets {
     rmr,
     tdee,
     deficit,
+    weeklyWeightChangeKg,
     weeklyLossKg,
     workoutsPerWeek,
     exerciseMinutesPerWeek: workoutsPerWeek * 30 + 120,

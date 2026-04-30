@@ -92,7 +92,7 @@ export function useEntitlement(feature: Feature): Verdict {
     return { allowed: false, reason: "trial-expired" };
   }
 
-  // status === "none" — apply free-tier rules per feature.
+  // status === "none"  -  apply free-tier rules per feature.
   if (feature === "ai-photo-unlimited") {
     const usage = onboardingExtras.aiPhotoUsage;
     const today = todayDayKey();

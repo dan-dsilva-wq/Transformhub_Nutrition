@@ -33,7 +33,7 @@ export function trackTesterEvent(
   });
 
   // Fire-and-forget. We never block the UI on this and we swallow errors
-  // (e.g. user signed out, table missing, network glitch) — the tester
+  // (e.g. user signed out, table missing, network glitch)  -  the tester
   // shouldn't see a failure for a background analytics ping.
   try {
     fetch("/api/tester-event", {

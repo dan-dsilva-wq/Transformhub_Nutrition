@@ -26,6 +26,9 @@ import { defaultApprovedFoods } from "@/lib/nutrition";
 import {
   calculateDailyTargets,
   createBusyHomeWorkoutPlan,
+  resolveGoalIntent,
+  resolveWeeklyRateKg,
+  suggestedGoalWeightKg,
   type TargetProfile,
 } from "@/lib/targets";
 import type { CoachResponse, MealEstimate } from "@/lib/ai/schemas";
@@ -72,6 +75,7 @@ const defaultChat: ChatMessage[] = [
 ];
 
 function profileToDraft(profile: TargetProfile): ProfileDraft {
+  const goalIntent = resolveGoalIntent(profile);
   return {
     age: String(profile.age),
     sexForCalories: profile.sexForCalories,
@@ -79,6 +83,8 @@ function profileToDraft(profile: TargetProfile): ProfileDraft {
     heightCm: String(profile.heightCm),
     currentWeightKg: String(profile.currentWeightKg),
     goalWeightKg: String(profile.goalWeightKg),
+    goalIntent,
+    weeklyRateKg: String(resolveWeeklyRateKg(profile, goalIntent)),
     activityLevel: profile.activityLevel,
     baselineSteps: String(profile.baselineSteps ?? 5600),
     workoutsPerWeek: String(profile.workoutsPerWeek ?? 3),
@@ -89,20 +95,64 @@ function profileToDraft(profile: TargetProfile): ProfileDraft {
 }
 
 function numOr(value: string, fallback: number) {
+  if (value.trim() === "") return fallback;
   const n = Number(value);
   return Number.isFinite(n) ? n : fallback;
 }
 
+function normaliseDraft(draft: Partial<ProfileDraft>, fallbackProfile: TargetProfile): ProfileDraft {
+  const currentWeightKg = String(draft.currentWeightKg ?? fallbackProfile.currentWeightKg);
+  const current = numOr(currentWeightKg, fallbackProfile.currentWeightKg);
+  const rawGoal = draft.goalWeightKg ?? String(fallbackProfile.goalWeightKg);
+  const goal = numOr(rawGoal, fallbackProfile.goalWeightKg);
+  const goalIntent = draft.goalIntent ?? resolveGoalIntent({
+    goalIntent: fallbackProfile.goalIntent,
+    currentWeightKg: current,
+    goalWeightKg: goal,
+  });
+
+  return {
+    ...profileToDraft({
+      ...fallbackProfile,
+      currentWeightKg: current,
+      goalWeightKg: goal,
+      goalIntent,
+      weeklyRateKg: fallbackProfile.weeklyRateKg,
+    }),
+    ...draft,
+    currentWeightKg,
+    goalWeightKg: rawGoal,
+    goalIntent,
+    weeklyRateKg: String(draft.weeklyRateKg ?? resolveWeeklyRateKg(fallbackProfile, goalIntent)),
+  };
+}
+
 function draftToProfile(draft: ProfileDraft): TargetProfile {
+  const currentWeightKg = numOr(draft.currentWeightKg, 80);
+  const goalIntent = draft.goalIntent ?? "lose";
   return {
     age: numOr(draft.age, 30),
     sexForCalories: draft.sexForCalories,
     heightCm: numOr(draft.heightCm, 170),
-    currentWeightKg: numOr(draft.currentWeightKg, 80),
-    goalWeightKg: numOr(draft.goalWeightKg, 72),
+    currentWeightKg,
+    goalWeightKg: numOr(
+      draft.goalWeightKg,
+      suggestedGoalWeightKg(currentWeightKg, goalIntent),
+    ),
+    goalIntent,
+    weeklyRateKg: numOr(draft.weeklyRateKg, resolveWeeklyRateKg({}, goalIntent)),
     activityLevel: draft.activityLevel,
     baselineSteps: numOr(draft.baselineSteps, 5000),
     workoutsPerWeek: numOr(draft.workoutsPerWeek, 3),
+  };
+}
+
+function normaliseProfile(profile: TargetProfile): TargetProfile {
+  const goalIntent = resolveGoalIntent(profile);
+  return {
+    ...profile,
+    goalIntent,
+    weeklyRateKg: resolveWeeklyRateKg(profile, goalIntent),
   };
 }
 
@@ -113,6 +163,8 @@ function sameTargetProfile(a: TargetProfile, b: TargetProfile) {
     a.heightCm === b.heightCm &&
     a.currentWeightKg === b.currentWeightKg &&
     a.goalWeightKg === b.goalWeightKg &&
+    resolveGoalIntent(a) === resolveGoalIntent(b) &&
+    resolveWeeklyRateKg(a, resolveGoalIntent(a)) === resolveWeeklyRateKg(b, resolveGoalIntent(b)) &&
     a.activityLevel === b.activityLevel &&
     (a.baselineSteps ?? 5000) === (b.baselineSteps ?? 5000) &&
     (a.workoutsPerWeek ?? 3) === (b.workoutsPerWeek ?? 3)
@@ -159,7 +211,7 @@ interface PersistedShape {
   reminderState?: "off" | "on";
   subscription?: Subscription;
   onboardingExtras?: OnboardingExtras;
-  /** date string of the currently-loaded "day" — used to reset water/steps daily */
+  /** date string of the currently-loaded "day"  -  used to reset water/steps daily */
   dayKey?: string;
 }
 
@@ -178,7 +230,7 @@ function persist(scope: string, state: PersistedShape) {
   try {
     window.localStorage.setItem(scopedKey(scope), JSON.stringify(state));
   } catch {
-    /* quota or private mode — ignore */
+    /* quota or private mode  -  ignore */
   }
 }
 
@@ -347,7 +399,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       // Don't let unscoped legacy data leak into a signed-out / demo session.
       clearLegacy();
     } else {
-      // Real user — adopt any pre-fix legacy blob into their namespace once.
+      // Real user  -  adopt any pre-fix legacy blob into their namespace once.
       migrateLegacyInto(storageScope);
     }
 
@@ -360,15 +412,23 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     const today = todayDayKey();
     const wasToday = persisted.dayKey === today;
 
+    const hydratedProfile = persisted.profile
+      ? normaliseProfile(persisted.profile)
+      : demoProfile;
+
     if (persisted.profile) {
-      setProfile(persisted.profile);
+      setProfile(hydratedProfile);
       try {
-        setTargets(calculateDailyTargets(persisted.profile));
+        setTargets(calculateDailyTargets(hydratedProfile));
       } catch {
         /* invalid persisted profile; ignore */
       }
     }
-    if (persisted.draft) setDraft(persisted.draft);
+    if (persisted.draft) {
+      setDraft(normaliseDraft(persisted.draft, hydratedProfile));
+    } else if (persisted.profile) {
+      setDraft(profileToDraft(hydratedProfile));
+    }
     if (persisted.meals) setMeals(persisted.meals);
     if (persisted.weights) setWeights(withoutSeedWeights(persisted.weights));
     if (persisted.checkIns) setCheckIns(persisted.checkIns);
@@ -395,7 +455,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       if (typeof persisted.waterMl === "number") setWaterMl(persisted.waterMl);
       if (typeof persisted.steps === "number") setStepsState(persisted.steps);
     } else {
-      // new day — reset daily counters
+      // new day  -  reset daily counters
       setWaterMl(0);
       setStepsState(0);
     }
@@ -404,7 +464,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setHasHydrated(true);
   }, [storageScope]);
 
-  // Persist on changes — only after hydration into the current scope is
+  // Persist on changes  -  only after hydration into the current scope is
   // complete, so we never overwrite a user's blob with reset defaults.
   useEffect(() => {
     if (!storageScope || !hasHydrated) return;
@@ -440,6 +500,44 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     hasOnboarded,
     subscription,
     onboardingExtras,
+  ]);
+
+  useEffect(() => {
+    if (auth.kind !== "signed-in" || !hasHydrated) return;
+
+    const timer = window.setTimeout(() => {
+      void fetch("/api/state/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          profile,
+          targets,
+          meals: meals.slice(0, 500).map((meal) => ({
+            ...meal,
+            imageUrl: meal.imageUrl?.startsWith("data:") ? undefined : meal.imageUrl,
+          })),
+          weights: weights.slice(0, 500),
+          checkIns: checkIns.slice(0, 500),
+          hasOnboarded,
+          onboardingExtras: { name: onboardingExtras.name },
+        }),
+        keepalive: true,
+      }).catch(() => {
+        /* best-effort sync; localStorage remains the offline cache */
+      });
+    }, 1200);
+
+    return () => window.clearTimeout(timer);
+  }, [
+    auth.kind,
+    hasHydrated,
+    profile,
+    targets,
+    meals,
+    weights,
+    checkIns,
+    hasOnboarded,
+    onboardingExtras.name,
   ]);
 
   // Reload the WebView when the app returns to foreground after a long
@@ -480,7 +578,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
           await supabase.auth.exchangeCodeForSession(code);
         }
       } catch {
-        /* ignore — bad URL */
+        /* ignore  -  bad URL */
       }
     }).then((handle) => {
       listener = handle;
@@ -490,7 +588,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     };
   }, [supabase]);
 
-  // Auth wiring (light — full sync logic intentionally simplified for this rebuild).
+  // Auth wiring (light  -  full sync logic intentionally simplified for this rebuild).
   useEffect(() => {
     if (!supabase) return;
 
@@ -543,7 +641,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     try {
       setTargets(calculateDailyTargets(next));
     } catch {
-      /* guardrail tripped — keep prior targets */
+      /* guardrail tripped  -  keep prior targets */
     }
     setWorkoutPlan(createBusyHomeWorkoutPlan(draft.equipment));
     if (changed) {
@@ -562,27 +660,30 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     try {
       setTargets(calculateDailyTargets(next));
     } catch {
-      /* guardrail — still mark onboarded so user can edit later */
+      /* guardrail  -  still mark onboarded so user can edit later */
     }
     setWorkoutPlan(createBusyHomeWorkoutPlan(draft.equipment));
     setHasOnboarded(true);
     trackTesterEvent("onboarding_completed", {
       currentWeightKg: next.currentWeightKg,
       goalWeightKg: next.goalWeightKg,
+      goalIntent: next.goalIntent,
+      weeklyRateKg: next.weeklyRateKg,
       activityLevel: next.activityLevel,
     });
   }, [draft]);
 
   const addMeal = useCallback<AppActions["addMeal"]>((meal) => {
+    const { source = "manual", loggedAt: requestedLoggedAt, ...mealData } = meal;
     const id = createStorageObjectId();
-    const loggedAt = meal.loggedAt ?? new Date().toISOString();
-    const next: MealLog = { id, loggedAt, ...meal };
+    const loggedAt = requestedLoggedAt ?? new Date().toISOString();
+    const next: MealLog = { id, loggedAt, ...mealData };
     setMeals((prev) => [next, ...prev]);
     trackTesterEvent("meal_logged", {
       name: next.name,
       calories: next.calories,
       proteinG: next.proteinG,
-      source: "manual",
+      source,
     });
     return next;
   }, []);
@@ -726,12 +827,12 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     }
     clearLegacy();
 
-    // Belt-and-braces — also tell the browser client to drop the session.
+    // Belt-and-braces  -  also tell the browser client to drop the session.
     if (supabase) {
       try {
         await supabase.auth.signOut();
       } catch {
-        /* ignore — server already deleted the user */
+        /* ignore  -  server already deleted the user */
       }
     }
 

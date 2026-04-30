@@ -66,7 +66,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: insertError.message }, { status: 500 });
   }
 
-  // Keep the testers row fresh — last_seen_at on every event, plus the
+  // Keep the testers row fresh  -  last_seen_at on every event, plus the
   // onboarding timestamp the first time we see "onboarding_completed".
   const updates: Record<string, unknown> = {
     id: user.id,

@@ -266,7 +266,7 @@ const introSteps: IntroStep[] = [
     eyebrow: "Welcome",
     emoji: "🌿",
     title: "Your food guide",
-    body: "A short, no-fuss way to eat for your goal. Two parts — pick what you like, then see your week.",
+    body: "A short, no-fuss way to eat for your goal. Two parts: pick what you like, then see your week.",
     bullets: [
       "We use your kcal & protein targets from You & targets.",
       "Nothing is rigid. Swap meals or re-roll the week any time.",
@@ -277,7 +277,7 @@ const introSteps: IntroStep[] = [
     eyebrow: "Step 1",
     emoji: "🥗",
     title: "Your foods",
-    body: "A master list of real, simple ingredients. Everything starts pre-ticked — just untap anything you don't eat.",
+    body: "A master list of real, simple ingredients. Everything starts pre-ticked. Untap anything you don't eat.",
     bullets: [
       "Filter by diet (omnivore, pescatarian, vegetarian, vegan).",
       "Per-meal portions adjust to your meals/day.",

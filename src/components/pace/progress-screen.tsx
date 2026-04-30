@@ -166,7 +166,7 @@ export function ProgressScreen() {
             value={
               rangeStats.totalKg != null
                 ? `${formatSign(rangeStats.totalKg)} kg`
-                : "—"
+                : "-"
             }
             hint={
               rangeStats.totalKg == null
@@ -182,12 +182,12 @@ export function ProgressScreen() {
             label="Pace vs target"
             value={
               stats.weeklyKg != null
-                ? `${Math.round(paceRatio(stats.weeklyKg, targets.weeklyLossKg) * 100)}%`
-                : "—"
+                ? `${Math.round(paceRatio(stats.weeklyKg, targets.weeklyWeightChangeKg) * 100)}%`
+                : "-"
             }
             hint={
-              targets.weeklyLossKg
-                ? `Aim ${targets.weeklyLossKg.toFixed(2)} kg/wk`
+              targets.weeklyWeightChangeKg
+                ? `Aim ${targets.weeklyWeightChangeKg.toFixed(2)} kg/wk`
                 : ""
             }
           />
@@ -199,7 +199,7 @@ export function ProgressScreen() {
           <InsightTile
             label="Total change"
             value={
-              stats.totalKg != null ? `${formatSign(stats.totalKg)} kg` : "—"
+              stats.totalKg != null ? `${formatSign(stats.totalKg)} kg` : "-"
             }
             hint={
               stats.weeks != null && stats.weeks > 0
@@ -848,10 +848,10 @@ function filterWeightsByRange(weights: DatedWeight[], range: RangeFilter) {
 
 function paceRatio(actualKg: number, targetKg: number) {
   if (!targetKg) return 0;
-  // both negative when losing — compare magnitudes
   const a = Math.abs(actualKg);
   const t = Math.abs(targetKg);
   if (actualKg > 0 && targetKg < 0) return 0;
+  if (actualKg < 0 && targetKg > 0) return 0;
   return Math.min(a / t, 1.5);
 }
 

@@ -35,7 +35,7 @@ export function TrialOffer({ onNext }: { onNext: () => void }) {
             : "Your first 7 days are on us."}
         </h2>
         <p className="mt-2 text-sm text-muted">
-          Try every premium feature free. Cancel anytime — no payment is taken
+          Try every premium feature free. Cancel anytime, no payment is taken
           today.
         </p>
       </div>

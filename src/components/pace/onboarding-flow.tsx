@@ -16,6 +16,7 @@ import { MotivationStep } from "./onboarding/motivation-step";
 import { PlanCalculation } from "./onboarding/plan-calculation";
 import { PlanReveal } from "./onboarding/plan-reveal";
 import { HabitPillars } from "./onboarding/habit-pillars";
+import { FeatureTour } from "./onboarding/feature-tour";
 import { TrialOffer } from "./onboarding/trial-offer";
 
 const STORAGE_KEY = "pace.onboarding.step.v1";
@@ -32,10 +33,11 @@ const Step = {
   CALCULATING: 8,
   REVEAL: 9,
   PILLARS: 10,
-  TRIAL: 11,
+  TOUR: 11,
+  TRIAL: 12,
 } as const;
 
-const TOTAL = 12;
+const TOTAL = 13;
 
 export function OnboardingFlow() {
   const { hasOnboarded, actions } = useAppState();
@@ -121,6 +123,8 @@ export function OnboardingFlow() {
           <PlanReveal onNext={onNext} />
         ) : step === Step.PILLARS ? (
           <HabitPillars onNext={onNext} />
+        ) : step === Step.TOUR ? (
+          <FeatureTour onNext={onNext} />
         ) : (
           <TrialOffer onNext={onNext} />
         )}

@@ -50,7 +50,7 @@ async function captureNative(source: CameraSource): Promise<string | null> {
     });
     return photo.dataUrl ?? null;
   } catch {
-    // User cancelled or denied permission — silent.
+    // User cancelled or denied permission  -  silent.
     return null;
   }
 }
@@ -59,7 +59,7 @@ type Tab = "photo" | "search" | "barcode";
 
 const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "photo", label: "Photo", icon: <Camera size={16} aria-hidden /> },
-  { id: "search", label: "Search", icon: <Search size={16} aria-hidden /> },
+  { id: "search", label: "Type food", icon: <Search size={16} aria-hidden /> },
   { id: "barcode", label: "Barcode", icon: <ScanBarcode size={16} aria-hidden /> },
 ];
 
@@ -80,7 +80,7 @@ export function LogScreen() {
         </h1>
       </header>
 
-      {/* Segmented tabs — glass pill */}
+      {/* Segmented tabs  -  glass pill */}
       <div className="grid grid-cols-3 gap-1 rounded-full border border-white/60 bg-white/40 p-1 backdrop-blur-xl">
         {tabs.map((t) => (
           <button
@@ -102,7 +102,7 @@ export function LogScreen() {
         ))}
       </div>
 
-      {tab === "photo" ? <PhotoFlow /> : null}
+      {tab === "photo" ? <PhotoFlow onTypeFood={() => setTab("search")} /> : null}
       {tab === "search" ? <SearchFlow /> : null}
       {tab === "barcode" ? <BarcodeFlow /> : null}
 
@@ -152,7 +152,7 @@ export function LogScreen() {
             className="mt-4"
             onClick={() => router.push("/today")}
           >
-            Done — back to today
+            Done, back to today
           </Button>
         </section>
       ) : null}
@@ -162,7 +162,7 @@ export function LogScreen() {
 
 /* ───────────────────────── Photo flow ───────────────────────── */
 
-function PhotoFlow() {
+function PhotoFlow({ onTypeFood }: { onTypeFood: () => void }) {
   const fileRef = useRef<HTMLInputElement | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [note, setNote] = useState("");
@@ -182,7 +182,6 @@ function PhotoFlow() {
     setEstimate(null);
     setError(null);
     setSource(null);
-    void runEstimate(dataUrl);
   }
 
   async function openCapture(kind: "camera" | "library") {
@@ -201,7 +200,6 @@ function PhotoFlow() {
       setEstimate(null);
       setError(null);
       setSource(null);
-      void runEstimate(dataUrl);
       return;
     }
 
@@ -310,6 +308,13 @@ function PhotoFlow() {
           >
             Or upload from photos
           </button>
+          <button
+            type="button"
+            onClick={onTypeFood}
+            className="mt-3 text-sm font-medium text-forest underline-offset-4 hover:underline"
+          >
+            Type food instead
+          </button>
         </div>
       </Card>
     );
@@ -333,21 +338,26 @@ function PhotoFlow() {
         </div>
       </Card>
 
-      {!estimate ? (
-        <Card>
-          <Field label="Optional note" hint="E.g. 'extra rice', 'no oil', 'sharing this'.">
+      <Card>
+          <Field label="Photo notes" hint="Add drinks, sauces, or anything the image misses.">
             <Textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="Anything the photo doesn't show…"
+              placeholder="Example: diet coke, half a slice, extra sauce"
             />
           </Field>
-          <Button size="lg" fullWidth className="mt-4" onClick={() => runEstimate()} loading={busy}>
-            {busy ? "Estimating macros" : "Update estimate"}
-          </Button>
+          <div className="mt-4 flex gap-2">
+            <Button variant="secondary" onClick={onTypeFood}>
+              Type food instead
+            </Button>
+            <Button size="lg" fullWidth onClick={() => runEstimate()} loading={busy}>
+              {busy ? "Estimating macros" : note.trim() ? "Analyse with notes" : "Analyse photo"}
+            </Button>
+          </div>
           {error ? <p className="mt-2 text-sm text-clay">{error}</p> : null}
         </Card>
-      ) : (
+
+      {estimate ? (
         <EstimateEditor
           estimate={estimate}
           source={source}
@@ -355,7 +365,7 @@ function PhotoFlow() {
           onSave={save}
           onDiscard={discard}
         />
-      )}
+      ) : null}
       <PaywallSheet
         open={paywallOpen}
         onClose={() => setPaywallOpen(false)}
@@ -421,12 +431,32 @@ function EstimateEditor({
       fiberG: Number((variant.fiberG * factor).toFixed(1)),
     });
   }
+
+  function addMissingItem() {
+    const items: MealEstimate["items"] = [
+      ...estimate.items,
+      {
+        name: "Missing item",
+        portion: "1 serving",
+        calories: 0,
+        proteinG: 0,
+        carbsG: 0,
+        fatG: 0,
+        fiberG: 0,
+        confidence: 0.4,
+      },
+    ];
+    onChange({ ...estimate, items, totals: sumItems(items), confidence: Math.min(estimate.confidence, 0.6) });
+  }
+
   return (
     <Card>
       <div className="flex items-center justify-between">
         <div>
           <div className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted">
-            {source === "demo" ? "Demo estimate" : `Confidence ${getMealConfidenceLabel(estimate.confidence)}`}
+            {source === "demo"
+              ? "Demo estimate"
+              : `Review before saving, confidence ${getMealConfidenceLabel(estimate.confidence)}`}
           </div>
           <h3 className="font-display text-xl text-ink-2">{estimate.summary}</h3>
         </div>
@@ -450,6 +480,9 @@ function EstimateEditor({
                 onChange={(e) => updateItem(idx, { name: e.target.value })}
                 className="min-w-0 flex-1 bg-transparent text-sm font-medium text-ink-2 outline-none"
               />
+              <span className="rounded-full bg-cream px-2 py-1 text-[10px] font-medium text-forest">
+                {getMealConfidenceLabel(item.confidence)}
+              </span>
               <span className="numerals text-base text-ink-2">
                 <input
                   type="number"
@@ -460,6 +493,12 @@ function EstimateEditor({
               </span>
               <span className="text-xs text-muted">kcal</span>
             </div>
+            <input
+              value={item.portion}
+              onChange={(e) => updateItem(idx, { portion: e.target.value })}
+              aria-label={`Serving size for ${item.name}`}
+              className="mt-1 w-full bg-transparent text-xs text-muted outline-none"
+            />
             <div className="mt-2 grid grid-cols-4 gap-2 text-xs text-muted">
               <MacroEdit label="P" value={item.proteinG} onChange={(v) => updateItem(idx, { proteinG: v })} />
               <MacroEdit label="C" value={item.carbsG} onChange={(v) => updateItem(idx, { carbsG: v })} />
@@ -484,6 +523,10 @@ function EstimateEditor({
           </li>
         ))}
       </ul>
+
+      <Button variant="secondary" size="sm" className="mt-3" onClick={addMissingItem}>
+        Add missing item
+      </Button>
 
       <div className="mt-4 rounded-2xl border border-white/70 bg-white/60 p-4 backdrop-blur-xl">
         <div className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted">Total</div>
@@ -519,7 +562,7 @@ function EstimateEditor({
           Discard
         </Button>
         <Button onClick={onSave} size="lg" fullWidth>
-          <Check size={18} /> Save meal
+          <Check size={18} /> Save to today
         </Button>
       </div>
     </Card>
@@ -641,6 +684,15 @@ function SearchFlow() {
   const [grams, setGrams] = useState("100");
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [customOpen, setCustomOpen] = useState(false);
+  const [custom, setCustom] = useState({
+    name: "",
+    calories: "",
+    proteinG: "0",
+    carbsG: "0",
+    fatG: "0",
+    fiberG: "0",
+  });
   const searchIdRef = useRef(0);
   const { actions } = useAppState();
 
@@ -731,6 +783,38 @@ function SearchFlow() {
     setGrams(String(Math.round(requestedGrams)));
   }
 
+  function openCustom() {
+    setCustom({
+      name: query.trim() || "Custom food",
+      calories: "",
+      proteinG: "0",
+      carbsG: "0",
+      fatG: "0",
+      fiberG: "0",
+    });
+    setCustomOpen(true);
+    setPicked(null);
+  }
+
+  function saveCustom() {
+    const name = custom.name.trim();
+    if (!name) return;
+    const calories = Math.max(Number(custom.calories) || 0, 0);
+    actions.addMeal({
+      name,
+      calories: Math.round(calories),
+      proteinG: Number((Number(custom.proteinG) || 0).toFixed(1)),
+      carbsG: Number((Number(custom.carbsG) || 0).toFixed(1)),
+      fatG: Number((Number(custom.fatG) || 0).toFixed(1)),
+      fiberG: Number((Number(custom.fiberG) || 0).toFixed(1)),
+    });
+    setCustomOpen(false);
+    setCustom({ name: "", calories: "", proteinG: "0", carbsG: "0", fatG: "0", fiberG: "0" });
+    setQuery("");
+    setResults([]);
+    setHasSearched(false);
+  }
+
   function save() {
     if (!picked) return;
     const g = Math.max(Number(grams) || 0, 0);
@@ -749,6 +833,79 @@ function SearchFlow() {
     setQuery("");
     setResults([]);
     setHasSearched(false);
+  }
+
+  if (customOpen) {
+    return (
+      <Card>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h3 className="font-display text-xl text-ink-2">Custom food</h3>
+            <p className="text-xs text-muted">Use this when search is not the right tool.</p>
+          </div>
+          <button
+            type="button"
+            data-tap
+            onClick={() => setCustomOpen(false)}
+            className="grid h-9 w-9 place-items-center rounded-full text-muted hover:bg-white/60"
+            aria-label="Close"
+          >
+            <X size={16} />
+          </button>
+        </div>
+        <Field label="Food name" className="mt-4">
+          <Input
+            value={custom.name}
+            onChange={(e) => setCustom((prev) => ({ ...prev, name: e.target.value }))}
+          />
+        </Field>
+        <div className="mt-3 grid grid-cols-2 gap-3">
+          <Field label="Calories">
+            <Input
+              type="number"
+              inputMode="decimal"
+              value={custom.calories}
+              onChange={(e) => setCustom((prev) => ({ ...prev, calories: e.target.value }))}
+            />
+          </Field>
+          <Field label="Protein (g)">
+            <Input
+              type="number"
+              inputMode="decimal"
+              value={custom.proteinG}
+              onChange={(e) => setCustom((prev) => ({ ...prev, proteinG: e.target.value }))}
+            />
+          </Field>
+          <Field label="Carbs (g)">
+            <Input
+              type="number"
+              inputMode="decimal"
+              value={custom.carbsG}
+              onChange={(e) => setCustom((prev) => ({ ...prev, carbsG: e.target.value }))}
+            />
+          </Field>
+          <Field label="Fat (g)">
+            <Input
+              type="number"
+              inputMode="decimal"
+              value={custom.fatG}
+              onChange={(e) => setCustom((prev) => ({ ...prev, fatG: e.target.value }))}
+            />
+          </Field>
+          <Field label="Fiber (g)">
+            <Input
+              type="number"
+              inputMode="decimal"
+              value={custom.fiberG}
+              onChange={(e) => setCustom((prev) => ({ ...prev, fiberG: e.target.value }))}
+            />
+          </Field>
+        </div>
+        <Button size="lg" fullWidth className="mt-4" onClick={saveCustom} disabled={!custom.name.trim()}>
+          <Check size={18} /> Add to today
+        </Button>
+      </Card>
+    );
   }
 
   if (picked) {
@@ -810,12 +967,19 @@ function SearchFlow() {
     <Card>
       <form className="flex items-center gap-2" onSubmit={handleSubmit}>
         <Input
-          placeholder="Search foods (e.g. 'banana', 'oats')…"
+          placeholder="Type food, drink, or brand"
           value={query}
           onChange={(e) => handleQueryChange(e.target.value)}
         />
-        <Button type="submit" loading={busy}>Search</Button>
+        <Button type="submit" loading={busy}>Find</Button>
       </form>
+      <button
+        type="button"
+        onClick={openCustom}
+        className="mt-3 text-sm font-medium text-forest underline-offset-4 hover:underline"
+      >
+        Can&apos;t find it? Create custom food
+      </button>
       {error ? <p className="mt-2 text-sm text-clay">{error}</p> : null}
       {busy ? (
         <div className="mt-4 space-y-2">
@@ -847,7 +1011,12 @@ function SearchFlow() {
           ))}
         </ul>
       ) : hasSearched && query.trim().length >= 2 && !busy ? (
-        <EmptyState title="No matches" body="Try a simpler word — 'oats' beats 'overnight oats'." />
+        <div className="mt-4 space-y-3">
+          <EmptyState title="No matches" body="Try a simpler word, or create a custom food." />
+          <Button variant="secondary" fullWidth onClick={openCustom}>
+            Create custom food
+          </Button>
+        </div>
       ) : (
         <p className="mt-4 text-xs text-muted">
           Powered by USDA FoodData Central. Branded items also available.

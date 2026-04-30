@@ -1,9 +1,10 @@
-import type { CoachResponse, MealEstimate } from "@/lib/ai/schemas";
+import type { CoachDraftMeal, CoachResponse, MealEstimate } from "@/lib/ai/schemas";
 import type {
   AccountabilityStyle,
   ActivityLevel,
   DailyTargets,
   EquipmentPreference,
+  GoalIntent,
   SexForCalories,
   TargetProfile,
   UnitSystem,
@@ -46,6 +47,7 @@ export interface ChatMessage {
   role: "user" | "assistant";
   content: string;
   actions?: string[];
+  draftMeal?: CoachDraftMeal;
 }
 
 export interface ProfileDraft {
@@ -55,6 +57,8 @@ export interface ProfileDraft {
   heightCm: string;
   currentWeightKg: string;
   goalWeightKg: string;
+  goalIntent: GoalIntent;
+  weeklyRateKg: string;
   activityLevel: ActivityLevel;
   baselineSteps: string;
   workoutsPerWeek: string;
@@ -178,7 +182,12 @@ export interface AppActions {
   /** Mark onboarding done (commits draft if needed). */
   finishOnboarding(): void;
 
-  addMeal(meal: Omit<MealLog, "id" | "loggedAt"> & { loggedAt?: string }): MealLog;
+  addMeal(
+    meal: Omit<MealLog, "id" | "loggedAt"> & {
+      loggedAt?: string;
+      source?: "manual" | "coach";
+    },
+  ): MealLog;
   addMealFromEstimate(estimate: MealEstimate, opts?: { imageUrl?: string }): MealLog;
   updateMeal(id: string, patch: Partial<Omit<MealLog, "id">>): void;
   removeMeal(id: string): void;

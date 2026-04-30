@@ -53,7 +53,7 @@ export function SettingsScreen() {
       "Type DELETE to confirm permanent account deletion.",
     );
     if (typed?.trim().toUpperCase() !== "DELETE") {
-      setDeleteError("Deletion cancelled — confirmation text did not match.");
+      setDeleteError("Deletion cancelled. Confirmation text did not match.");
       return;
     }
     setDeleting(true);
@@ -160,7 +160,7 @@ export function SettingsScreen() {
               <AlertTriangle size={16} aria-hidden />
             </IconBadge>
             <p className="text-sm text-ink-2">
-              Permanently delete your account and all associated data — profile, meals, weights, check-ins, photos, and chat history. This cannot be undone.
+              Permanently delete your account and all associated data: profile, meals, weights, check-ins, photos, and chat history. This cannot be undone.
             </p>
           </div>
           {deleteError ? (
@@ -175,7 +175,7 @@ export function SettingsScreen() {
               disabled={deleting}
             >
               <Trash2 size={16} aria-hidden />
-              {deleting ? "Deleting…" : "Delete account"}
+              {deleting ? "Deleting..." : "Delete account"}
             </Button>
           </div>
           <p className="mt-3 text-xs text-faint">

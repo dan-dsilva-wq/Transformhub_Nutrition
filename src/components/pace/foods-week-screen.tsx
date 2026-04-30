@@ -106,7 +106,7 @@ function buildWeeks(
   return [
     {
       name: "Last week",
-      range: `${fmt(last)} – ${fmt(lastEnd)}`,
+      range: `${fmt(last)} - ${fmt(lastEnd)}`,
       badge: "Past",
       badgeClass: "past",
       days: makeDays(0, seed, slots, banned, overrides),
@@ -114,7 +114,7 @@ function buildWeeks(
     },
     {
       name: "This week",
-      range: `${fmt(cur)} – ${fmt(curEnd)}`,
+      range: `${fmt(cur)} - ${fmt(curEnd)}`,
       badge: "Current",
       badgeClass: "this-week",
       days: makeDays(1, seed + 1, slots, banned, overrides),
@@ -122,7 +122,7 @@ function buildWeeks(
     },
     {
       name: "Next week",
-      range: `${fmt(next)} – ${fmt(nextEnd)}`,
+      range: `${fmt(next)} - ${fmt(nextEnd)}`,
       badge: "Planned",
       badgeClass: "future",
       days: makeDays(2, seed + 3, slots, banned, overrides),
@@ -380,7 +380,7 @@ export function FoodsWeekScreen() {
           <div className="rounded-3xl border border-white/85 bg-white/55 p-4 backdrop-blur-xl">
             <div className="text-sm font-semibold">Plan ahead</div>
             <p className="mt-1 text-xs text-muted">
-              Lock in next week now, or wait — it&rsquo;ll auto-build on Sunday.
+              Lock in next week now, or wait. It&rsquo;ll auto-build on Sunday.
             </p>
           </div>
         ) : null}
@@ -767,7 +767,7 @@ function SwapSheet({
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-sm font-medium">{key}</div>
                       <div className="text-[11px] text-muted">
-                        {r ? `${r.kcal} kcal · ${r.p}g protein · ${r.time}` : "—"}
+                        {r ? `${r.kcal} kcal · ${r.p}g protein · ${r.time}` : "-"}
                       </div>
                     </div>
                     <Check size={14} className="text-forest opacity-0" aria-hidden />
@@ -818,10 +818,10 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 }
 
 const generateSteps = [
-  "Reading your foods…",
-  "Balancing protein, carbs &amp; fat…",
-  "Rotating meals across the week…",
-  "Wrapping up your plan…",
+  "Reading your foods...",
+  "Balancing protein, carbs &amp; fat...",
+  "Rotating meals across the week...",
+  "Wrapping up your plan...",
 ];
 
 function GenerateWeek({
@@ -871,7 +871,7 @@ function GenerateWeek({
         <h1 className="font-display mt-1 text-[34px] leading-[1.05] text-ink-2">
           {phase === "running" ? (
             <>
-              Building your <span className="text-forest">week…</span>
+              Building your <span className="text-forest">week...</span>
             </>
           ) : (
             <>
@@ -881,8 +881,8 @@ function GenerateWeek({
         </h1>
         <p className="mt-2 text-sm text-muted">
           {phase === "running"
-            ? "Hang tight — we're tailoring this to you."
-            : `Hi ${name ?? "there"} — let's spin up a 7-day plan from your foods.`}
+            ? "Hang tight. We're tailoring this to you."
+            : `Hi ${name ?? "there"}. Let's spin up a 7-day plan from your foods.`}
         </p>
       </header>
 
@@ -969,7 +969,7 @@ function GenerateWeek({
         {phase === "running" ? (
           <>
             <Sparkles size={16} className="animate-pulse" aria-hidden />
-            Generating…
+            Generating...
           </>
         ) : (
           <>

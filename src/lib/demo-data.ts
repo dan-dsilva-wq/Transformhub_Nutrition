@@ -6,6 +6,8 @@ export const demoProfile: TargetProfile = {
   heightCm: 168,
   currentWeightKg: 82,
   goalWeightKg: 72,
+  goalIntent: "lose",
+  weeklyRateKg: 0.5,
   activityLevel: "light",
   baselineSteps: 5600,
   workoutsPerWeek: 3,

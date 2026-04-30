@@ -18,7 +18,7 @@ const levels = [
   {
     id: "moderate",
     label: "Moderate",
-    desc: "Active job or 3–5 sessions/wk",
+    desc: "Active job or 3-5 sessions/wk",
     icon: Bike,
   },
   {
@@ -48,7 +48,7 @@ export function ActivityStep({ onNext }: { onNext: () => void }) {
           How active is a normal week?
         </h2>
         <p className="mt-2 text-sm text-muted">
-          Be honest — under-counting is the usual mistake.
+          Be honest. Under-counting is the usual mistake.
         </p>
         <div className="mt-8 grid grid-cols-1 gap-3">
           {levels.map((l) => {

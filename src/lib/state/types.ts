@@ -95,6 +95,13 @@ export type DietaryPref =
   | "pescatarian"
   | "no-dairy"
   | "no-gluten"
+  | "no-peanuts"
+  | "no-tree-nuts"
+  | "no-fish"
+  | "no-shellfish"
+  | "no-soy"
+  | "no-eggs"
+  | "no-sesame"
   | "halal"
   | "kosher";
 
@@ -150,6 +157,8 @@ export interface OnboardingExtras {
   weekSwaps?: Record<string, string>;
   /** Whether the user has run the first-time week generator. */
   weekGenerated?: boolean;
+  /** Seed used to keep the generated food week and shopping list in sync. */
+  weekPlanSeed?: number;
   /** Ingredient names the user never wants suggested again (case-insensitive match). */
   skippedIngredients?: string[];
   /** Ingredient names the user has marked as already in their pantry — hidden from shopping list. */

@@ -1,4 +1,8 @@
 import { recipes, type Recipe } from "./food-data";
+import {
+  ingredientMatchesSkip as ingredientMatchesBlockedFood,
+  recipeHasSkipped as recipeHasBlockedFood,
+} from "./planning";
 
 export type Aisle =
   | "produce"
@@ -124,6 +128,7 @@ export function buildShoppingList(
   opts: {
     skippedIngredients?: string[];
     pantryStaples?: string[];
+    dayLabels?: string[];
   } = {},
 ): { items: ShoppingItem[]; pantryHits: string[] } {
   const skip = new Set(
@@ -140,12 +145,12 @@ export function buildShoppingList(
     if (!recipe) continue;
     for (const ing of recipe.ingredients) {
       const key = ing.n.toLowerCase().trim();
-      if (skip.has(key)) continue;
+      if (skip.has(key) || ingredientMatchesBlockedFood(ing.n, opts.skippedIngredients ?? [])) continue;
       if (pantry.has(key)) {
         pantryHits.add(ing.n);
         continue;
       }
-      const day = dayLabels[m.dayIdx] ?? "";
+      const day = opts.dayLabels?.[m.dayIdx] ?? dayLabels[m.dayIdx] ?? "";
       const occ = {
         day,
         slot: m.slot,
@@ -202,13 +207,10 @@ export function groupByAisle(items: ShoppingItem[]): Map<Aisle, ShoppingItem[]> 
 }
 
 export function ingredientMatchesSkip(name: string, skipped: string[]): boolean {
-  const n = name.toLowerCase();
-  return skipped.some((s) => n === s.toLowerCase());
+  return ingredientMatchesBlockedFood(name, skipped);
 }
 
 /** True if a recipe contains any skipped ingredient — used to filter recipe pool. */
 export function recipeHasSkipped(recipe: Recipe, skipped: string[]): boolean {
-  if (!skipped.length) return false;
-  const skipSet = new Set(skipped.map((s) => s.toLowerCase()));
-  return recipe.ingredients.some((i) => skipSet.has(i.n.toLowerCase()));
+  return recipeHasBlockedFood(recipe, skipped);
 }

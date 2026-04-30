@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  coachRequestSchema,
   coachResponseSchema,
   getMealConfidenceLabel,
   mealEstimateSchema,
@@ -76,6 +77,18 @@ describe("AI schemas", () => {
 
     expect(parsed.suggestedActions).toContain("Log dinner");
     expect(parsed.draftMeal?.name).toBe("Pizza slice");
+  });
+
+  it("accepts up to five recent coach memory messages", () => {
+    const parsed = coachRequestSchema.parse({
+      message: "What should I do for dinner?",
+      recentMessages: [
+        { role: "user", content: "I skipped lunch." },
+        { role: "assistant", content: "Make dinner simple and protein-led." },
+      ],
+    });
+
+    expect(parsed.recentMessages).toHaveLength(2);
   });
 
   it("labels low confidence estimates for review", () => {

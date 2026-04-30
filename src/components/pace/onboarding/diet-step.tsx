@@ -14,6 +14,13 @@ const options: { id: DietaryPref; label: string }[] = [
   { id: "pescatarian", label: "Pescatarian" },
   { id: "no-dairy", label: "No dairy" },
   { id: "no-gluten", label: "No gluten" },
+  { id: "no-peanuts", label: "No peanuts" },
+  { id: "no-tree-nuts", label: "No tree nuts" },
+  { id: "no-fish", label: "No fish" },
+  { id: "no-shellfish", label: "No shellfish" },
+  { id: "no-soy", label: "No soy" },
+  { id: "no-eggs", label: "No eggs" },
+  { id: "no-sesame", label: "No sesame" },
   { id: "halal", label: "Halal" },
   { id: "kosher", label: "Kosher" },
 ];

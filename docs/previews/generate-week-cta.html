@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Generate Week CTA — preview</title>
+  <style>
+    :root {
+      --forest: #1f5f4a;
+      --ink-2: #1c2420;
+      --ink: #2c352f;
+      --muted: #6b7770;
+      --faint: #98a39c;
+      --hairline: rgba(28,36,32,0.08);
+      --cream: #faf6ef;
+      --stone-2: #ece6da;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(180deg, #f4efe5 0%, #ece4d3 100%);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 32px 16px 80px;
+    }
+    .wrap {
+      display: grid;
+      gap: 32px;
+      max-width: 1080px;
+      margin: 0 auto;
+      grid-template-columns: 1fr 1fr;
+    }
+    @media (max-width: 760px) { .wrap { grid-template-columns: 1fr; } }
+    .col h2 {
+      font-size: 12px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0 0 12px;
+      text-align: center;
+    }
+    .phone {
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto;
+      background: linear-gradient(180deg, #f6f0e3 0%, #efe5cf 100%);
+      border-radius: 36px;
+      padding: 28px 20px 80px;
+      box-shadow: 0 30px 60px -30px rgba(0,0,0,0.25), 0 8px 24px -10px rgba(0,0,0,0.1);
+      border: 1px solid rgba(255,255,255,0.7);
+    }
+    .eyebrow {
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.22em;
+      color: var(--muted);
+      margin: 0;
+    }
+    h1 {
+      font-family: "Fraunces", "Times New Roman", serif;
+      font-size: 32px;
+      line-height: 1.05;
+      color: var(--ink-2);
+      margin: 6px 0 0;
+      font-weight: 600;
+    }
+    h1 .accent { color: var(--forest); }
+    .sub {
+      font-size: 14px;
+      color: var(--muted);
+      margin: 8px 0 0;
+      line-height: 1.4;
+    }
+
+    /* CTA */
+    .cta-wrap { position: relative; margin-top: 20px; }
+    .cta-glow-ring {
+      position: absolute;
+      inset: -6px;
+      border-radius: 999px;
+      background: rgba(31, 95, 74, 0.32);
+      filter: blur(10px);
+      animation: pulse 1.8s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.55; transform: scale(1); }
+      50% { opacity: 0.95; transform: scale(1.03); }
+    }
+    .cta {
+      position: relative;
+      width: 100%;
+      height: 56px;
+      border-radius: 999px;
+      background: var(--forest);
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 12px 28px -10px rgba(31, 95, 74, 0.55);
+      transition: transform 0.15s ease;
+    }
+    .cta:hover { transform: translateY(-1px); }
+    .cta:active { transform: translateY(0); }
+    .cta svg { display: block; }
+    .hint {
+      margin: 8px 0 0;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--forest);
+    }
+
+    /* Plan card */
+    .plan {
+      margin-top: 16px;
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,0.85);
+      background: rgba(255,255,255,0.55);
+      backdrop-filter: blur(20px);
+      padding: 20px;
+      box-shadow: 0 8px 24px -16px rgba(0,0,0,0.15);
+    }
+    .plan-head { display: flex; gap: 12px; align-items: center; }
+    .plan-icon {
+      width: 48px; height: 48px;
+      border-radius: 16px;
+      background: rgba(31, 95, 74, 0.1);
+      color: var(--forest);
+      display: grid; place-items: center;
+      flex-shrink: 0;
+    }
+    .plan-meta-eyebrow {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .plan-meta-title {
+      font-family: "Fraunces", "Times New Roman", serif;
+      font-size: 18px;
+      color: var(--ink-2);
+      margin-top: 2px;
+    }
+    .steps { list-style: none; padding: 0; margin: 16px 0 0; display: grid; gap: 8px; }
+    .step {
+      display: flex; align-items: center; gap: 10px;
+      border: 1px solid var(--hairline);
+      background: rgba(255,255,255,0.4);
+      border-radius: 16px;
+      padding: 8px 12px;
+      font-size: 14px;
+      color: var(--faint);
+    }
+    .step .num {
+      width: 24px; height: 24px;
+      border-radius: 999px;
+      background: var(--stone-2);
+      color: var(--muted);
+      display: grid; place-items: center;
+      font-size: 11px; font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    /* Old (before) state */
+    .before .cta-wrap { display: none; }
+    .before .old-bottom {
+      margin-top: 16px;
+      width: 100%; height: 48px;
+      border-radius: 999px;
+      background: var(--forest);
+      color: white;
+      font-size: 14px; font-weight: 500;
+      border: none;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      box-shadow: 0 8px 20px -8px rgba(31, 95, 74, 0.45);
+    }
+    .before h1 { font-weight: 500; }
+
+    /* Annotation */
+    .note {
+      max-width: 420px;
+      margin: 16px auto 0;
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.5;
+    }
+    .note b { color: var(--ink-2); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- BEFORE -->
+    <div class="col">
+      <h2>Before</h2>
+      <div class="phone before">
+        <p class="eyebrow">YOUR FOOD WEEK</p>
+        <h1>Ready when <span class="accent">you are.</span></h1>
+        <p class="sub">Hi Dan. Let's spin up a 7-day plan from your foods.</p>
+
+        <div class="plan">
+          <div class="plan-head">
+            <div class="plan-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
+            </div>
+            <div>
+              <div class="plan-meta-eyebrow">Personalised plan</div>
+              <div class="plan-meta-title">3 meals/day · 24 recipes</div>
+            </div>
+          </div>
+          <ul class="steps">
+            <li class="step"><span class="num">1</span><span>Reading your liked foods</span></li>
+            <li class="step"><span class="num">2</span><span>Matching macros to your targets</span></li>
+            <li class="step"><span class="num">3</span><span>Drafting 7 days of meals</span></li>
+            <li class="step"><span class="num">4</span><span>Building your shopping list</span></li>
+          </ul>
+        </div>
+
+        <button class="old-bottom">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
+          Generate my week
+        </button>
+      </div>
+      <p class="note">
+        CTA hides at the bottom of the screen. Users have to <b>scroll past the steps card</b> to see it.
+        The headline doesn't say what to do.
+      </p>
+    </div>
+
+    <!-- AFTER -->
+    <div class="col">
+      <h2>After</h2>
+      <div class="phone">
+        <p class="eyebrow">YOUR FOOD WEEK</p>
+        <h1>Tap below to build your <span class="accent">first week.</span></h1>
+        <p class="sub">Hi Dan. Nothing here yet — hit the green button to generate your 7-day plan.</p>
+
+        <div class="cta-wrap">
+          <span class="cta-glow-ring" aria-hidden="true"></span>
+          <button class="cta">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
+            Generate my first week
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </button>
+          <p class="hint">↑ Tap here to start</p>
+        </div>
+
+        <div class="plan">
+          <div class="plan-head">
+            <div class="plan-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
+            </div>
+            <div>
+              <div class="plan-meta-eyebrow">Personalised plan</div>
+              <div class="plan-meta-title">3 meals/day · 24 recipes</div>
+            </div>
+          </div>
+          <ul class="steps">
+            <li class="step"><span class="num">1</span><span>Reading your liked foods</span></li>
+            <li class="step"><span class="num">2</span><span>Matching macros to your targets</span></li>
+            <li class="step"><span class="num">3</span><span>Drafting 7 days of meals</span></li>
+            <li class="step"><span class="num">4</span><span>Building your shopping list</span></li>
+          </ul>
+        </div>
+      </div>
+      <p class="note">
+        Headline now <b>tells the user what to do</b>. The CTA sits directly below it with a
+        <b>pulsing glow</b> and an "↑ Tap here to start" hint. The steps card moves below as preview only.
+      </p>
+    </div>
+  </div>
+</body>
+</html>

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
 import {
+  ArrowRight,
   Ban,
   Check,
   ChevronLeft,
@@ -18,6 +19,8 @@ import {
 } from "lucide-react";
 import { clsx } from "clsx";
 import { useAppState } from "@/lib/state/app-state";
+import type { DailyTargets } from "@/lib/targets";
+import type { DietaryPref } from "@/lib/state/types";
 import { LockedState } from "./paywall-sheet";
 import {
   mealIcoFor,
@@ -25,7 +28,18 @@ import {
   recipes,
   type Recipe,
 } from "./foods/food-data";
-import { recipeHasSkipped } from "./foods/shopping";
+import {
+  dayPlannedNutrition,
+  ingredientMatchesSkip,
+  mealSlotsFor,
+  pickRecipeKey,
+  plannedNutritionForRecipe,
+  recipeAllowedForPreferences,
+  recipeFitsSlot,
+  rotatedDayNames,
+  weekStartFromToday,
+} from "./foods/planning";
+import { DEFAULT_PANTRY } from "./foods/shopping";
 import { trackTesterEvent } from "@/lib/tester/track";
 
 interface DayPlan {
@@ -42,28 +56,8 @@ interface WeekPlan {
   showShop: boolean;
 }
 
-function weekStart(offsetWeeks: number): Date {
-  const d = new Date();
-  d.setDate(d.getDate() + offsetWeeks * 7);
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-
-function rotatedDayNames(): string[] {
-  const base = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const today = new Date().getDay();
-  return [...base.slice(today), ...base.slice(0, today)];
-}
-
 function fmt(d: Date): string {
   return new Intl.DateTimeFormat("en-GB", { month: "short", day: "numeric" }).format(d);
-}
-
-function mealSlotsFor(mealsPerDay: number): string[] {
-  if (mealsPerDay <= 2) return ["Breakfast", "Dinner"];
-  if (mealsPerDay >= 5) return ["Breakfast", "Mid-morning", "Lunch", "Afternoon", "Dinner"];
-  if (mealsPerDay === 4) return ["Breakfast", "Lunch", "Snack", "Dinner"];
-  return ["Breakfast", "Lunch", "Dinner"];
 }
 
 const dayNames = rotatedDayNames();
@@ -81,47 +75,34 @@ const chapterMoods: { title: string; tint: string; sub: string }[] = [
 const TODAY_HERO_TITLE = "Today is the one";
 const TODAY_HERO_SUB = "Cook this. The rest of the week can wait.";
 
-function pickRecipeKey(
-  shift: number,
-  dayIdx: number,
-  slotIdx: number,
-  banned: Set<string>,
-  skipped: string[],
-): string {
-  const candidates = recipeKeys.filter((k) => {
-    if (banned.has(k)) return false;
-    const r = recipes[k];
-    if (!r) return false;
-    return !recipeHasSkipped(r, skipped);
-  });
-  const list = candidates.length > 0 ? candidates : recipeKeys;
-  return list[(dayIdx + shift + slotIdx * 2) % list.length];
-}
-
 function makeDays(
   weekIdx: number,
   shift: number,
   slots: string[],
   banned: Set<string>,
   skipped: string[],
+  dietaryPreferences: DietaryPref[],
   overrides: Record<string, string>,
 ): DayPlan[] {
-  return dayNames.map((n, dayIdx) => ({
-    name: n,
-    meals: slots.map((_, slotIdx) => {
+  return dayNames.map((n, dayIdx) => {
+    const usedToday = new Set<string>();
+    const meals = slots.map((_, slotIdx) => {
       const positionKey = `${weekIdx}|${dayIdx}|${slotIdx}`;
       const overridden = overrides[positionKey];
       const useOverride =
         overridden &&
         !banned.has(overridden) &&
         recipes[overridden] &&
-        !recipeHasSkipped(recipes[overridden], skipped);
+        recipeFitsSlot(overridden, recipes[overridden], slots[slotIdx] ?? "") &&
+        recipeAllowedForPreferences(overridden, recipes[overridden], dietaryPreferences, skipped);
       const key = useOverride
         ? (overridden as string)
-        : pickRecipeKey(shift, dayIdx, slotIdx, banned, skipped);
+        : pickRecipeKey(shift, dayIdx, slotIdx, banned, skipped, dietaryPreferences, slots[slotIdx] ?? "", usedToday);
+      usedToday.add(key);
       return { key };
-    }),
-  }));
+    });
+    return { name: n, meals };
+  });
 }
 
 const MAX_WEEKS_AHEAD = 4;
@@ -131,13 +112,14 @@ function buildWeeks(
   slots: string[],
   banned: Set<string>,
   skipped: string[],
+  dietaryPreferences: DietaryPref[],
   overrides: Record<string, string>,
   weeksAhead: number,
 ): WeekPlan[] {
   const total = 1 + Math.max(0, Math.min(MAX_WEEKS_AHEAD, weeksAhead));
   const out: WeekPlan[] = [];
   for (let i = 0; i < total; i++) {
-    const start = weekStart(i);
+    const start = weekStartFromToday(i);
     const end = new Date(start);
     end.setDate(end.getDate() + 6);
     out.push({
@@ -145,7 +127,7 @@ function buildWeeks(
       range: `${fmt(start)} - ${fmt(end)}`,
       badge: i === 0 ? "Current" : "Planned",
       badgeClass: i === 0 ? "this-week" : "future",
-      days: makeDays(i, seed + i * 2, slots, banned, skipped, overrides),
+      days: makeDays(i, seed + i * 2, slots, banned, skipped, dietaryPreferences, overrides),
       showShop: true,
     });
   }
@@ -156,19 +138,6 @@ const badgeTone: Record<WeekPlan["badgeClass"], string> = {
   "this-week": "bg-forest text-white",
   future: "bg-sky-200 text-sky-900",
 };
-
-function dayKcalProtein(day: DayPlan): { kcal: number; p: number } {
-  let kcal = 0;
-  let p = 0;
-  for (const m of day.meals) {
-    const r = recipes[m.key];
-    if (r) {
-      kcal += r.kcal;
-      p += r.p;
-    }
-  }
-  return { kcal, p };
-}
 
 function totalDayMinutes(day: DayPlan): number {
   let m = 0;
@@ -182,9 +151,9 @@ function totalDayMinutes(day: DayPlan): number {
 }
 
 export function FoodsScreen() {
-  const { onboardingExtras, actions } = useAppState();
+  const { onboardingExtras, targets, actions } = useAppState();
   const mealsPerDay = onboardingExtras.routine?.mealsPerDay ?? 3;
-  const [planSeed, setPlanSeed] = useState(0);
+  const planSeed = onboardingExtras.weekPlanSeed ?? 0;
   const [mealCountOpen, setMealCountOpen] = useState(false);
   const [introOpen, setIntroOpen] = useState(
     !onboardingExtras.hasSeenWeekIntro,
@@ -199,6 +168,10 @@ export function FoodsScreen() {
     () => onboardingExtras.skippedIngredients ?? [],
     [onboardingExtras.skippedIngredients],
   );
+  const dietaryPreferences = useMemo(
+    () => onboardingExtras.dietaryPreferences ?? [],
+    [onboardingExtras.dietaryPreferences],
+  );
   const overrides = useMemo(
     () => onboardingExtras.weekSwaps ?? {},
     [onboardingExtras.weekSwaps],
@@ -208,8 +181,8 @@ export function FoodsScreen() {
     Math.min(MAX_WEEKS_AHEAD, onboardingExtras.weeksAhead ?? 0),
   );
   const weeks = useMemo(
-    () => buildWeeks(planSeed, slots, banned, skipped, overrides, weeksAhead),
-    [planSeed, slots, banned, skipped, overrides, weeksAhead],
+    () => buildWeeks(planSeed, slots, banned, skipped, dietaryPreferences, overrides, weeksAhead),
+    [planSeed, slots, banned, skipped, dietaryPreferences, overrides, weeksAhead],
   );
   const [weekIndex, setWeekIndex] = useState<number>(0);
   const [openRecipe, setOpenRecipe] = useState<{
@@ -290,7 +263,7 @@ export function FoodsScreen() {
 
   function addToPantry(name: string) {
     const next = Array.from(
-      new Set([...(onboardingExtras.pantryStaples ?? []), name]),
+      new Set([...(onboardingExtras.pantryStaples ?? DEFAULT_PANTRY), name]),
     );
     actions.setOnboardingExtras({ pantryStaples: next });
   }
@@ -321,7 +294,10 @@ export function FoodsScreen() {
             0,
           )}
           onDone={() => {
-            actions.setOnboardingExtras({ weekGenerated: true });
+            actions.setOnboardingExtras({
+              weekGenerated: true,
+              weekPlanSeed: onboardingExtras.weekPlanSeed ?? 0,
+            });
             trackTesterEvent("week_generated", { mealsPerDay });
           }}
         />
@@ -333,58 +309,51 @@ export function FoodsScreen() {
   return (
     <LockedState feature="nutrition-guide">
       <div className="stagger-up space-y-4 pb-32">
-        <header className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-muted">
-              YOUR FOOD WEEK
-            </p>
-            <h1 className="font-display mt-1 text-[34px] leading-[1.04] text-ink-2">
-              {week.name === "This week" ? (
-                <>
-                  This <span className="text-forest">week.</span>
-                </>
-              ) : (
-                week.name
-              )}
-            </h1>
-            <p className="mt-1 text-xs text-muted">{week.range} · {mealsPerDay} meals/day</p>
-          </div>
-          <div className="flex shrink-0 items-center gap-1.5">
-            <button
-              type="button"
-              data-tap
-              onClick={() => setMealCountOpen(true)}
-              aria-haspopup="dialog"
-              className="tap-bounce inline-flex h-9 items-center gap-1 rounded-full bg-white/70 px-3 text-xs shadow-sm backdrop-blur"
-              aria-label="Change meals per day"
-            >
-              <Utensils size={12} aria-hidden /> {mealsPerDay}/day
-            </button>
-            {week.showShop ? (
-              <Link
-                href="/you/foods/shopping"
-                aria-label="Open shopping list"
-                className="tap-bounce relative grid h-9 w-9 place-items-center rounded-full bg-white/70 shadow-sm backdrop-blur"
-              >
-                <ShoppingBag size={15} aria-hidden />
-                <span className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-clay" />
-              </Link>
-            ) : null}
-          </div>
+        <header>
+          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-muted">
+            YOUR FOOD WEEK
+          </p>
+          <h1 className="font-display mt-1 text-[34px] leading-[1.04] text-ink-2">
+            {week.name === "This week" ? (
+              <>
+                This <span className="text-forest">week.</span>
+              </>
+            ) : (
+              week.name
+            )}
+          </h1>
+          <p className="mt-1 text-xs text-muted">{week.range} · {mealsPerDay} meals/day</p>
         </header>
 
-        <div className="flex items-center justify-between gap-3 rounded-3xl border border-white/85 bg-white/55 px-2 py-2 backdrop-blur-xl">
+        {week.showShop ? (
+          <Link
+            href="/you/foods/shopping"
+            aria-label="Open shopping list"
+            className="tap-bounce flex items-center gap-3 rounded-2xl border border-forest/20 bg-gradient-to-r from-forest/[0.10] to-forest/[0.04] px-3.5 py-3"
+          >
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-forest text-white shadow-sm">
+              <ShoppingBag size={16} aria-hidden />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-sm font-semibold text-ink-2">Shopping list ready</span>
+              <span className="block text-[11px] text-muted">Sorted by aisle · tap to open</span>
+            </span>
+            <ChevronRight size={16} className="shrink-0 text-forest" aria-hidden />
+          </Link>
+        ) : null}
+
+        <div className="flex items-center justify-between gap-2 rounded-3xl border border-white/85 bg-white/55 px-2 py-2 backdrop-blur-xl">
           <button
             type="button"
             data-tap
             onClick={() => step(-1)}
             disabled={weekIndex === 0}
-            className="grid h-9 w-9 place-items-center rounded-full border border-hairline bg-white text-ink disabled:opacity-30"
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-hairline bg-white text-ink disabled:opacity-30"
             aria-label="Previous week"
           >
             <ChevronLeft size={16} aria-hidden />
           </button>
-          <div className="flex flex-1 items-center justify-center gap-2">
+          <div className="flex flex-1 items-center justify-center gap-1.5">
             <span
               className={clsx(
                 "rounded-full px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-[0.14em]",
@@ -396,11 +365,27 @@ export function FoodsScreen() {
             <button
               type="button"
               data-tap
-              onClick={() => setPlanSeed((s) => s + 1)}
-              className="tap-bounce inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-medium text-ink-2 shadow-sm"
-              aria-label="Re-roll the week"
+              onClick={() => setMealCountOpen(true)}
+              aria-haspopup="dialog"
+              className="tap-bounce inline-flex h-7 items-center gap-1 rounded-full bg-white px-2.5 text-[11px] font-medium text-ink-2 shadow-sm"
+              aria-label="Change meals per day"
             >
-              <RefreshCw size={12} aria-hidden /> Re-roll
+              <Utensils size={11} aria-hidden /> {mealsPerDay}/day
+            </button>
+            <button
+              type="button"
+              data-tap
+              onClick={() =>
+                actions.setOnboardingExtras({
+                  weekPlanSeed: planSeed + 1,
+                  shoppingChecked: [],
+                })
+              }
+              className="tap-bounce grid h-7 w-7 place-items-center rounded-full bg-white text-ink-2 shadow-sm"
+              aria-label="Re-roll the week"
+              title="Re-roll the week"
+            >
+              <RefreshCw size={12} aria-hidden />
             </button>
           </div>
           {isLastWeek && canGenerateMore ? (
@@ -429,7 +414,7 @@ export function FoodsScreen() {
 
         {week.days.map((d, i) => {
           const isToday = weekIndex === 0 && i === todayIdx;
-          const dayDate = new Date(weekStart(weekIndex));
+          const dayDate = new Date(weekStartFromToday(weekIndex));
           dayDate.setDate(dayDate.getDate() + i);
           return (
             <ChapterCard
@@ -438,6 +423,8 @@ export function FoodsScreen() {
               dayIdx={i}
               chapterIndex={weekIndex * 7 + i}
               slots={slots}
+              mealsPerDay={mealsPerDay}
+              targets={targets}
               isToday={isToday}
               dateLabel={fmt(dayDate)}
               onMealTap={tapMeal}
@@ -485,10 +472,10 @@ export function FoodsScreen() {
               ingredient{skipped.length === 1 ? "" : "s"} from your plan.
             </p>
             <Link
-              href="/you/settings#foods-to-skip"
+              href="/you/foods/list"
               className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-forest"
             >
-              Edit in You · Settings <ChevronRight size={12} aria-hidden />
+              Open food list <ChevronRight size={12} aria-hidden />
             </Link>
           </div>
         ) : null}
@@ -500,6 +487,9 @@ export function FoodsScreen() {
           slot={openRecipe.slot}
           name={openRecipe.key}
           recipe={openRecipe.recipe}
+          slotIdx={openRecipe.slotIdx}
+          mealsPerDay={mealsPerDay}
+          targets={targets}
           skipped={skipped}
           pantry={onboardingExtras.pantryStaples ?? []}
           onClose={() => setOpenRecipe(null)}
@@ -530,6 +520,7 @@ export function FoodsScreen() {
           currentKey={swapTarget.currentKey}
           banned={banned}
           skipped={skipped}
+          dietaryPreferences={dietaryPreferences}
           onPick={(newKey) => {
             applySwap(swapTarget.dayIdx, swapTarget.slotIdx, newKey);
             setSwapTarget(null);
@@ -576,6 +567,8 @@ function ChapterCard({
   dayIdx,
   chapterIndex,
   slots,
+  mealsPerDay,
+  targets,
   isToday,
   dateLabel,
   onMealTap,
@@ -584,6 +577,8 @@ function ChapterCard({
   dayIdx: number;
   chapterIndex: number;
   slots: string[];
+  mealsPerDay: number;
+  targets: DailyTargets;
   isToday: boolean;
   dateLabel: string;
   onMealTap: (
@@ -595,7 +590,7 @@ function ChapterCard({
   ) => void;
 }) {
   const mood = chapterMoods[chapterIndex % chapterMoods.length];
-  const { kcal, p } = dayKcalProtein(day);
+  const nutrition = dayPlannedNutrition(day, mealsPerDay, targets);
   const minutes = totalDayMinutes(day);
   const title = isToday ? TODAY_HERO_TITLE : mood.title;
   const subtitle = isToday ? TODAY_HERO_SUB : mood.sub;
@@ -742,7 +737,7 @@ function ChapterCard({
           }}
         >
           <span className="numerals">
-            {kcal} kcal · {p}g P
+            ~{nutrition.calories} kcal · {nutrition.proteinG}g P
           </span>
           {(() => {
             const heroIdx = day.meals.length - 1;
@@ -868,6 +863,9 @@ function RecipeSheet({
   slot,
   name,
   recipe,
+  slotIdx,
+  mealsPerDay,
+  targets,
   skipped,
   pantry,
   onClose,
@@ -879,6 +877,9 @@ function RecipeSheet({
   slot: string;
   name: string;
   recipe: Recipe;
+  slotIdx: number;
+  mealsPerDay: number;
+  targets: DailyTargets;
   skipped: string[];
   pantry: string[];
   onClose: () => void;
@@ -888,8 +889,8 @@ function RecipeSheet({
 }) {
   const dragStartY = useRef<number | null>(null);
   const [dragY, setDragY] = useState(0);
-  const skippedSet = new Set(skipped.map((s) => s.toLowerCase()));
   const pantrySet = new Set(pantry.map((p) => p.toLowerCase()));
+  const planned = plannedNutritionForRecipe(recipe, slotIdx, mealsPerDay, targets);
 
   function startDrag(event: PointerEvent<HTMLDivElement>) {
     dragStartY.current = event.clientY;
@@ -944,11 +945,18 @@ function RecipeSheet({
         </div>
 
         <div className="mt-4 grid grid-cols-4 gap-2">
-          <Stat label="Kcal" value={recipe.kcal} />
-          <Stat label="Protein" value={`${recipe.p}g`} />
-          <Stat label="Carbs" value={`${recipe.c}g`} />
-          <Stat label="Fats" value={`${recipe.f}g`} />
+          <Stat label="Kcal" value={planned.calories} />
+          <Stat label="Protein" value={`${planned.proteinG}g`} />
+          <Stat label="Carbs" value={`${planned.carbsG}g`} />
+          <Stat label="Fats" value={`${planned.fatG}g`} />
         </div>
+        <p className="mt-2 rounded-2xl bg-forest/[0.06] px-3 py-2 text-[11px] text-muted">
+          Portion target for your {targets.calories} kcal day. Use about{" "}
+          <span className="font-semibold text-ink-2">
+            {Math.round(planned.portionFactor * 100)}%
+          </span>{" "}
+          of the listed recipe if you want it to fit tightly.
+        </p>
 
         <SectionTitle>Ingredients</SectionTitle>
         <p className="-mt-1 mb-2 text-[11px] text-muted">
@@ -957,7 +965,7 @@ function RecipeSheet({
         <div className="space-y-1.5">
           {recipe.ingredients.map((i) => {
             const lc = i.n.toLowerCase();
-            const isSkipped = skippedSet.has(lc);
+            const isSkipped = ingredientMatchesSkip(i.n, skipped);
             const isPantry = pantrySet.has(lc);
             return (
               <button
@@ -1135,6 +1143,7 @@ function SwapSheet({
   currentKey,
   banned,
   skipped,
+  dietaryPreferences,
   onPick,
   onBan,
   onClose,
@@ -1144,6 +1153,7 @@ function SwapSheet({
   currentKey: string;
   banned: Set<string>;
   skipped: string[];
+  dietaryPreferences: DietaryPref[];
   onPick: (newKey: string) => void;
   onBan: (key: string) => void;
   onClose: () => void;
@@ -1153,7 +1163,7 @@ function SwapSheet({
     if (banned.has(k)) return false;
     const r = recipes[k];
     if (!r) return false;
-    return !recipeHasSkipped(r, skipped);
+    return recipeFitsSlot(k, r, slot) && recipeAllowedForPreferences(k, r, dietaryPreferences, skipped);
   });
 
   return (
@@ -1321,16 +1331,42 @@ function GenerateWeek({
             </>
           ) : (
             <>
-              Ready when <span className="text-forest">you are.</span>
+              Tap below to build your <span className="text-forest">first week.</span>
             </>
           )}
         </h1>
         <p className="mt-2 text-sm text-muted">
           {phase === "running"
             ? "Hang tight. We're tailoring this to you."
-            : `Hi ${name ?? "there"}. Let's spin up a 7-day plan from your foods.`}
+            : `Hi ${name ?? "there"}. Nothing here yet — hit the green button to generate your 7-day plan.`}
         </p>
       </header>
+
+      {/* Primary CTA — surfaced above the fold so first-time users can't miss it */}
+      {phase === "idle" ? (
+        <div className="relative">
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -inset-1 rounded-full bg-forest/30 blur-md animate-pulse"
+          />
+          <button
+            type="button"
+            data-tap
+            onClick={() => {
+              setStepIdx(0);
+              setPhase("running");
+            }}
+            className="cta-glow tap-bounce relative inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-forest text-base font-semibold text-white shadow-elevated"
+          >
+            <Sparkles size={18} aria-hidden />
+            Generate my first week
+            <ArrowRight size={18} aria-hidden />
+          </button>
+          <p className="mt-2 text-center text-[11px] font-medium uppercase tracking-[0.18em] text-forest">
+            ↑ Tap here to start
+          </p>
+        </div>
+      ) : null}
 
       <div className="rounded-3xl border border-white/85 bg-white/55 p-5 shadow-card backdrop-blur-xl">
         <div className="flex items-center gap-3">
@@ -1389,35 +1425,16 @@ function GenerateWeek({
         </ul>
       </div>
 
-      <button
-        type="button"
-        data-tap
-        onClick={() => {
-          if (phase === "idle") {
-            setStepIdx(0);
-            setPhase("running");
-          }
-        }}
-        disabled={phase === "running"}
-        className={clsx(
-          "tap-bounce inline-flex h-12 w-full items-center justify-center gap-2 rounded-full text-sm font-medium shadow-elevated transition",
-          phase === "running"
-            ? "cursor-not-allowed bg-forest/70 text-white"
-            : "cta-glow bg-forest text-white",
-        )}
-      >
-        {phase === "running" ? (
-          <>
-            <Sparkles size={16} className="animate-pulse" aria-hidden />
-            Generating...
-          </>
-        ) : (
-          <>
-            <Sparkles size={16} aria-hidden />
-            Generate my week
-          </>
-        )}
-      </button>
+      {phase === "running" ? (
+        <button
+          type="button"
+          disabled
+          className="tap-bounce inline-flex h-12 w-full cursor-not-allowed items-center justify-center gap-2 rounded-full bg-forest/70 text-sm font-medium text-white shadow-elevated"
+        >
+          <Sparkles size={16} className="animate-pulse" aria-hidden />
+          Generating...
+        </button>
+      ) : null}
     </div>
   );
 }

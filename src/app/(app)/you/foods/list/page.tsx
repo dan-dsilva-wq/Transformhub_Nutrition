@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import { FoodsListScreen } from "@/components/pace/foods-list-screen";
 
 export default function FoodsListPage() {
-  redirect("/you/settings#foods-to-skip");
+  return <FoodsListScreen />;
 }

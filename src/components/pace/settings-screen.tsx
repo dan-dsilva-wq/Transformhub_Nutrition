@@ -31,6 +31,7 @@ export function SettingsScreen() {
 
   const skippedIngredients = onboardingExtras.skippedIngredients ?? [];
   const pantryStaples = onboardingExtras.pantryStaples ?? DEFAULT_PANTRY;
+  const [skipDraft, setSkipDraft] = useState("");
   const [pantryDraft, setPantryDraft] = useState("");
 
   async function runSubscriptionAction(action: () => Promise<boolean>) {
@@ -42,6 +43,21 @@ export function SettingsScreen() {
   function removeSkipped(name: string) {
     const next = skippedIngredients.filter((s) => s !== name);
     actions.setOnboardingExtras({ skippedIngredients: next });
+  }
+
+  function addSkipped() {
+    const name = skipDraft.trim();
+    if (!name) return;
+    if (skippedIngredients.some((s) => s.toLowerCase() === name.toLowerCase())) {
+      setSkipDraft("");
+      return;
+    }
+    actions.setOnboardingExtras({
+      skippedIngredients: [...skippedIngredients, name],
+      weekGenerated: false,
+      weekSwaps: {},
+    });
+    setSkipDraft("");
   }
 
   function removePantry(name: string) {
@@ -233,20 +249,43 @@ export function SettingsScreen() {
 
       <Card>
         <div id="foods-to-skip" />
-        <SectionHeader eyebrow="Food preferences" title="Foods to skip" />
+        <SectionHeader eyebrow="Food safety" title="Allergies & foods to skip" />
         <div className="flex items-start gap-3">
           <IconBadge tone="clay">
             <Ban size={16} aria-hidden />
           </IconBadge>
           <p className="flex-1 text-sm text-muted">
-            Ingredients we&rsquo;ll never put in your weekly plan. Tap any
-            ingredient in a recipe to add it here.
+            Ingredients we&rsquo;ll never put in your weekly plan. Add allergies
+            like peanuts, sesame, shellfish, or gluten here.
           </p>
         </div>
+        <form
+          className="mt-3 flex gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            addSkipped();
+          }}
+        >
+          <input
+            type="text"
+            value={skipDraft}
+            onChange={(e) => setSkipDraft(e.target.value)}
+            placeholder="Add allergy or food — e.g. Peanuts"
+            className="flex-1 rounded-full border border-hairline bg-paper px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-clay"
+          />
+          <button
+            type="submit"
+            data-tap
+            disabled={!skipDraft.trim()}
+            className="tap-bounce inline-flex h-10 items-center gap-1 rounded-full bg-clay px-4 text-sm font-medium text-white disabled:bg-stone-2 disabled:text-faint"
+          >
+            <Plus size={14} aria-hidden /> Add
+          </button>
+        </form>
         <div className="mt-3 flex flex-wrap gap-1.5">
           {skippedIngredients.length === 0 ? (
             <span className="rounded-full bg-paper px-3 py-1.5 text-xs text-faint">
-              Nothing skipped — long-press an ingredient on a recipe to add one.
+              Nothing skipped yet.
             </span>
           ) : (
             skippedIngredients.map((s) => (

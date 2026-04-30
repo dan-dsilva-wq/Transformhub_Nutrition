@@ -15,49 +15,25 @@ import {
 import { clsx } from "clsx";
 import { useAppState } from "@/lib/state/app-state";
 import { LockedState } from "./paywall-sheet";
-import { recipeKeys, recipes } from "./foods/food-data";
-import { recipeHasSkipped } from "./foods/shopping";
+import { recipes } from "./foods/food-data";
+import {
+  mealSlotsFor,
+  pickRecipeKey,
+  recipeAllowedForPreferences,
+  recipeFitsSlot,
+  rotatedDayNames,
+  weekStartFromToday,
+} from "./foods/planning";
 import {
   aisles,
   buildShoppingList,
+  DEFAULT_PANTRY,
   groupByAisle,
   type Aisle,
   type ShoppingItem,
 } from "./foods/shopping";
 
-const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-
-function mealSlotsFor(mealsPerDay: number): string[] {
-  if (mealsPerDay <= 2) return ["Breakfast", "Dinner"];
-  if (mealsPerDay >= 5) return ["Breakfast", "Mid-morning", "Lunch", "Afternoon", "Dinner"];
-  if (mealsPerDay === 4) return ["Breakfast", "Lunch", "Snack", "Dinner"];
-  return ["Breakfast", "Lunch", "Dinner"];
-}
-
-function pickRecipeKey(
-  shift: number,
-  dayIdx: number,
-  slotIdx: number,
-  banned: Set<string>,
-  skipped: string[],
-): string {
-  const candidates = recipeKeys.filter((k) => {
-    if (banned.has(k)) return false;
-    const r = recipes[k];
-    if (!r) return false;
-    return !recipeHasSkipped(r, skipped);
-  });
-  const list = candidates.length > 0 ? candidates : recipeKeys;
-  return list[(dayIdx + shift + slotIdx * 2) % list.length];
-}
-
-function weekStart(offsetWeeks: number): Date {
-  const d = new Date();
-  const day = d.getDay() || 7;
-  d.setDate(d.getDate() - (day - 1) + offsetWeeks * 7);
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
+const dayNames = rotatedDayNames();
 
 function fmt(d: Date): string {
   return new Intl.DateTimeFormat("en-GB", {
@@ -73,28 +49,19 @@ interface WeekOption {
   shift: number;
 }
 
-function buildWeekOptions(): WeekOption[] {
-  const cur = weekStart(0);
-  const curEnd = new Date(cur);
-  curEnd.setDate(curEnd.getDate() + 6);
-  const next = weekStart(1);
-  const nextEnd = new Date(next);
-  nextEnd.setDate(nextEnd.getDate() + 6);
-
-  return [
-    {
-      label: "This week",
-      range: `${fmt(cur)} - ${fmt(curEnd)}`,
-      weekIdx: 1,
-      shift: 1,
-    },
-    {
-      label: "Next week",
-      range: `${fmt(next)} - ${fmt(nextEnd)}`,
-      weekIdx: 2,
-      shift: 3,
-    },
-  ];
+function buildWeekOptions(seed: number, weeksAhead: number): WeekOption[] {
+  const total = 1 + Math.max(0, Math.min(4, weeksAhead));
+  return Array.from({ length: total }, (_, weekIdx) => {
+    const start = weekStartFromToday(weekIdx);
+    const end = new Date(start);
+    end.setDate(end.getDate() + 6);
+    return {
+      label: weekIdx === 0 ? "This week" : weekIdx === 1 ? "Next week" : `In ${weekIdx} weeks`,
+      range: `${fmt(start)} - ${fmt(end)}`,
+      weekIdx,
+      shift: seed + weekIdx * 2,
+    };
+  });
 }
 
 export function FoodsShoppingScreen() {
@@ -109,6 +76,10 @@ export function FoodsShoppingScreen() {
     () => onboardingExtras.skippedIngredients ?? [],
     [onboardingExtras.skippedIngredients],
   );
+  const dietaryPreferences = useMemo(
+    () => onboardingExtras.dietaryPreferences ?? [],
+    [onboardingExtras.dietaryPreferences],
+  );
   const overrides = useMemo(
     () => onboardingExtras.weekSwaps ?? {},
     [onboardingExtras.weekSwaps],
@@ -121,8 +92,13 @@ export function FoodsShoppingScreen() {
     () => onboardingExtras.pantryStaples,
     [onboardingExtras.pantryStaples],
   );
+  const planSeed = onboardingExtras.weekPlanSeed ?? 0;
+  const weeksAhead = onboardingExtras.weeksAhead ?? 0;
 
-  const weekOptions = useMemo(() => buildWeekOptions(), []);
+  const weekOptions = useMemo(
+    () => buildWeekOptions(planSeed, weeksAhead),
+    [planSeed, weeksAhead],
+  );
   const [optionIdx, setOptionIdx] = useState(0);
   const [filterAisle, setFilterAisle] = useState<Aisle | "all">("all");
   const [confirmClear, setConfirmClear] = useState(false);
@@ -130,28 +106,32 @@ export function FoodsShoppingScreen() {
   const opt = weekOptions[optionIdx];
 
   const meals = useMemo(() => {
-    return dayNames.flatMap((_, dayIdx) =>
-      slots.map((slotLabel, slotIdx) => {
+    return dayNames.flatMap((_, dayIdx) => {
+      const usedToday = new Set<string>();
+      return slots.map((slotLabel, slotIdx) => {
         const positionKey = `${opt.weekIdx}|${dayIdx}|${slotIdx}`;
         const overridden = overrides[positionKey];
         const useOverride =
           overridden &&
           !banned.has(overridden) &&
           recipes[overridden] &&
-          !recipeHasSkipped(recipes[overridden], skipped);
+          recipeFitsSlot(overridden, recipes[overridden], slotLabel) &&
+          recipeAllowedForPreferences(overridden, recipes[overridden], dietaryPreferences, skipped);
         const key = useOverride
           ? (overridden as string)
-          : pickRecipeKey(opt.shift, dayIdx, slotIdx, banned, skipped);
+          : pickRecipeKey(opt.shift, dayIdx, slotIdx, banned, skipped, dietaryPreferences, slotLabel, usedToday);
+        usedToday.add(key);
         return { dayIdx, slot: slotLabel, key };
-      }),
-    );
-  }, [opt, slots, banned, skipped, overrides]);
+      });
+    });
+  }, [opt, slots, banned, skipped, dietaryPreferences, overrides]);
 
   const { items, pantryHits } = useMemo(
     () =>
       buildShoppingList(meals, {
         skippedIngredients: skipped,
         pantryStaples,
+        dayLabels: dayNames,
       }),
     [meals, skipped, pantryStaples],
   );
@@ -198,7 +178,7 @@ export function FoodsShoppingScreen() {
   }
 
   function removePantry(name: string) {
-    const next = (onboardingExtras.pantryStaples ?? []).filter((n) => n !== name);
+    const next = (onboardingExtras.pantryStaples ?? DEFAULT_PANTRY).filter((n) => n !== name);
     actions.setOnboardingExtras({ pantryStaples: next });
   }
 
@@ -461,7 +441,7 @@ export function FoodsShoppingScreen() {
         </p>
 
         <Link
-          href="/you/settings#foods-to-skip"
+          href="/you/foods/list"
           className="block rounded-3xl border border-hairline bg-white/60 px-4 py-3 backdrop-blur"
         >
           <div className="flex items-center justify-between gap-3">

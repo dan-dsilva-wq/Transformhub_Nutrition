@@ -42,6 +42,15 @@ export const coachRequestSchema = z.object({
   message: z.string().min(1).max(1000),
   profileSummary: z.string().max(1200).optional(),
   recentSummary: z.string().max(2000).optional(),
+  recentMessages: z
+    .array(
+      z.object({
+        role: z.enum(["user", "assistant"]),
+        content: z.string().min(1).max(1000),
+      }),
+    )
+    .max(5)
+    .optional(),
 });
 
 export const coachDraftMealSchema = z.object({
@@ -76,6 +85,13 @@ export const recipeIdeasRequestSchema = z.object({
         "pescatarian",
         "no-dairy",
         "no-gluten",
+        "no-peanuts",
+        "no-tree-nuts",
+        "no-fish",
+        "no-shellfish",
+        "no-soy",
+        "no-eggs",
+        "no-sesame",
         "halal",
         "kosher",
       ]),
@@ -121,6 +137,13 @@ export const nutritionPlanRequestSchema = z.object({
         "pescatarian",
         "no-dairy",
         "no-gluten",
+        "no-peanuts",
+        "no-tree-nuts",
+        "no-fish",
+        "no-shellfish",
+        "no-soy",
+        "no-eggs",
+        "no-sesame",
         "halal",
         "kosher",
       ]),

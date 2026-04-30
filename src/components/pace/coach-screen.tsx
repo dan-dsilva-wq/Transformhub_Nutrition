@@ -15,6 +15,8 @@ import { useEntitlement } from "@/lib/entitlement";
 import { PaywallSheet } from "./paywall-sheet";
 import { trackTesterEvent } from "@/lib/tester/track";
 
+const COACH_MEMORY_LIMIT = 5;
+
 export function CoachScreen() {
   const {
     profile,
@@ -71,11 +73,16 @@ export function CoachScreen() {
     setError(null);
     actions.bumpUsage("coach");
 
+    const recentMessages = chat.slice(-COACH_MEMORY_LIMIT).map((entry) => ({
+      role: entry.role,
+      content: entry.content,
+    }));
+
     try {
       const res = await fetch("/api/ai/coach", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ message, profileSummary, recentSummary }),
+        body: JSON.stringify({ message, profileSummary, recentSummary, recentMessages }),
       });
       if (res.ok) {
         const json = await res.json();
@@ -233,7 +240,7 @@ function Bubble({
             onDiscard={onHideDraft}
           />
         ) : null}
-        {actions && actions.length > 0 ? (
+        {actions && actions.length > 0 && !draftMeal ? (
           <ul className="mt-2 flex flex-wrap gap-1.5">
             {actions.map((a, i) => (
               <li
@@ -284,7 +291,7 @@ function DraftMealCard({
   };
 
   return (
-    <div className="mt-3 rounded-2xl border border-white/70 bg-white/75 p-3">
+    <div className="mt-3 rounded-2xl border border-forest/25 bg-white/90 p-3 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           {editing ? (
@@ -341,32 +348,40 @@ function DraftMealCard({
         </div>
       ) : null}
 
-      <div className="mt-3 flex flex-wrap gap-2">
+      {!added ? (
+        <p className="mt-3 rounded-xl bg-sage/45 px-3 py-2 text-xs font-medium text-forest">
+          Tap Add to today to log this estimate now. You can edit it first if needed.
+        </p>
+      ) : null}
+
+      <div className="mt-3 grid gap-2">
         <button
           type="button"
           data-tap
           onClick={() => onAdd?.(parsed)}
           disabled={added}
-          className="rounded-full bg-forest px-3 py-1.5 text-xs font-medium text-white disabled:bg-stone-2 disabled:text-faint"
+          className="w-full rounded-2xl bg-forest px-4 py-3 text-sm font-semibold text-white shadow-sm disabled:bg-stone-2 disabled:text-faint"
         >
           {added ? "Added" : "Add to today"}
         </button>
-        <button
-          type="button"
-          data-tap
-          onClick={() => setEditing((prev) => !prev)}
-          className="rounded-full border border-white/70 bg-white/80 px-3 py-1.5 text-xs font-medium text-ink-2"
-        >
-          {editing ? "Done editing" : "Edit first"}
-        </button>
-        <button
-          type="button"
-          data-tap
-          onClick={onDiscard}
-          className="rounded-full px-3 py-1.5 text-xs font-medium text-muted"
-        >
-          Discard
-        </button>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            data-tap
+            onClick={() => setEditing((prev) => !prev)}
+            className="rounded-full border border-white/70 bg-white/80 px-3 py-2 text-xs font-medium text-ink-2"
+          >
+            {editing ? "Done editing" : "Edit first"}
+          </button>
+          <button
+            type="button"
+            data-tap
+            onClick={onDiscard}
+            className="rounded-full px-3 py-2 text-xs font-medium text-muted"
+          >
+            Discard
+          </button>
+        </div>
       </div>
     </div>
   );

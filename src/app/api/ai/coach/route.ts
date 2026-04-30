@@ -16,6 +16,17 @@ function errorResponse(message: string, status: number) {
   return NextResponse.json({ error: message }, { status });
 }
 
+function formatRecentMessages(
+  messages: Array<{ role: "user" | "assistant"; content: string }> | undefined,
+) {
+  if (!messages?.length) return "No recent conversation.";
+
+  return messages
+    .slice(-5)
+    .map((message) => `${message.role === "user" ? "User" : "Coach"}: ${message.content}`)
+    .join("\n");
+}
+
 export async function POST(request: Request) {
   const authError = await requireSignedInUser();
   if (authError) return authError;
@@ -49,6 +60,9 @@ ${parsed.data.profileSummary || "No profile summary provided."}
 Recent progress:
 ${parsed.data.recentSummary || "No recent summary provided."}
 
+Recent conversation, oldest to newest:
+${formatRecentMessages(parsed.data.recentMessages)}
+
 User message:
 ${parsed.data.message}
 `,
@@ -64,7 +78,7 @@ ${parsed.data.message}
     const coachWithoutDraft = {
       reply: coach.reply,
       tone: coach.tone,
-      suggestedActions: coach.suggestedActions,
+      suggestedActions: draftMeal ? [] : coach.suggestedActions,
       checkInQuestion: coach.checkInQuestion,
       riskFlag: coach.riskFlag,
     };

@@ -99,6 +99,7 @@ describe("AI schemas", () => {
       suggestedActions: ["**Log food**"],
       checkInQuestion: "What next?",
       riskFlag: "none",
+      draftMeal: null,
     });
     expect(sanitized.reply).not.toContain("**");
     expect(sanitized.reply).not.toContain("\u2014");

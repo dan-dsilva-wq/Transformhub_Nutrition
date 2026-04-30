@@ -43,6 +43,7 @@ export function guardrailCoachResponse(message: string): CoachResponse | null {
     suggestedActions: ["Log a meal", "Review today's target"],
     checkInQuestion: "What did you eat or what are you aiming for today?",
     riskFlag: "none",
+    draftMeal: null,
   };
 }
 

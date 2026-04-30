@@ -61,9 +61,16 @@ ${parsed.data.message}
       coachResponseSchema.parse(JSON.parse(response.output_text)),
     );
     const draftMeal = coach.draftMeal ?? inferDraftMealFromMessage(parsed.data.message) ?? undefined;
+    const coachWithoutDraft = {
+      reply: coach.reply,
+      tone: coach.tone,
+      suggestedActions: coach.suggestedActions,
+      checkInQuestion: coach.checkInQuestion,
+      riskFlag: coach.riskFlag,
+    };
 
     return NextResponse.json({
-      coach: draftMeal ? { ...coach, draftMeal } : coach,
+      coach: draftMeal ? { ...coachWithoutDraft, draftMeal } : coachWithoutDraft,
       model: openAiModel,
     });
   } catch (error) {

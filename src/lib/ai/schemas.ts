@@ -46,7 +46,7 @@ export const coachRequestSchema = z.object({
 
 export const coachDraftMealSchema = z.object({
   name: z.string().min(1).max(100),
-  portion: z.string().min(1).max(80).optional(),
+  portion: z.string().min(1).max(80).nullable(),
   calories: z.number().nonnegative(),
   proteinG: z.number().nonnegative(),
   carbsG: z.number().nonnegative(),
@@ -60,8 +60,8 @@ export const coachResponseSchema = z.object({
   tone: z.enum(["firm_supportive", "gentle_supportive"]),
   suggestedActions: z.array(z.string()).max(4),
   checkInQuestion: z.string().min(1),
-  riskFlag: z.enum(["none", "medical", "disordered_eating", "injury"]).default("none"),
-  draftMeal: coachDraftMealSchema.optional(),
+  riskFlag: z.enum(["none", "medical", "disordered_eating", "injury"]),
+  draftMeal: coachDraftMealSchema.nullable(),
 });
 
 export const recipeIdeasRequestSchema = z.object({

@@ -85,7 +85,7 @@ export function CoachScreen() {
           role: "assistant",
           content: coach.reply,
           actions: coach.suggestedActions,
-          draftMeal: coach.draftMeal,
+          draftMeal: coach.draftMeal ?? undefined,
         });
       } else if (res.status === 503) {
         actions.appendChat({

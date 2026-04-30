@@ -5,7 +5,10 @@ import { useRouter } from "next/navigation";
 import {
   Camera,
   Check,
+  ChevronDown,
+  ChevronUp,
   Image as ImageIcon,
+  Loader2,
   Search,
   ScanBarcode,
   Trash2,
@@ -331,14 +334,23 @@ function PhotoFlow({ onTypeFood }: { onTypeFood: () => void }) {
       {!estimate ? (
         <Card className="!p-4">
           <div className="flex items-center gap-3">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={preview} alt="" className="h-16 w-16 rounded-2xl object-cover" />
+            <div className="relative h-16 w-16 shrink-0">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={preview} alt="" className="h-16 w-16 rounded-2xl object-cover" />
+              {busy ? (
+                <div className="absolute inset-0 grid place-items-center rounded-2xl bg-black/35">
+                  <Loader2 size={22} className="animate-spin text-white" aria-hidden />
+                </div>
+              ) : null}
+            </div>
             <div className="min-w-0 flex-1">
               <h2 className="font-display text-xl text-ink-2">
-                {busy ? "Analysing your photo" : "Photo ready"}
+                {busy ? "Estimating your meal…" : "Photo ready"}
               </h2>
               <p className="mt-1 text-sm text-muted">
-                {busy ? "Building the meal estimate now." : "Review the result once it appears."}
+                {busy
+                  ? "This usually takes 5–10 seconds. Hang tight."
+                  : "Review the result once it appears."}
               </p>
               {error ? <p className="mt-1 text-sm text-clay">{error}</p> : null}
             </div>
@@ -384,6 +396,8 @@ function EstimateEditor({
   onSave: () => void;
   onDiscard: () => void;
 }) {
+  const [detailsOpen, setDetailsOpen] = useState(false);
+
   function updateItem(idx: number, patch: Partial<MealEstimate["items"][number]>) {
     const items = estimate.items.map((it, i) => (i === idx ? { ...it, ...patch } : it));
     onChange({ ...estimate, items, totals: sumItems(items) });
@@ -445,84 +459,33 @@ function EstimateEditor({
     onChange({ ...estimate, items, totals: sumItems(items), confidence: Math.min(estimate.confidence, 0.6) });
   }
 
+  const headline = buildHeadline(estimate);
+
   return (
     <Card>
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
           <div className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted">
             {source === "demo"
               ? "Demo estimate"
-              : `Review before saving, confidence ${getMealConfidenceLabel(estimate.confidence)}`}
+              : `Confidence ${getMealConfidenceLabel(estimate.confidence)}`}
           </div>
-          <h3 className="font-display text-xl text-ink-2">{estimate.summary}</h3>
+          <h3 className="font-display text-xl text-ink-2">{headline}</h3>
         </div>
         <button
           type="button"
           data-tap
           onClick={onDiscard}
           aria-label="Discard"
-          className="grid h-9 w-9 place-items-center rounded-full text-muted hover:bg-white/60"
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted hover:bg-white/60"
         >
           <X size={16} />
         </button>
       </div>
 
-      <ul className="mt-4 space-y-2">
-        {estimate.items.map((item, idx) => (
-          <li key={idx} className="rounded-2xl border border-white/70 bg-white/60 p-3 backdrop-blur-xl">
-            <div className="flex items-center justify-between gap-2">
-              <input
-                value={item.name}
-                onChange={(e) => updateItem(idx, { name: e.target.value })}
-                className="min-w-0 flex-1 bg-transparent text-sm font-medium text-ink-2 outline-none"
-              />
-              <span className="rounded-full bg-cream px-2 py-1 text-[10px] font-medium text-forest">
-                {getMealConfidenceLabel(item.confidence)}
-              </span>
-              <span className="numerals text-base text-ink-2">
-                <input
-                  type="number"
-                  value={item.calories}
-                  onChange={(e) => updateItemCalories(idx, Number(e.target.value) || 0)}
-                  className="w-16 bg-transparent text-right outline-none"
-                />
-              </span>
-              <span className="text-xs text-muted">kcal</span>
-            </div>
-            <input
-              value={item.portion}
-              onChange={(e) => updateItem(idx, { portion: e.target.value })}
-              aria-label={`Serving size for ${item.name}`}
-              className="mt-1 w-full bg-transparent text-xs text-muted outline-none"
-            />
-            <div className="mt-2 grid grid-cols-4 gap-2 text-xs text-muted">
-              <MacroEdit label="P" value={item.proteinG} onChange={(v) => updateItem(idx, { proteinG: v })} />
-              <MacroEdit label="C" value={item.carbsG} onChange={(v) => updateItem(idx, { carbsG: v })} />
-              <MacroEdit label="F" value={item.fatG} onChange={(v) => updateItem(idx, { fatG: v })} />
-              <MacroEdit label="Fb" value={item.fiberG} onChange={(v) => updateItem(idx, { fiberG: v })} />
-            </div>
-            {isMilkItem(item.name) ? (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {milkVariants.map((variant) => (
-                  <button
-                    key={variant.label}
-                    type="button"
-                    data-tap
-                    onClick={() => applyMilkVariant(idx, variant)}
-                    className="rounded-full border border-white/70 bg-white/70 px-3 py-1.5 text-xs font-medium text-ink hover:bg-white"
-                  >
-                    {variant.label}
-                  </button>
-                ))}
-              </div>
-            ) : null}
-          </li>
-        ))}
-      </ul>
-
-      <div className="mt-4 rounded-2xl border border-white/70 bg-white/60 p-4 backdrop-blur-xl">
-        <div className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted">Total</div>
-        <div className="mt-1 flex items-baseline justify-between gap-3">
+      {/* Headline totals */}
+      <div className="mt-3 rounded-2xl border border-white/70 bg-white/60 p-4 backdrop-blur-xl">
+        <div className="flex items-baseline justify-between gap-3">
           <label className="flex items-baseline gap-2">
             <input
               type="number"
@@ -538,30 +501,138 @@ function EstimateEditor({
             {Math.round(estimate.totals.proteinG)}g P · {Math.round(estimate.totals.carbsG)}g C · {Math.round(estimate.totals.fatG)}g F
           </span>
         </div>
-        <p className="mt-1 text-xs text-muted">Edit calories and the macros scale to match.</p>
-        <div className="mt-3 grid grid-cols-4 gap-3">
-          <TotalBar letter="P" value={estimate.totals.proteinG} colorVar="--color-forest" />
-          <TotalBar letter="C" value={estimate.totals.carbsG} colorVar="--color-sky" />
-          <TotalBar letter="F" value={estimate.totals.fatG} colorVar="--color-clay" />
-          <TotalBar letter="Fb" value={estimate.totals.fiberG} colorVar="--color-sage" />
-        </div>
       </div>
 
-      <p className="mt-3 text-xs text-muted">{estimate.safetyNote}</p>
+      {/* Compact item list */}
+      <ul className="mt-3 space-y-1.5">
+        {estimate.items.map((item, idx) => (
+          <li
+            key={idx}
+            className="flex items-center justify-between gap-3 rounded-xl border border-white/60 bg-white/45 px-3 py-2 text-sm"
+          >
+            <span className="min-w-0 truncate text-ink-2">
+              <span className="font-medium">{item.name}</span>
+              <span className="text-muted"> · {item.portion}</span>
+            </span>
+            <span className="numerals shrink-0 text-ink-2">
+              {Math.round(item.calories)}
+              <span className="text-xs text-muted"> kcal</span>
+            </span>
+          </li>
+        ))}
+      </ul>
 
-      <div className="mt-4 grid grid-cols-[auto_auto_1fr] gap-2">
-        <Button variant="secondary" onClick={addMissingItem} size="lg">
-          Add missing
-        </Button>
-        <Button variant="ghost" onClick={onDiscard} size="lg">
-          Discard
-        </Button>
+      <button
+        type="button"
+        data-tap
+        onClick={() => setDetailsOpen((v) => !v)}
+        className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-forest underline-offset-4 hover:underline"
+        aria-expanded={detailsOpen}
+      >
+        {detailsOpen ? <ChevronUp size={14} aria-hidden /> : <ChevronDown size={14} aria-hidden />}
+        {detailsOpen ? "Hide details" : "Edit items & macros"}
+      </button>
+
+      {detailsOpen ? (
+        <div className="mt-3 space-y-3">
+          <p className="text-xs text-muted">Edit calories and the macros scale to match.</p>
+          <ul className="space-y-2">
+            {estimate.items.map((item, idx) => (
+              <li key={idx} className="rounded-2xl border border-white/70 bg-white/60 p-3 backdrop-blur-xl">
+                <div className="flex items-center justify-between gap-2">
+                  <input
+                    value={item.name}
+                    onChange={(e) => updateItem(idx, { name: e.target.value })}
+                    className="min-w-0 flex-1 bg-transparent text-sm font-medium text-ink-2 outline-none"
+                  />
+                  <span className="rounded-full bg-cream px-2 py-1 text-[10px] font-medium text-forest">
+                    {getMealConfidenceLabel(item.confidence)}
+                  </span>
+                  <span className="numerals text-base text-ink-2">
+                    <input
+                      type="number"
+                      value={item.calories}
+                      onChange={(e) => updateItemCalories(idx, Number(e.target.value) || 0)}
+                      className="w-16 bg-transparent text-right outline-none"
+                    />
+                  </span>
+                  <span className="text-xs text-muted">kcal</span>
+                </div>
+                <input
+                  value={item.portion}
+                  onChange={(e) => updateItem(idx, { portion: e.target.value })}
+                  aria-label={`Serving size for ${item.name}`}
+                  className="mt-1 w-full bg-transparent text-xs text-muted outline-none"
+                />
+                <div className="mt-2 grid grid-cols-4 gap-2 text-xs text-muted">
+                  <MacroEdit label="P" value={item.proteinG} onChange={(v) => updateItem(idx, { proteinG: v })} />
+                  <MacroEdit label="C" value={item.carbsG} onChange={(v) => updateItem(idx, { carbsG: v })} />
+                  <MacroEdit label="F" value={item.fatG} onChange={(v) => updateItem(idx, { fatG: v })} />
+                  <MacroEdit label="Fb" value={item.fiberG} onChange={(v) => updateItem(idx, { fiberG: v })} />
+                </div>
+                {isMilkItem(item.name) ? (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {milkVariants.map((variant) => (
+                      <button
+                        key={variant.label}
+                        type="button"
+                        data-tap
+                        onClick={() => applyMilkVariant(idx, variant)}
+                        className="rounded-full border border-white/70 bg-white/70 px-3 py-1.5 text-xs font-medium text-ink hover:bg-white"
+                      >
+                        {variant.label}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+
+          <div className="grid grid-cols-4 gap-3">
+            <TotalBar letter="P" value={estimate.totals.proteinG} colorVar="--color-forest" />
+            <TotalBar letter="C" value={estimate.totals.carbsG} colorVar="--color-sky" />
+            <TotalBar letter="F" value={estimate.totals.fatG} colorVar="--color-clay" />
+            <TotalBar letter="Fb" value={estimate.totals.fiberG} colorVar="--color-sage" />
+          </div>
+
+          <p className="text-xs text-muted">{estimate.safetyNote}</p>
+        </div>
+      ) : null}
+
+      <div className="mt-4 space-y-2">
         <Button onClick={onSave} size="lg" fullWidth>
           <Check size={18} /> Save to today
         </Button>
+        <div className="grid grid-cols-2 gap-2">
+          <Button variant="secondary" onClick={addMissingItem}>
+            Add missing
+          </Button>
+          <Button variant="ghost" onClick={onDiscard}>
+            Discard
+          </Button>
+        </div>
       </div>
     </Card>
   );
+}
+
+function buildHeadline(estimate: MealEstimate): string {
+  const summary = estimate.summary?.trim() ?? "";
+  // If the model returned a concise list, use it.
+  if (summary && summary.length <= 60 && !/\b(estimated|portion|looks|visible|plate)\b/i.test(summary)) {
+    return summary;
+  }
+  // Otherwise build one from the items.
+  const parts = estimate.items
+    .slice(0, 4)
+    .map((it) => {
+      const qty = it.portion?.match(/^\s*(\d+(?:\.\d+)?)\s*(\S+.*)?$/);
+      if (qty) return `${qty[1]} ${it.name.toLowerCase()}`;
+      return it.name;
+    });
+  if (parts.length === 0) return "Meal";
+  return parts.join(", ");
 }
 
 function MacroEdit({

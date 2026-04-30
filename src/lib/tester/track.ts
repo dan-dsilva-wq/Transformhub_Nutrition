@@ -8,6 +8,7 @@ type TesterEventType =
   | "week_generated"
   | "meal_swapped"
   | "meal_banned"
+  | "ingredient_skipped"
   | "coach_message_sent"
   | "review_submitted";
 

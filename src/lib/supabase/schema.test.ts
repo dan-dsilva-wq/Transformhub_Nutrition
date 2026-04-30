@@ -6,6 +6,10 @@ const migration = readFileSync(
   join(process.cwd(), "supabase", "migrations", "001_initial_schema.sql"),
   "utf8",
 );
+const billingMigration = readFileSync(
+  join(process.cwd(), "supabase", "migrations", "006_billing_entitlements.sql"),
+  "utf8",
+);
 
 describe("Supabase migration", () => {
   it("enables RLS on every user-owned table", () => {
@@ -35,5 +39,15 @@ describe("Supabase migration", () => {
     expect(migration).toContain("('meal-photos', 'meal-photos', false");
     expect(migration).toContain("('progress-photos', 'progress-photos', false");
     expect(migration).toContain("auth.uid()::text = (storage.foldername(name))[1]");
+  });
+
+  it("keeps billing records server-owned and user-readable", () => {
+    expect(billingMigration).toContain(
+      "alter table public.billing_subscriptions enable row level security;",
+    );
+    expect(billingMigration).toContain(
+      "alter table public.billing_events enable row level security;",
+    );
+    expect(billingMigration).toContain("auth.uid() = user_id");
   });
 });

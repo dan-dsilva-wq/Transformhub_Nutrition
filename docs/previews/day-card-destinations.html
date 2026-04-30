@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cook now / Open day — destination previews</title>
+<style>
+  :root {
+    --paper: #f6f3ec;
+    --ink-2: #18241f;
+    --muted: #6c7a73;
+    --faint: #9aa6a0;
+    --forest: #1f5f4a;
+    --clay: #c2613f;
+    --hairline: rgba(24,36,31,.08);
+    --stone-2: #e6e1d6;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    background: #ddd6c8;
+    color: var(--ink-2);
+    padding: 32px 16px 80px;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; }
+  h1 {
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: 28px;
+    margin: 0 0 6px;
+  }
+  p.lead { margin: 0 0 24px; color: #4d5a54; font-size: 14px; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 28px;
+  }
+
+  .label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #4d5a54;
+    margin: 0 0 10px;
+  }
+  .desc {
+    font-size: 12px;
+    color: #4d5a54;
+    margin: 0 0 12px;
+    line-height: 1.4;
+  }
+
+  /* phone frame */
+  .phone {
+    background: var(--paper);
+    border-radius: 36px;
+    padding: 18px 14px 22px;
+    box-shadow: 0 12px 40px rgba(0,0,0,.12);
+    max-width: 420px;
+    margin: 0 auto;
+  }
+  .phone .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--forest);
+    cursor: pointer;
+    font-weight: 500;
+  }
+
+  /* generic */
+  .eyebrow {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .h-display {
+    font-family: "Playfair Display", Georgia, serif;
+    margin: 4px 0 6px;
+  }
+  .pill {
+    display: inline-block;
+    background: rgba(0,0,0,.06);
+    border-radius: 999px;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ink-2);
+  }
+  .pill.forest { background: rgba(31,95,74,.12); color: var(--forest); }
+  .pill.clay { background: rgba(194,97,63,.14); color: var(--clay); }
+
+  /* === COOK NOW recipe screen === */
+  .hero {
+    border-radius: 24px;
+    overflow: hidden;
+    background: linear-gradient(160deg,#18241f,#2a4a3c);
+    color: white;
+    padding: 22px 20px 24px;
+    box-shadow: 0 8px 28px rgba(24,36,31,.18);
+  }
+  .hero .eyebrow { color: rgba(255,255,255,.6); }
+  .hero h2 { font-family: "Playfair Display", Georgia, serif; font-size: 30px; margin: 6px 0 6px; }
+  .hero .sub { font-size: 13px; color: rgba(255,255,255,.78); margin: 0 0 16px; }
+  .hero .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    background: rgba(255,255,255,.08);
+    padding: 12px;
+    border-radius: 16px;
+  }
+  .hero .stats .stat .v {
+    font-size: 18px;
+    font-weight: 600;
+    font-feature-settings: "tnum";
+  }
+  .hero .stats .stat .l {
+    font-size: 10px;
+    color: rgba(255,255,255,.7);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    margin-top: 2px;
+  }
+
+  .card {
+    background: white;
+    border-radius: 20px;
+    padding: 16px;
+    margin-top: 14px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 20px rgba(0,0,0,.04);
+  }
+  .card h3 {
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: 18px;
+    margin: 4px 0 10px;
+  }
+  .ingredients li,
+  .steps li {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--hairline);
+    font-size: 14px;
+  }
+  .ingredients li:last-child,
+  .steps li:last-child { border-bottom: 0; }
+  .ingredients li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .ingredients .qty { color: var(--muted); font-size: 12px; }
+
+  ol.steps { padding-left: 18px; margin: 0; }
+  ol.steps li { padding-left: 6px; }
+  ol.steps li::marker { color: var(--forest); font-weight: 600; }
+
+  .cta-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .btn {
+    border: 0;
+    border-radius: 999px;
+    padding: 12px 16px;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .btn.primary { background: var(--forest); color: white; }
+  .btn.secondary { background: white; color: var(--ink-2); border: 1px solid var(--hairline); }
+
+  /* === OPEN DAY · day detail === */
+  .day-head {
+    border-radius: 24px;
+    background: linear-gradient(160deg,#dff5e8,#cfe9ff);
+    padding: 20px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.06);
+  }
+  .day-head h2 {
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: 28px;
+    margin: 6px 0 4px;
+  }
+  .day-head .sub { font-size: 13px; color: rgba(44,58,51,.7); margin: 0 0 14px; }
+  .day-head .totals {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .meal-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    background: white;
+    border-radius: 18px;
+    margin-top: 10px;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0,0,0,.03);
+  }
+  .meal-row:hover { background: #fafaf6; }
+  .meal-row .ico {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: rgba(31,95,74,.08);
+    display: grid;
+    place-items: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .meal-row .body { flex: 1; min-width: 0; }
+  .meal-row .slot {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .meal-row .name {
+    font-size: 15px;
+    font-weight: 500;
+    margin-top: 2px;
+  }
+  .meal-row .meta {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 3px;
+    font-feature-settings: "tnum";
+  }
+  .meal-row .arrow { color: var(--faint); font-size: 18px; }
+
+  .section-head {
+    margin: 18px 0 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  /* === sheet variant === */
+  .sheet-frame {
+    background: rgba(0,0,0,.35);
+    backdrop-filter: blur(2px);
+    border-radius: 36px;
+    padding: 16px 0 0;
+    overflow: hidden;
+  }
+  .sheet {
+    background: var(--paper);
+    border-radius: 28px 28px 0 0;
+    padding: 8px 16px 22px;
+    margin-top: 90px;
+  }
+  .sheet .grabber {
+    width: 40px;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--stone-2);
+    margin: 0 auto 10px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Where should "Cook now" / "Open day" land?</h1>
+  <p class="lead">You picked option C (pill button). Now decide what the pill <b>does</b>. Three destinations below — pick one for "Cook now" (today's hero) and one for "Open day" (other days).</p>
+
+  <div class="grid">
+
+    <!-- ===================== DEST 1 · COOK NOW = recipe screen ===================== -->
+    <div>
+      <p class="label">Cook now → 1 · Recipe screen (full route)</p>
+      <p class="desc">Tapping "Cook now" navigates to the hero meal's recipe screen. Full ingredients, steps, big "Mark as cooked / Log it" CTA. Best for the today card — this is the moment of truth.</p>
+      <div class="phone">
+        <div class="topbar">
+          <span class="back">‹ Today</span>
+          <span>·</span>
+          <span style="opacity:.6">Recipe</span>
+        </div>
+        <div class="hero">
+          <p class="eyebrow">Wed · Dinner · the hero</p>
+          <h2>Salmon & greens</h2>
+          <p class="sub">Pan-seared salmon, charred broccolini, lemon-tahini drizzle.</p>
+          <div class="stats">
+            <div class="stat"><div class="v">540</div><div class="l">kcal</div></div>
+            <div class="stat"><div class="v">42g</div><div class="l">protein</div></div>
+            <div class="stat"><div class="v">18 min</div><div class="l">total</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Ingredients · serves 1</h3>
+          <ul class="ingredients" style="list-style:none; padding:0; margin:0">
+            <li><span>Salmon fillet</span><span class="qty">160 g</span></li>
+            <li><span>Broccolini</span><span class="qty">1 bunch</span></li>
+            <li><span>Tahini</span><span class="qty">1 tbsp</span></li>
+            <li><span>Lemon</span><span class="qty">½</span></li>
+            <li><span>Olive oil</span><span class="qty">1 tsp</span></li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Steps</h3>
+          <ol class="steps">
+            <li>Heat pan medium-high. Salt the salmon, skin-side down 4 min.</li>
+            <li>Flip 2 min. Rest off heat.</li>
+            <li>Char broccolini in same pan, 3 min, splash of water.</li>
+            <li>Whisk tahini + lemon + 2 tsp water. Drizzle, plate, eat.</li>
+          </ol>
+        </div>
+        <div class="cta-row">
+          <button class="btn secondary">Swap meal</button>
+          <button class="btn primary">Mark as cooked ✓</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== DEST 2 · OPEN DAY = day detail ===================== -->
+    <div>
+      <p class="label">Open day → 2 · Day detail screen</p>
+      <p class="desc">Tapping "Open day" on a non-today card opens that day's full breakdown. All meals as tappable rows, totals, swap actions. Best for planning ahead.</p>
+      <div class="phone">
+        <div class="topbar">
+          <span class="back">‹ Week</span>
+          <span style="opacity:.6">Thursday</span>
+        </div>
+        <div class="day-head">
+          <p class="eyebrow">Chapter 2 · Thursday</p>
+          <h2>Quick fixes</h2>
+          <p class="sub">Light prep, more time outside. 22 min total cook time.</p>
+          <div class="totals">
+            <span class="pill forest">1780 kcal</span>
+            <span class="pill">128g protein</span>
+            <span class="pill">4 meals</span>
+          </div>
+        </div>
+
+        <div class="section-head">
+          <p class="eyebrow">Meals</p>
+          <span class="pill" style="background:rgba(31,95,74,.1);color:var(--forest)">Swap any</span>
+        </div>
+
+        <div class="meal-row">
+          <div class="ico">🥚</div>
+          <div class="body">
+            <div class="slot">Breakfast</div>
+            <div class="name">Eggs on sourdough</div>
+            <div class="meta">420 kcal · 28g P · 6 min</div>
+          </div>
+          <span class="arrow">›</span>
+        </div>
+        <div class="meal-row">
+          <div class="ico">🥪</div>
+          <div class="body">
+            <div class="slot">Lunch</div>
+            <div class="name">Chicken & avocado wrap</div>
+            <div class="meta">540 kcal · 38g P · 4 min</div>
+          </div>
+          <span class="arrow">›</span>
+        </div>
+        <div class="meal-row">
+          <div class="ico">🍎</div>
+          <div class="body">
+            <div class="slot">Snack</div>
+            <div class="name">Apple & peanut butter</div>
+            <div class="meta">220 kcal · 8g P · 0 min</div>
+          </div>
+          <span class="arrow">›</span>
+        </div>
+        <div class="meal-row">
+          <div class="ico">🍝</div>
+          <div class="body">
+            <div class="slot">Dinner</div>
+            <div class="name">Lemon-garlic pasta</div>
+            <div class="meta">600 kcal · 54g P · 12 min</div>
+          </div>
+          <span class="arrow">›</span>
+        </div>
+
+        <div class="cta-row" style="margin-top:14px">
+          <button class="btn secondary">Shopping list</button>
+          <button class="btn primary">Cook the hero →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== DEST 3 · OPEN DAY = bottom sheet ===================== -->
+    <div>
+      <p class="label">Open day → 3 · Bottom sheet (no nav)</p>
+      <p class="desc">Same info as #2 but as a sheet that slides up over the week view — no route change, easy to dismiss. Best if you want users to stay in the week flow.</p>
+      <div class="phone sheet-frame">
+        <div class="sheet">
+          <div class="grabber"></div>
+          <div class="day-head" style="margin-top:4px; box-shadow:none">
+            <p class="eyebrow">Thursday · Chapter 2</p>
+            <h2>Quick fixes</h2>
+            <p class="sub">Light prep, more time outside.</p>
+            <div class="totals">
+              <span class="pill forest">1780 kcal</span>
+              <span class="pill">128g P</span>
+              <span class="pill">22 min</span>
+            </div>
+          </div>
+
+          <div class="meal-row">
+            <div class="ico">🥚</div>
+            <div class="body">
+              <div class="slot">Breakfast</div>
+              <div class="name">Eggs on sourdough</div>
+              <div class="meta">420 kcal · 28g P</div>
+            </div>
+            <span class="arrow">›</span>
+          </div>
+          <div class="meal-row">
+            <div class="ico">🥪</div>
+            <div class="body">
+              <div class="slot">Lunch</div>
+              <div class="name">Chicken & avocado wrap</div>
+              <div class="meta">540 kcal · 38g P</div>
+            </div>
+            <span class="arrow">›</span>
+          </div>
+          <div class="meal-row">
+            <div class="ico">🍝</div>
+            <div class="body">
+              <div class="slot">Dinner</div>
+              <div class="name">Lemon-garlic pasta</div>
+              <div class="meta">600 kcal · 54g P</div>
+            </div>
+            <span class="arrow">›</span>
+          </div>
+
+          <div class="cta-row" style="margin-top:14px">
+            <button class="btn secondary">Close</button>
+            <button class="btn primary">Open hero recipe</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <h2 style="margin-top:32px; font-family:'Playfair Display',Georgia,serif">Pick the combo</h2>
+  <p class="lead">
+    Reply with your choice for each:
+    <br><b>Cook now</b> → 1 (recipe screen) is almost certainly the right call — it's the action.
+    <br><b>Open day</b> → 2 (full screen) or 3 (sheet)?
+  </p>
+</div>
+</body>
+</html>

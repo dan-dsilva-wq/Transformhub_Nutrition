@@ -81,10 +81,19 @@ export function useEntitlement(feature: Feature): Verdict {
   const { subscription, onboardingExtras } = useAppState();
 
   if (subscription.status === "active") {
+    if (
+      subscription.currentPeriodEndsAtIso &&
+      (trialDaysLeft(subscription.currentPeriodEndsAtIso) ?? 0) <= 0
+    ) {
+      return { allowed: false, reason: "trial-expired" };
+    }
     return { allowed: true, via: "active" };
   }
 
   if (subscription.status === "trial") {
+    if ((trialDaysLeft(subscription.trialEndsAtIso) ?? 0) <= 0) {
+      return { allowed: false, reason: "trial-expired" };
+    }
     return { allowed: true, via: "trial" };
   }
 

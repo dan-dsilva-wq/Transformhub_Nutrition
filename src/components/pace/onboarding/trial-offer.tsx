@@ -1,6 +1,8 @@
 "use client";
 
 import { ArrowRight, Check, Sparkles } from "lucide-react";
+import { useState } from "react";
+import { BILLING_ENABLED } from "@/lib/billing/config";
 import { useAppState } from "@/lib/state/app-state";
 import { Button } from "../primitives";
 
@@ -15,11 +17,14 @@ const perks = [
 
 export function TrialOffer({ onNext }: { onNext: () => void }) {
   const { onboardingExtras, actions } = useAppState();
+  const [busy, setBusy] = useState(false);
   const name = onboardingExtras.name;
 
-  function startTrial() {
-    actions.startTrial();
-    onNext();
+  async function startTrial() {
+    setBusy(true);
+    const ok = await actions.startTrial();
+    setBusy(false);
+    if (ok || !BILLING_ENABLED) onNext();
   }
 
   return (
@@ -55,7 +60,7 @@ export function TrialOffer({ onNext }: { onNext: () => void }) {
       </ul>
 
       <div className="mt-auto flex flex-col items-center gap-3 pt-8">
-        <Button onClick={startTrial} size="lg" fullWidth>
+        <Button onClick={startTrial} size="lg" fullWidth loading={busy}>
           Start free trial <ArrowRight size={18} />
         </Button>
         <button

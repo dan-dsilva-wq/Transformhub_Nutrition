@@ -1,7 +1,8 @@
 "use client";
 
 import { Sparkles, Lock, Check } from "lucide-react";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+import { BILLING_ENABLED } from "@/lib/billing/config";
 import { useAppState } from "@/lib/state/app-state";
 import {
   featureCopy,
@@ -29,22 +30,26 @@ export function PaywallSheet({
   onClose: () => void;
   feature: Feature;
 }) {
-  const { subscription, actions } = useAppState();
+  const { subscription, notice, actions } = useAppState();
+  const [busy, setBusy] = useState(false);
   const copy = featureCopy[feature];
   const isExpired =
     subscription.status === "expired" ||
     (subscription.status === "trial" &&
       (trialDaysLeft(subscription.trialEndsAtIso) ?? 0) === 0);
 
-  function startTrial() {
-    actions.startTrial();
-    onClose();
+  async function startTrial() {
+    setBusy(true);
+    const ok = await actions.startTrial();
+    setBusy(false);
+    if (ok) onClose();
   }
 
-  function resubscribe() {
-    // Mocked: extend trial 7 days as a test affordance until real billing lands.
-    actions.startTrial();
-    onClose();
+  async function restore() {
+    setBusy(true);
+    const ok = await actions.restoreSubscription();
+    setBusy(false);
+    if (ok) onClose();
   }
 
   return (
@@ -73,18 +78,24 @@ export function PaywallSheet({
 
         <div className="space-y-2">
           {isExpired ? (
-            <Button onClick={resubscribe} size="lg" fullWidth>
-              Resubscribe
+            <Button onClick={startTrial} size="lg" fullWidth loading={busy}>
+              {BILLING_ENABLED ? "Subscribe" : "Resubscribe"}
             </Button>
           ) : subscription.status === "none" ? (
-            <Button onClick={startTrial} size="lg" fullWidth>
-              Start free 7-day trial
+            <Button onClick={startTrial} size="lg" fullWidth loading={busy}>
+              {BILLING_ENABLED ? "Start free trial" : "Start free 7-day trial"}
             </Button>
           ) : (
             <Button onClick={onClose} size="lg" fullWidth>
               Keep going
             </Button>
           )}
+          {BILLING_ENABLED ? (
+            <Button variant="secondary" onClick={restore} fullWidth loading={busy}>
+              Restore purchases
+            </Button>
+          ) : null}
+          {notice ? <p className="text-center text-xs text-muted">{notice}</p> : null}
           <button
             type="button"
             onClick={onClose}
@@ -124,6 +135,13 @@ function LockedCard({
   expired: boolean;
 }) {
   const { actions } = useAppState();
+  const [busy, setBusy] = useState(false);
+
+  async function startTrial() {
+    setBusy(true);
+    await actions.startTrial();
+    setBusy(false);
+  }
 
   return (
     <div className="stagger-up space-y-5">
@@ -139,9 +157,16 @@ function LockedCard({
         <Button
           size="lg"
           className="mt-5"
-          onClick={() => actions.startTrial()}
+          onClick={startTrial}
+          loading={busy}
         >
-          {expired ? "Resubscribe" : "Start free 7-day trial"}
+          {expired
+            ? BILLING_ENABLED
+              ? "Subscribe"
+              : "Resubscribe"
+            : BILLING_ENABLED
+              ? "Start free trial"
+              : "Start free 7-day trial"}
         </Button>
       </div>
 

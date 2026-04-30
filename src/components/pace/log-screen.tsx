@@ -26,7 +26,6 @@ import {
   Input,
   SectionHeader,
   Skeleton,
-  Textarea,
 } from "./primitives";
 import { clsx } from "clsx";
 import { BrowserMultiFormatReader, type IScannerControls } from "@zxing/browser";
@@ -164,8 +163,8 @@ export function LogScreen() {
 
 function PhotoFlow({ onTypeFood }: { onTypeFood: () => void }) {
   const fileRef = useRef<HTMLInputElement | null>(null);
+  const estimateRunRef = useRef(0);
   const [preview, setPreview] = useState<string | null>(null);
-  const [note, setNote] = useState("");
   const [estimate, setEstimate] = useState<MealEstimate | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -182,6 +181,8 @@ function PhotoFlow({ onTypeFood }: { onTypeFood: () => void }) {
     setEstimate(null);
     setError(null);
     setSource(null);
+    e.target.value = "";
+    void runEstimate(dataUrl);
   }
 
   async function openCapture(kind: "camera" | "library") {
@@ -200,6 +201,7 @@ function PhotoFlow({ onTypeFood }: { onTypeFood: () => void }) {
       setEstimate(null);
       setError(null);
       setSource(null);
+      void runEstimate(dataUrl);
       return;
     }
 
@@ -222,6 +224,8 @@ function PhotoFlow({ onTypeFood }: { onTypeFood: () => void }) {
       setPaywallOpen(true);
       return;
     }
+    const runId = estimateRunRef.current + 1;
+    estimateRunRef.current = runId;
     setBusy(true);
     setError(null);
     try {
@@ -229,28 +233,31 @@ function PhotoFlow({ onTypeFood }: { onTypeFood: () => void }) {
       const res = await fetch("/api/ai/meal-estimate", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ imageDataUrl, note: note.trim() || undefined }),
+        body: JSON.stringify({ imageDataUrl }),
       });
+      if (runId !== estimateRunRef.current) return;
       if (res.ok) {
         const json = await res.json();
+        if (runId !== estimateRunRef.current) return;
         setEstimate(json.estimate as MealEstimate);
         setSource("ai");
       } else if (res.status === 503) {
         // No OPENAI_API_KEY → demo fallback so the flow stays usable
-        setEstimate(demoEstimate(note));
+        setEstimate(demoEstimate());
         setSource("demo");
       } else {
         const json = await res.json().catch(() => ({}));
         setError(json.error ?? "Estimate failed.");
-        setEstimate(demoEstimate(note));
+        setEstimate(demoEstimate());
         setSource("demo");
       }
     } catch {
+      if (runId !== estimateRunRef.current) return;
       setError("Network unavailable. Showing a demo estimate.");
-      setEstimate(demoEstimate(note));
+      setEstimate(demoEstimate());
       setSource("demo");
     } finally {
-      setBusy(false);
+      if (runId === estimateRunRef.current) setBusy(false);
     }
   }
 
@@ -259,14 +266,13 @@ function PhotoFlow({ onTypeFood }: { onTypeFood: () => void }) {
     actions.addMealFromEstimate(estimate, { imageUrl: preview ?? undefined });
     setPreview(null);
     setEstimate(null);
-    setNote("");
     setSource(null);
   }
 
   function discard() {
+    estimateRunRef.current += 1;
     setPreview(null);
     setEstimate(null);
-    setNote("");
     setError(null);
     setSource(null);
     setBusy(false);
@@ -322,42 +328,32 @@ function PhotoFlow({ onTypeFood }: { onTypeFood: () => void }) {
 
   return (
     <div className="space-y-4">
-      <Card className="!p-3">
-        <div className="relative overflow-hidden rounded-2xl">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={preview} alt="" className="block h-64 w-full object-cover" />
-          <button
-            type="button"
-            data-tap
-            onClick={discard}
-            aria-label="Discard"
-            className="absolute right-2 top-2 grid h-9 w-9 place-items-center rounded-full bg-black/50 text-white"
-          >
-            <X size={16} />
-          </button>
-        </div>
-      </Card>
-
-      <Card>
-          <Field label="Photo notes" hint="Add drinks, sauces, or anything the image misses.">
-            <Textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="Example: diet coke, half a slice, extra sauce"
-            />
-          </Field>
-          <div className="mt-4 flex gap-2">
-            <Button variant="secondary" onClick={onTypeFood}>
-              Type food instead
-            </Button>
-            <Button size="lg" fullWidth onClick={() => runEstimate()} loading={busy}>
-              {busy ? "Estimating macros" : note.trim() ? "Analyse with notes" : "Analyse photo"}
-            </Button>
+      {!estimate ? (
+        <Card className="!p-4">
+          <div className="flex items-center gap-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={preview} alt="" className="h-16 w-16 rounded-2xl object-cover" />
+            <div className="min-w-0 flex-1">
+              <h2 className="font-display text-xl text-ink-2">
+                {busy ? "Analysing your photo" : "Photo ready"}
+              </h2>
+              <p className="mt-1 text-sm text-muted">
+                {busy ? "Building the meal estimate now." : "Review the result once it appears."}
+              </p>
+              {error ? <p className="mt-1 text-sm text-clay">{error}</p> : null}
+            </div>
+            <button
+              type="button"
+              data-tap
+              onClick={discard}
+              aria-label="Discard"
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted hover:bg-white/60"
+            >
+              <X size={16} />
+            </button>
           </div>
-          {error ? <p className="mt-2 text-sm text-clay">{error}</p> : null}
         </Card>
-
-      {estimate ? (
+      ) : (
         <EstimateEditor
           estimate={estimate}
           source={source}
@@ -365,7 +361,7 @@ function PhotoFlow({ onTypeFood }: { onTypeFood: () => void }) {
           onSave={save}
           onDiscard={discard}
         />
-      ) : null}
+      )}
       <PaywallSheet
         open={paywallOpen}
         onClose={() => setPaywallOpen(false)}
@@ -524,10 +520,6 @@ function EstimateEditor({
         ))}
       </ul>
 
-      <Button variant="secondary" size="sm" className="mt-3" onClick={addMissingItem}>
-        Add missing item
-      </Button>
-
       <div className="mt-4 rounded-2xl border border-white/70 bg-white/60 p-4 backdrop-blur-xl">
         <div className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted">Total</div>
         <div className="mt-1 flex items-baseline justify-between gap-3">
@@ -557,7 +549,10 @@ function EstimateEditor({
 
       <p className="mt-3 text-xs text-muted">{estimate.safetyNote}</p>
 
-      <div className="mt-4 flex gap-3">
+      <div className="mt-4 grid grid-cols-[auto_auto_1fr] gap-2">
+        <Button variant="secondary" onClick={addMissingItem} size="lg">
+          Add missing
+        </Button>
         <Button variant="ghost" onClick={onDiscard} size="lg">
           Discard
         </Button>
@@ -1276,9 +1271,9 @@ function fileToDataUrl(file: File) {
   });
 }
 
-function demoEstimate(note: string): MealEstimate {
+function demoEstimate(): MealEstimate {
   return {
-    summary: note.trim() || "Chicken rice bowl with vegetables",
+    summary: "Chicken rice bowl with vegetables",
     items: [
       { name: "Chicken breast", portion: "1 palm", calories: 230, proteinG: 42, carbsG: 0, fatG: 5, fiberG: 0, confidence: 0.7 },
       { name: "Rice", portion: "1 cupped hand", calories: 210, proteinG: 4, carbsG: 45, fatG: 1, fiberG: 1, confidence: 0.7 },

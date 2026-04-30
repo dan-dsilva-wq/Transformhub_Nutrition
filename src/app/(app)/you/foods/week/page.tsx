@@ -1,5 +1,5 @@
-import { FoodsWeekScreen } from "@/components/pace/foods-week-screen";
+import { redirect } from "next/navigation";
 
 export default function FoodsWeekPage() {
-  return <FoodsWeekScreen />;
+  redirect("/you/foods");
 }

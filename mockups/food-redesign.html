@@ -1,0 +1,744 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Pace — food page redesign options</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --forest: #1f5f4a;
+    --forest-2: #2a7a5e;
+    --cream: #f6f1e7;
+    --paper: #fbf7ee;
+    --ink-2: #18241f;
+    --ink: #2c3a33;
+    --muted: #6c7a73;
+    --faint: #9aa69e;
+    --hairline: #e6dfcf;
+    --sage: #8aa896;
+    --amber: #c98a3a;
+    --clay: #b86a4a;
+    --mint: #a7f3d0;
+    --sky: #bae6fd;
+    --peach: #fde1c4;
+    --rose: #f6c8c0;
+  }
+  body { background: #efe8d6; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; color: var(--ink); }
+  .font-display { font-family: "Fraunces", "Georgia", serif; font-weight: 600; letter-spacing: -0.01em; }
+  .text-forest { color: var(--forest); }
+  .bg-forest { background: var(--forest); }
+  .text-ink-2 { color: var(--ink-2); }
+  .text-ink { color: var(--ink); }
+  .text-muted { color: var(--muted); }
+  .text-faint { color: var(--faint); }
+  .bg-paper { background: var(--paper); }
+  .bg-cream { background: var(--cream); }
+  .border-hairline { border-color: var(--hairline); }
+  .shadow-card { box-shadow: 0 8px 28px -16px rgba(24,36,31,.18), 0 2px 6px -2px rgba(24,36,31,.06); }
+  .shadow-elevated { box-shadow: 0 24px 50px -22px rgba(24,36,31,.32), 0 6px 12px -4px rgba(24,36,31,.10); }
+  .glass { background: rgba(255,255,255,.55); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,.7); }
+  .glass-strong { background: rgba(255,255,255,.78); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,.75); }
+  .phone {
+    width: 380px; min-height: 820px; border-radius: 44px; padding: 10px;
+    background: linear-gradient(180deg,#222 0%,#111 100%);
+    box-shadow: 0 50px 80px -30px rgba(0,0,0,.35);
+  }
+  .screen { background: var(--cream); border-radius: 36px; min-height: 800px; overflow: hidden; position:relative; }
+  .notch { position:absolute; top:8px; left:50%; transform:translateX(-50%); width:120px; height:28px; border-radius:18px; background:#0d0d0d; z-index: 10; }
+  .scroll { height: 800px; overflow-y: auto; padding: 44px 16px 100px; }
+  .scroll::-webkit-scrollbar { display:none; }
+  .chip { display:inline-flex; align-items:center; gap:6px; padding: 5px 10px; border-radius: 999px; font-size: 11px; font-weight: 500; }
+  .ring-forest { box-shadow: 0 0 0 2px var(--forest) inset; }
+  .grid-7 { display:grid; grid-template-columns: repeat(7, minmax(0,1fr)); gap: 6px; }
+  .day-pill { aspect-ratio: 1/1.4; border-radius: 14px; padding: 6px; display:flex; flex-direction:column; justify-content:space-between; }
+  .meal-row { display:grid; grid-template-columns: 36px 1fr auto; gap: 10px; align-items:center; }
+  .badge { font-size: 10px; padding: 2px 6px; border-radius: 999px; background: rgba(31,95,74,.1); color: var(--forest); font-weight: 600; }
+  .ingredient { display:inline-flex; align-items:center; gap:4px; padding: 3px 8px; border-radius: 999px; background: rgba(255,255,255,.7); border: 1px solid var(--hairline); font-size: 11px; }
+  .ingredient.dim { opacity: .35; text-decoration: line-through; }
+  .tab { padding: 10px 0; font-size: 12px; text-align:center; border-radius: 12px; }
+  .label { font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .row { display:flex; align-items:center; justify-content:space-between; }
+  .check { width: 18px; height: 18px; border-radius: 6px; border: 1.5px solid var(--hairline); display:inline-grid; place-items:center; }
+  .check.on { background: var(--forest); border-color: var(--forest); color: white; }
+  .stripe { background: repeating-linear-gradient(45deg, rgba(31,95,74,.06) 0 6px, transparent 6px 12px); }
+  h1.display { font-family: "Fraunces", serif; font-weight: 600; letter-spacing: -0.02em; line-height: 1.04; }
+  .pill-tab { padding: 8px 14px; border-radius: 999px; font-size: 12px; font-weight: 500; }
+  .pill-tab.active { background: var(--forest); color: white; }
+  .pill-tab.idle { background: rgba(255,255,255,.6); color: var(--ink); }
+  .dot { width: 6px; height: 6px; border-radius: 999px; display:inline-block; }
+  .progress { height: 4px; background: rgba(31,95,74,.12); border-radius:999px; overflow:hidden; }
+  .progress > span { display:block; height:100%; background: var(--forest); border-radius:999px; }
+  .picker { width: 64px; height: 64px; border-radius: 50%; display:grid; place-items:center; font-family:"Fraunces", serif; font-size: 22px; }
+  .pop { position:relative; }
+  .pop::after { content:""; position:absolute; right:8px; top:8px; width:6px; height:6px; border-radius:999px; background: var(--clay); }
+  .lvl { display:inline-block; width:14px; height:3px; border-radius:999px; background: rgba(0,0,0,.12); margin-right:2px; }
+  .lvl.on { background: var(--forest); }
+</style>
+</head>
+<body class="py-10">
+
+<div class="max-w-[1320px] mx-auto px-6">
+  <header class="mb-8">
+    <p class="text-[11px] tracking-[.22em] uppercase text-muted">Pace · food page redesign</p>
+    <h1 class="font-display text-4xl text-ink-2 mt-2">Three directions for the food page</h1>
+    <p class="mt-2 text-sm text-muted max-w-[700px]">"Your foods" leaves the page entirely. Diet preference is set in onboarding; ingredient dislikes are flagged inline from a recipe or week view via "Don't suggest", then editable from <span class="font-medium text-ink">You → Settings → Foods to skip</span>. The food page becomes a single act: <em>generate the week</em>. Each day is the hero.</p>
+  </header>
+
+  <div class="grid grid-cols-3 gap-10">
+
+    <!-- ============ OPTION A: Hero day, week as ribbon ============ -->
+    <section>
+      <h2 class="font-display text-2xl text-ink-2">Option A — Today is the hero</h2>
+      <p class="text-sm text-muted mt-1 mb-4">A big "today's plate" card up top. The other six days live as a horizontal ribbon. Shopping list is a sticky pill that pops up from the bottom. Day detail = recipes + steps in-line.</p>
+      <div class="phone mx-auto">
+        <div class="screen">
+          <div class="notch"></div>
+          <div class="scroll">
+            <div class="row">
+              <div>
+                <p class="label">Wed · week 2</p>
+                <h1 class="display text-[34px] text-ink-2 mt-1">Your week.</h1>
+              </div>
+              <button class="glass-strong shadow-card rounded-full px-3 py-2 text-xs font-medium text-ink-2">↻ Re-roll</button>
+            </div>
+
+            <!-- target strip -->
+            <div class="glass rounded-3xl p-3 mt-3 row text-xs">
+              <div><span class="font-display text-lg text-ink-2">2,180</span> <span class="text-muted">kcal</span></div>
+              <div><span class="font-display text-lg text-ink-2">156g</span> <span class="text-muted">protein</span></div>
+              <div><span class="font-display text-lg text-ink-2">3</span> <span class="text-muted">meals</span></div>
+            </div>
+
+            <!-- hero today card -->
+            <div class="mt-4 rounded-3xl shadow-card overflow-hidden" style="background: linear-gradient(160deg,#dff5e8,#cfe9ff);">
+              <div class="p-4">
+                <div class="row">
+                  <span class="chip" style="background:rgba(255,255,255,.7); color:var(--forest)">● Today</span>
+                  <span class="text-xs text-muted">Apr 30</span>
+                </div>
+                <h3 class="font-display text-2xl text-ink-2 mt-2">Wednesday</h3>
+                <p class="text-xs text-muted">2,210 kcal · 162g protein · 3 meals on the plate</p>
+
+                <div class="mt-3 space-y-2">
+                  <div class="rounded-2xl bg-white/70 p-3">
+                    <div class="row">
+                      <div class="meal-row">
+                        <div class="picker" style="background:#fde1c4">🥣</div>
+                        <div>
+                          <p class="text-[10px] tracking-[.18em] uppercase text-muted">Breakfast · 8:00</p>
+                          <p class="font-display text-base text-ink-2">Greek yogurt, oats, berries</p>
+                        </div>
+                      </div>
+                      <span class="badge">38g P</span>
+                    </div>
+                  </div>
+                  <div class="rounded-2xl bg-white/70 p-3">
+                    <div class="row">
+                      <div class="meal-row">
+                        <div class="picker" style="background:#bae6fd">🥗</div>
+                        <div>
+                          <p class="text-[10px] tracking-[.18em] uppercase text-muted">Lunch · 13:00</p>
+                          <p class="font-display text-base text-ink-2">Chicken & quinoa bowl</p>
+                        </div>
+                      </div>
+                      <span class="badge">52g P</span>
+                    </div>
+                  </div>
+                  <div class="rounded-2xl bg-white/70 p-3">
+                    <div class="row">
+                      <div class="meal-row">
+                        <div class="picker" style="background:#a7f3d0">🍲</div>
+                        <div>
+                          <p class="text-[10px] tracking-[.18em] uppercase text-muted">Dinner · 19:30</p>
+                          <p class="font-display text-base text-ink-2">Salmon, lemon, greens</p>
+                        </div>
+                      </div>
+                      <span class="badge">62g P</span>
+                    </div>
+                  </div>
+                </div>
+
+                <button class="mt-3 w-full rounded-full bg-forest text-white text-sm font-medium py-2.5 shadow-elevated">Open today’s recipes →</button>
+              </div>
+            </div>
+
+            <!-- week ribbon -->
+            <div class="mt-5">
+              <div class="row">
+                <p class="label">The rest of the week</p>
+                <a class="text-xs text-forest font-medium">All 7 →</a>
+              </div>
+              <div class="grid-7 mt-2">
+                <div class="day-pill" style="background:rgba(255,255,255,.5)"><div class="text-[10px] text-muted">M</div><div class="font-display text-sm text-ink-2">28</div></div>
+                <div class="day-pill" style="background:rgba(255,255,255,.5)"><div class="text-[10px] text-muted">T</div><div class="font-display text-sm text-ink-2">29</div></div>
+                <div class="day-pill ring-forest" style="background:white"><div class="text-[10px] text-forest font-semibold">W</div><div class="font-display text-sm text-ink-2">30</div></div>
+                <div class="day-pill" style="background:rgba(255,255,255,.7)"><div class="text-[10px] text-muted">T</div><div class="font-display text-sm text-ink-2">1</div></div>
+                <div class="day-pill" style="background:rgba(255,255,255,.7)"><div class="text-[10px] text-muted">F</div><div class="font-display text-sm text-ink-2">2</div></div>
+                <div class="day-pill" style="background:rgba(255,255,255,.7)"><div class="text-[10px] text-muted">S</div><div class="font-display text-sm text-ink-2">3</div></div>
+                <div class="day-pill" style="background:rgba(255,255,255,.7)"><div class="text-[10px] text-muted">S</div><div class="font-display text-sm text-ink-2">4</div></div>
+              </div>
+            </div>
+
+            <!-- variety / skip card -->
+            <div class="mt-5 rounded-3xl glass-strong shadow-card p-4">
+              <p class="label">Variety this week</p>
+              <div class="mt-2 flex flex-wrap gap-1.5">
+                <span class="ingredient">🐟 Salmon ×2</span>
+                <span class="ingredient">🍗 Chicken ×3</span>
+                <span class="ingredient">🥚 Eggs ×4</span>
+                <span class="ingredient">🥬 Greens ×6</span>
+                <span class="ingredient dim">🍄 Mushrooms <span class="text-clay">skipped</span></span>
+              </div>
+              <p class="mt-3 text-xs text-muted">Tap any ingredient → <span class="text-ink font-medium">Don’t suggest</span>. Manage in <span class="text-forest font-medium">You → Foods to skip</span>.</p>
+            </div>
+
+            <!-- shopping list pill -->
+            <div class="mt-4 rounded-3xl bg-ink-2 text-white p-4 shadow-elevated" style="background:#18241f">
+              <div class="row">
+                <div>
+                  <p class="text-[10px] tracking-[.22em] uppercase text-white/60">Shopping list</p>
+                  <p class="font-display text-lg mt-0.5">42 items · 6 aisles</p>
+                </div>
+                <button class="rounded-full bg-white text-ink-2 text-xs font-medium px-3 py-2">Open →</button>
+              </div>
+              <div class="mt-2 flex gap-1">
+                <span class="dot" style="background:#a7f3d0"></span>
+                <span class="dot" style="background:#bae6fd"></span>
+                <span class="dot" style="background:#fde1c4"></span>
+                <span class="dot" style="background:#f6c8c0"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ============ OPTION B: Vertical day cards (calendar feel) ============ -->
+    <section>
+      <h2 class="font-display text-2xl text-ink-2">Option B — Day cards, scrollable week</h2>
+      <p class="text-sm text-muted mt-1 mb-4">Every day is a full card; today is highlighted and expanded by default. Macros, recipes, prep time, and a per-day shopping micro-list all live inside the card. Feels like opening a really nice planner.</p>
+      <div class="phone mx-auto">
+        <div class="screen">
+          <div class="notch"></div>
+          <div class="scroll">
+            <div class="row">
+              <div>
+                <p class="label">Apr 28 → May 4</p>
+                <h1 class="display text-[34px] text-ink-2 mt-1">This week.</h1>
+              </div>
+              <div class="flex gap-1">
+                <button class="glass rounded-full w-9 h-9 grid place-items-center text-ink">‹</button>
+                <button class="glass rounded-full w-9 h-9 grid place-items-center text-ink">›</button>
+              </div>
+            </div>
+
+            <!-- segmented week selector -->
+            <div class="mt-3 flex gap-1 glass rounded-full p-1">
+              <button class="pill-tab idle flex-1">Last</button>
+              <button class="pill-tab active flex-1">This week</button>
+              <button class="pill-tab idle flex-1">Next</button>
+            </div>
+
+            <!-- shopping shortcut -->
+            <div class="mt-3 row glass-strong rounded-2xl px-3 py-2.5 shadow-card">
+              <div class="flex items-center gap-2">
+                <div class="picker" style="width:32px;height:32px;background:#fde1c4;font-size:14px">🛒</div>
+                <div>
+                  <p class="text-xs font-medium text-ink-2">Shopping list ready</p>
+                  <p class="text-[10px] text-muted">42 items · tap to review</p>
+                </div>
+              </div>
+              <span class="text-forest text-lg">›</span>
+            </div>
+
+            <!-- TODAY card expanded -->
+            <div class="mt-4 rounded-3xl shadow-card p-4" style="background:linear-gradient(160deg,#fff,#eaf6ef); border:1.5px solid var(--forest)">
+              <div class="row">
+                <div>
+                  <p class="text-[10px] tracking-[.22em] uppercase text-forest font-semibold">Today · Wed</p>
+                  <p class="font-display text-2xl text-ink-2 mt-0.5">A bright, light day</p>
+                </div>
+                <div class="text-right">
+                  <p class="font-display text-lg text-ink-2">2,210</p>
+                  <p class="text-[10px] text-muted">kcal · 162g P</p>
+                </div>
+              </div>
+
+              <div class="mt-3 progress"><span style="width:38%"></span></div>
+              <p class="text-[10px] text-muted mt-1">Breakfast logged · 2 meals to go</p>
+
+              <div class="mt-3 space-y-2">
+                <div class="row rounded-2xl bg-white/80 p-2.5">
+                  <div class="meal-row">
+                    <div class="picker" style="width:40px;height:40px;background:#fde1c4;font-size:18px">🥣</div>
+                    <div>
+                      <p class="font-medium text-sm text-ink-2">Greek yogurt + oats</p>
+                      <p class="text-[10px] text-muted">8 min · 38g P · 420 kcal</p>
+                    </div>
+                  </div>
+                  <span class="check on">✓</span>
+                </div>
+                <div class="row rounded-2xl bg-white/80 p-2.5">
+                  <div class="meal-row">
+                    <div class="picker" style="width:40px;height:40px;background:#bae6fd;font-size:18px">🥗</div>
+                    <div>
+                      <p class="font-medium text-sm text-ink-2">Chicken quinoa bowl</p>
+                      <p class="text-[10px] text-muted">15 min · 52g P · 690 kcal</p>
+                    </div>
+                  </div>
+                  <span class="check"></span>
+                </div>
+                <div class="row rounded-2xl bg-white/80 p-2.5">
+                  <div class="meal-row">
+                    <div class="picker" style="width:40px;height:40px;background:#a7f3d0;font-size:18px">🍲</div>
+                    <div>
+                      <p class="font-medium text-sm text-ink-2">Salmon + lemon greens</p>
+                      <p class="text-[10px] text-muted">22 min · 62g P · 1,100 kcal</p>
+                    </div>
+                  </div>
+                  <span class="check"></span>
+                </div>
+              </div>
+
+              <p class="label mt-3">Today’s ingredients</p>
+              <div class="mt-1 flex flex-wrap gap-1">
+                <span class="ingredient">salmon</span>
+                <span class="ingredient">quinoa</span>
+                <span class="ingredient">chicken</span>
+                <span class="ingredient">spinach</span>
+                <span class="ingredient">lemon</span>
+                <span class="ingredient">oats</span>
+                <span class="ingredient">yogurt</span>
+                <span class="ingredient">berries</span>
+              </div>
+              <p class="text-[10px] text-muted mt-2">Long-press an ingredient to mark <span class="text-ink font-medium">Don’t suggest</span>.</p>
+            </div>
+
+            <!-- collapsed day -->
+            <div class="mt-3 rounded-3xl bg-white/70 shadow-card p-3.5">
+              <div class="row">
+                <div class="flex items-center gap-3">
+                  <div class="picker" style="width:44px;height:44px;background:#bae6fd;font-size:18px">T</div>
+                  <div>
+                    <p class="font-display text-base text-ink-2">Thursday</p>
+                    <p class="text-[10px] text-muted">Eggs · turkey wrap · stir-fry</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <p class="text-xs text-ink-2 font-semibold">2,180</p>
+                  <p class="text-[10px] text-muted">155g P</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-3 rounded-3xl bg-white/70 shadow-card p-3.5">
+              <div class="row">
+                <div class="flex items-center gap-3">
+                  <div class="picker" style="width:44px;height:44px;background:#a7f3d0;font-size:18px">F</div>
+                  <div>
+                    <p class="font-display text-base text-ink-2">Friday</p>
+                    <p class="text-[10px] text-muted">Smoothie · tuna · pasta</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <p class="text-xs text-ink-2 font-semibold">2,200</p>
+                  <p class="text-[10px] text-muted">160g P</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-3 rounded-3xl bg-white/70 shadow-card p-3.5">
+              <div class="row">
+                <div class="flex items-center gap-3">
+                  <div class="picker" style="width:44px;height:44px;background:#fde1c4;font-size:18px">S</div>
+                  <div>
+                    <p class="font-display text-base text-ink-2">Saturday</p>
+                    <p class="text-[10px] text-muted">Pancakes · poke bowl · roast</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <p class="text-xs text-ink-2 font-semibold">2,250</p>
+                  <p class="text-[10px] text-muted">158g P</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ============ OPTION C: Editorial / magazine ============ -->
+    <section>
+      <h2 class="font-display text-2xl text-ink-2">Option C — Editorial week</h2>
+      <p class="text-sm text-muted mt-1 mb-4">Each day reads like a chapter in a cookbook: theme, mood, key ingredient, prep cost. The week generates with character. Shopping list is grouped by aisle and previewed inline. Designed to feel curated, not algorithmic.</p>
+      <div class="phone mx-auto">
+        <div class="screen">
+          <div class="notch"></div>
+          <div class="scroll" style="background:linear-gradient(180deg,#f6f1e7,#efe8d6)">
+            <p class="label">Week 18 · curated for Dan</p>
+            <h1 class="display text-[36px] text-ink-2 mt-1">A lighter week,<br/><span class="text-forest">built for spring.</span></h1>
+            <p class="text-xs text-muted mt-2">2,200 kcal · 160g protein · 3 meals/day · pescatarian, no mushrooms</p>
+
+            <div class="mt-3 flex gap-2 items-center">
+              <button class="rounded-full bg-forest text-white text-xs font-medium px-4 py-2 shadow-elevated">↻ Re-roll the week</button>
+              <button class="rounded-full glass-strong text-xs font-medium text-ink-2 px-4 py-2 shadow-card">Lock favorites</button>
+              <button class="ml-auto rounded-full glass-strong shadow-card w-10 h-10 grid place-items-center text-ink-2 pop" aria-label="Shopping list">🛍️</button>
+            </div>
+
+            <!-- chapter day 1 -->
+            <article class="mt-5 rounded-3xl overflow-hidden shadow-card" style="background:linear-gradient(160deg,#a7f3d0,#dff5e8)">
+              <div class="p-4">
+                <div class="row">
+                  <p class="label">Chapter 1 · Mon</p>
+                  <span class="chip" style="background:rgba(0,0,0,.06); color:var(--ink-2)">easy · 35 min total</span>
+                </div>
+                <h3 class="font-display text-2xl text-ink-2 mt-1">Reset Monday</h3>
+                <p class="text-xs text-ink/70 mt-1">Bright greens, lean protein, no fuss. A clean start.</p>
+                <div class="mt-3 grid grid-cols-3 gap-2 text-center">
+                  <div class="rounded-xl bg-white/60 p-2"><p class="text-[18px]">🥚</p><p class="text-[10px] text-muted mt-0.5">Eggs & toast</p></div>
+                  <div class="rounded-xl bg-white/60 p-2"><p class="text-[18px]">🥗</p><p class="text-[10px] text-muted mt-0.5">Tuna salad</p></div>
+                  <div class="rounded-xl bg-white/60 p-2"><p class="text-[18px]">🍝</p><p class="text-[10px] text-muted mt-0.5">Lemon pasta</p></div>
+                </div>
+                <div class="mt-3 row text-[11px] text-ink/80">
+                  <span>2,180 kcal · 155g P</span>
+                  <a class="font-medium text-forest">Open day →</a>
+                </div>
+              </div>
+            </article>
+
+            <!-- chapter day 2 - TODAY -->
+            <article class="mt-3 rounded-3xl overflow-hidden shadow-elevated" style="background:linear-gradient(160deg,#18241f,#2a4a3c); color:white">
+              <div class="p-4">
+                <div class="row">
+                  <p class="label" style="color:rgba(255,255,255,.6)">Chapter 2 · Wed · today</p>
+                  <span class="chip" style="background:rgba(255,255,255,.15); color:white">cook night · 50 min</span>
+                </div>
+                <h3 class="font-display text-2xl mt-1" style="color:white">Slow & golden</h3>
+                <p class="text-xs mt-1" style="color:rgba(255,255,255,.75)">A hands-on dinner worth the apron. Salmon, lemon, charred greens.</p>
+                <div class="mt-3 grid grid-cols-3 gap-2 text-center">
+                  <div class="rounded-xl p-2" style="background:rgba(255,255,255,.1)"><p class="text-[18px]">🥣</p><p class="text-[10px] mt-0.5" style="color:rgba(255,255,255,.7)">Yogurt + oats</p></div>
+                  <div class="rounded-xl p-2" style="background:rgba(255,255,255,.1)"><p class="text-[18px]">🥗</p><p class="text-[10px] mt-0.5" style="color:rgba(255,255,255,.7)">Quinoa bowl</p></div>
+                  <div class="rounded-xl p-2" style="background:rgba(255,255,255,.18); box-shadow:0 0 0 1px rgba(255,255,255,.3)"><p class="text-[18px]">🐟</p><p class="text-[10px] mt-0.5" style="color:white">Salmon ★</p></div>
+                </div>
+                <div class="mt-3 progress" style="background:rgba(255,255,255,.18)"><span style="width:38%; background:#a7f3d0"></span></div>
+                <div class="mt-2 row text-[11px]" style="color:rgba(255,255,255,.85)">
+                  <span>2,210 kcal · 162g P</span>
+                  <a class="font-medium" style="color:#a7f3d0">Cook now →</a>
+                </div>
+              </div>
+            </article>
+
+            <!-- chapter day 3 -->
+            <article class="mt-3 rounded-3xl overflow-hidden shadow-card" style="background:linear-gradient(160deg,#fde1c4,#fff)">
+              <div class="p-4">
+                <div class="row">
+                  <p class="label">Chapter 3 · Fri</p>
+                  <span class="chip" style="background:rgba(0,0,0,.06); color:var(--ink-2)">leftovers-friendly</span>
+                </div>
+                <h3 class="font-display text-2xl text-ink-2 mt-1">Office Friday</h3>
+                <p class="text-xs text-ink/70 mt-1">Built around what’s already in the fridge from Thursday.</p>
+                <div class="mt-3 row text-[11px] text-ink/80">
+                  <span>3 meals · 2 reuse yesterday’s greens</span>
+                  <a class="font-medium text-forest">Open day →</a>
+                </div>
+              </div>
+            </article>
+
+            <!-- skip footer -->
+            <p class="text-[11px] text-muted mt-5 text-center">No mushrooms · no cilantro · pescatarian — set in <span class="text-ink font-medium">You → Foods to skip</span></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- =============== Shopping list screen (Option C aesthetic) =============== -->
+  <section class="mt-16">
+    <div class="row">
+      <div>
+        <p class="label">Option C · companion screen</p>
+        <h2 class="font-display text-3xl text-ink-2 mt-1">The shopping list, on its own canvas.</h2>
+        <p class="text-sm text-muted mt-2 max-w-[640px]">Reached from the 🛍️ button in the week header, the "Need anything for today?" tile inside a day, or a swipe-up from the week. A full screen — not a panel — so it can breathe and feel like a finished object you'd actually take to the shop.</p>
+      </div>
+    </div>
+
+    <div class="mt-6 grid grid-cols-2 gap-10 items-start">
+      <!-- the shopping screen -->
+      <div class="phone mx-auto">
+        <div class="screen">
+          <div class="notch"></div>
+          <div class="scroll" style="background:linear-gradient(180deg,#f6f1e7,#efe8d6); padding-top: 44px">
+            <!-- header -->
+            <div class="row">
+              <button class="glass-strong rounded-full w-9 h-9 grid place-items-center text-ink-2 shadow-card">‹</button>
+              <p class="label">Apr 28 → May 4</p>
+              <button class="glass-strong rounded-full w-9 h-9 grid place-items-center text-ink-2 shadow-card">⋯</button>
+            </div>
+
+            <h1 class="display text-[36px] text-ink-2 mt-4 leading-[1.0]">The list.</h1>
+            <p class="text-xs text-muted mt-1">Everything you need for the week, sorted by aisle.</p>
+
+            <!-- summary card -->
+            <div class="mt-4 rounded-3xl shadow-card overflow-hidden" style="background: linear-gradient(160deg,#18241f,#2a4a3c); color:white">
+              <div class="p-4">
+                <div class="row">
+                  <div>
+                    <p class="text-[10px] tracking-[.22em] uppercase" style="color:rgba(255,255,255,.6)">Total basket</p>
+                    <p class="font-display text-3xl mt-1">42 items</p>
+                  </div>
+                  <div class="text-right">
+                    <p class="font-display text-2xl">~£38</p>
+                    <p class="text-[10px]" style="color:rgba(255,255,255,.6)">est · 6 aisles</p>
+                  </div>
+                </div>
+                <div class="mt-3 progress" style="background:rgba(255,255,255,.18)"><span style="width:14%; background:#a7f3d0"></span></div>
+                <p class="text-[10px] mt-1" style="color:rgba(255,255,255,.7)">6 of 42 in basket</p>
+              </div>
+              <div class="grid grid-cols-3 text-center text-[11px]" style="background:rgba(0,0,0,.18)">
+                <button class="py-2.5" style="color:white">Share</button>
+                <button class="py-2.5 border-l border-r" style="color:white; border-color:rgba(255,255,255,.1)">Export PDF</button>
+                <button class="py-2.5" style="color:#a7f3d0">Mark all</button>
+              </div>
+            </div>
+
+            <!-- aisle filter chips -->
+            <div class="mt-4 flex gap-1.5 overflow-x-auto" style="scrollbar-width:none">
+              <span class="chip" style="background:var(--forest); color:white">All · 42</span>
+              <span class="chip glass">🥬 Produce 14</span>
+              <span class="chip glass">🐟 Protein 8</span>
+              <span class="chip glass">🌾 Pantry 11</span>
+              <span class="chip glass">🥛 Dairy 5</span>
+              <span class="chip glass">❄ Frozen 4</span>
+            </div>
+
+            <!-- aisle: produce -->
+            <section class="mt-5">
+              <div class="row">
+                <div class="flex items-center gap-2">
+                  <div class="picker" style="width:28px;height:28px;background:#a7f3d0;font-size:14px">🥬</div>
+                  <p class="font-display text-lg text-ink-2">Produce</p>
+                </div>
+                <p class="text-[11px] text-muted">14 items</p>
+              </div>
+
+              <div class="mt-2 rounded-3xl bg-white/80 shadow-card overflow-hidden">
+                <div class="row p-3 border-b border-hairline">
+                  <div class="flex items-center gap-3">
+                    <span class="check on">✓</span>
+                    <div>
+                      <p class="text-sm text-ink-2 font-medium" style="text-decoration:line-through; color:var(--faint)">Spinach · 200g</p>
+                      <p class="text-[10px] text-muted">Mon lunch · Wed dinner</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="row p-3 border-b border-hairline">
+                  <div class="flex items-center gap-3">
+                    <span class="check"></span>
+                    <div>
+                      <p class="text-sm text-ink-2 font-medium">Lemons · 4</p>
+                      <p class="text-[10px] text-muted">Wed dinner · Fri lunch</p>
+                    </div>
+                  </div>
+                  <span class="text-[10px] text-muted">~£1.20</span>
+                </div>
+                <div class="row p-3 border-b border-hairline">
+                  <div class="flex items-center gap-3">
+                    <span class="check"></span>
+                    <div>
+                      <p class="text-sm text-ink-2 font-medium">Blueberries · 250g</p>
+                      <p class="text-[10px] text-muted">Mon, Wed, Fri breakfast</p>
+                    </div>
+                  </div>
+                  <span class="text-[10px] text-muted">~£3.00</span>
+                </div>
+                <div class="row p-3 border-b border-hairline">
+                  <div class="flex items-center gap-3">
+                    <span class="check"></span>
+                    <div>
+                      <p class="text-sm text-ink-2 font-medium">Avocado · 2</p>
+                      <p class="text-[10px] text-muted">Tue lunch · Thu breakfast</p>
+                    </div>
+                  </div>
+                  <span class="text-[10px] text-muted">~£2.40</span>
+                </div>
+                <div class="row p-3">
+                  <div class="flex items-center gap-3">
+                    <span class="check"></span>
+                    <div>
+                      <p class="text-sm text-ink-2 font-medium">Cherry tomatoes · 300g</p>
+                      <p class="text-[10px] text-muted">Tue lunch · Sat dinner</p>
+                    </div>
+                  </div>
+                  <span class="text-[10px] text-muted">~£1.80</span>
+                </div>
+              </div>
+            </section>
+
+            <!-- aisle: protein -->
+            <section class="mt-5">
+              <div class="row">
+                <div class="flex items-center gap-2">
+                  <div class="picker" style="width:28px;height:28px;background:#fde1c4;font-size:14px">🐟</div>
+                  <p class="font-display text-lg text-ink-2">Protein</p>
+                </div>
+                <p class="text-[11px] text-muted">8 items</p>
+              </div>
+
+              <div class="mt-2 rounded-3xl bg-white/80 shadow-card overflow-hidden">
+                <div class="row p-3 border-b border-hairline" style="background:linear-gradient(90deg, rgba(167,243,208,.25), transparent)">
+                  <div class="flex items-center gap-3">
+                    <span class="check"></span>
+                    <div>
+                      <p class="text-sm text-ink-2 font-medium">Salmon fillets · 2 × 200g <span class="badge ml-1">⭐ hero</span></p>
+                      <p class="text-[10px] text-muted">Wed dinner · Sun lunch</p>
+                    </div>
+                  </div>
+                  <span class="text-[10px] text-muted">~£12.00</span>
+                </div>
+                <div class="row p-3 border-b border-hairline">
+                  <div class="flex items-center gap-3">
+                    <span class="check"></span>
+                    <div>
+                      <p class="text-sm text-ink-2 font-medium">Chicken breast · 600g</p>
+                      <p class="text-[10px] text-muted">Wed lunch · Thu lunch · Fri dinner</p>
+                    </div>
+                  </div>
+                  <span class="text-[10px] text-muted">~£6.50</span>
+                </div>
+                <div class="row p-3">
+                  <div class="flex items-center gap-3">
+                    <span class="check on">✓</span>
+                    <div>
+                      <p class="text-sm font-medium" style="text-decoration:line-through; color:var(--faint)">Eggs · 12</p>
+                      <p class="text-[10px] text-muted">Mon, Tue, Thu breakfast</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- aisle: pantry -->
+            <section class="mt-5">
+              <div class="row">
+                <div class="flex items-center gap-2">
+                  <div class="picker" style="width:28px;height:28px;background:#bae6fd;font-size:14px">🌾</div>
+                  <p class="font-display text-lg text-ink-2">Pantry</p>
+                </div>
+                <p class="text-[11px] text-muted">11 items</p>
+              </div>
+
+              <div class="mt-2 rounded-3xl bg-white/80 shadow-card overflow-hidden">
+                <div class="row p-3 border-b border-hairline">
+                  <div class="flex items-center gap-3">
+                    <span class="check"></span>
+                    <div>
+                      <p class="text-sm text-ink-2 font-medium">Quinoa · 250g</p>
+                      <p class="text-[10px] text-muted">Wed lunch · Sat lunch</p>
+                    </div>
+                  </div>
+                  <span class="text-[10px] text-muted">~£2.20</span>
+                </div>
+                <div class="row p-3">
+                  <div class="flex items-center gap-3">
+                    <span class="check"></span>
+                    <div>
+                      <p class="text-sm text-ink-2 font-medium">Rolled oats · 500g</p>
+                      <p class="text-[10px] text-muted">Mon, Wed, Fri breakfast</p>
+                    </div>
+                  </div>
+                  <span class="text-[10px] text-muted">~£1.40</span>
+                </div>
+              </div>
+            </section>
+
+            <!-- already at home -->
+            <section class="mt-5 rounded-3xl shadow-card p-4 stripe">
+              <p class="label">Already at home</p>
+              <p class="text-xs text-muted mt-1">Tap to remove from the list — we'll keep them in mind for next week's plan.</p>
+              <div class="mt-2 flex flex-wrap gap-1.5">
+                <span class="ingredient">olive oil</span>
+                <span class="ingredient">salt</span>
+                <span class="ingredient">pepper</span>
+                <span class="ingredient">garlic</span>
+                <span class="ingredient">soy sauce</span>
+              </div>
+            </section>
+
+            <p class="text-[11px] text-muted mt-6 text-center">Long-press any item → Skip · Swap · Don't suggest again</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- design notes -->
+      <div class="space-y-4 self-start">
+        <div class="rounded-3xl bg-white shadow-card p-5">
+          <p class="label">Entry points</p>
+          <h3 class="font-display text-lg text-ink-2 mt-1">Three ways in, one screen</h3>
+          <ul class="mt-2 text-sm text-muted space-y-1.5">
+            <li>· 🛍️ button in the week header (top-right)</li>
+            <li>· "Need anything?" tile inside any day</li>
+            <li>· Swipe up from the bottom of the week</li>
+          </ul>
+        </div>
+
+        <div class="rounded-3xl bg-white shadow-card p-5">
+          <p class="label">Why a full screen</p>
+          <h3 class="font-display text-lg text-ink-2 mt-1">It's a destination, not a side panel</h3>
+          <p class="text-sm text-muted mt-1">A real shop is a 20-minute job. A bottom-sheet feels temporary; a full screen lets you check items off without dismissing context every time. Back arrow returns to the week with progress preserved.</p>
+        </div>
+
+        <div class="rounded-3xl bg-white shadow-card p-5">
+          <p class="label">The hero card</p>
+          <h3 class="font-display text-lg text-ink-2 mt-1">Dark, calm, single number</h3>
+          <p class="text-sm text-muted mt-1">42 items, ~£38, a slim progress bar. It mirrors the dark "today" chapter on the week so the two screens feel like sisters. Quick actions (Share / PDF / Mark all) live in a single inset row beneath it.</p>
+        </div>
+
+        <div class="rounded-3xl bg-white shadow-card p-5">
+          <p class="label">Aisle as chapter</p>
+          <h3 class="font-display text-lg text-ink-2 mt-1">Each section is a small story</h3>
+          <p class="text-sm text-muted mt-1">Produce, Protein, Pantry, Dairy, Frozen, Other. Each headed by a tinted icon and a count. Items show which days they're for ("Wed dinner · Sun lunch") so it never feels disconnected from the meals.</p>
+        </div>
+
+        <div class="rounded-3xl bg-white shadow-card p-5">
+          <p class="label">Already at home</p>
+          <h3 class="font-display text-lg text-ink-2 mt-1">A pantry-tag section at the bottom</h3>
+          <p class="text-sm text-muted mt-1">Light striped panel with staples the user has marked permanent (olive oil, salt, soy sauce). They never appear in the main list — but they're visible, removable, and a quiet reminder.</p>
+        </div>
+
+        <div class="rounded-3xl bg-white shadow-card p-5">
+          <p class="label">Long-press item</p>
+          <h3 class="font-display text-lg text-ink-2 mt-1">Skip · Swap · Don't suggest</h3>
+          <p class="text-sm text-muted mt-1">Same gesture as the recipe ingredient pills. Skipping removes from this week's basket; "Don't suggest" pushes it into <span class="text-ink font-medium">You → Foods to skip</span> permanently.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- shared interaction notes -->
+  <section class="mt-12 grid grid-cols-3 gap-6">
+    <div class="rounded-3xl bg-white shadow-card p-5">
+      <p class="label">Shared · ingredient long-press</p>
+      <h3 class="font-display text-lg text-ink-2 mt-1">"Don’t suggest mushrooms"</h3>
+      <p class="text-sm text-muted mt-1">Tap or long-press any ingredient pill in a recipe or week view. A small sheet pops up: <em>Skip in future plans</em> / <em>Just this week</em> / <em>Cancel</em>. The skip is added to <span class="text-ink font-medium">You → Foods to skip</span> and the week regenerates around it.</p>
+    </div>
+    <div class="rounded-3xl bg-white shadow-card p-5">
+      <p class="label">Shared · onboarding does the diet</p>
+      <h3 class="font-display text-lg text-ink-2 mt-1">No more food list page</h3>
+      <p class="text-sm text-muted mt-1">Diet preference (omnivore / pescatarian / vegetarian / vegan) is captured in onboarding and edited from <span class="text-ink font-medium">You</span>. The 200-item food checklist disappears — replaced by lightweight in-context skips.</p>
+    </div>
+    <div class="rounded-3xl bg-white shadow-card p-5">
+      <p class="label">Shared · settings home for skips</p>
+      <h3 class="font-display text-lg text-ink-2 mt-1">You → Foods to skip</h3>
+      <p class="text-sm text-muted mt-1">A clean list of every ingredient you’ve marked. Tap to remove. One source of truth. Survives re-rolls and week swaps.</p>
+    </div>
+  </section>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Day-card CTA previews</title>
+<style>
+  :root {
+    --paper: #f6f3ec;
+    --ink-2: #18241f;
+    --muted: #6c7a73;
+    --forest: #1f5f4a;
+    --hairline: rgba(24,36,31,.08);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    background: var(--paper);
+    color: var(--ink-2);
+    padding: 32px 16px 80px;
+  }
+  .wrap { max-width: 480px; margin: 0 auto; }
+  h1 {
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: 28px;
+    margin: 0 0 6px;
+  }
+  h2 {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 32px 0 10px;
+  }
+  p.lead { margin: 0 0 24px; color: var(--muted); font-size: 14px; }
+
+  /* shared card */
+  .card {
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.06);
+    margin-bottom: 14px;
+    background: linear-gradient(160deg,#dff5e8,#cfe9ff);
+  }
+  .card.today {
+    background: linear-gradient(160deg,#18241f,#2a4a3c);
+    color: white;
+    box-shadow: 0 8px 28px rgba(24,36,31,.25);
+  }
+  .card-head { padding: 16px 16px 12px; }
+  .eyebrow {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .today .eyebrow { color: rgba(255,255,255,.6); }
+  .pill {
+    float: right;
+    background: rgba(0,0,0,.06);
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 10px;
+    font-weight: 500;
+  }
+  .today .pill { background: rgba(255,255,255,.15); color: white; }
+  .title {
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: 22px;
+    margin: 4px 0 4px;
+  }
+  .today .title { color: white; }
+  .sub { font-size: 12px; color: rgba(44,58,51,.7); margin: 0; }
+  .today .sub { color: rgba(255,255,255,.75); }
+
+  .meals {
+    padding: 0 16px 16px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .meal {
+    background: rgba(255,255,255,.6);
+    border-radius: 16px;
+    padding: 8px;
+    text-align: center;
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+  }
+  .today .meal { background: rgba(255,255,255,.1); color: white; }
+  .meal .ico { font-size: 20px; line-height: 1; }
+  .meal .slot { font-size: 10px; color: var(--muted); margin-top: 4px; }
+  .today .meal .slot { color: rgba(255,255,255,.75); }
+  .meal .name { font-size: 10.5px; font-weight: 500; margin-top: 2px; }
+
+  .footer {
+    padding: 0 16px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+  }
+  .today .footer { color: rgba(255,255,255,.85); }
+  .footer .nums { color: rgba(44,58,51,.85); }
+  .today .footer .nums { color: rgba(255,255,255,.85); }
+
+  /* CTAs */
+  .cta-text { color: var(--forest); font-weight: 500; }
+  .today .cta-text { color: #a7f3d0; }
+
+  .cta-btn {
+    border: 0;
+    background: transparent;
+    color: var(--forest);
+    font: inherit;
+    font-weight: 500;
+    font-size: 11px;
+    cursor: pointer;
+    padding: 4px 0;
+  }
+  .cta-btn:hover { text-decoration: underline; text-underline-offset: 4px; }
+  .today .cta-btn { color: #a7f3d0; }
+
+  .cta-pill {
+    border: 0;
+    background: var(--forest);
+    color: white;
+    font: inherit;
+    font-weight: 500;
+    font-size: 11px;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 999px;
+  }
+  .cta-pill:hover { filter: brightness(1.1); }
+  .today .cta-pill { background: #a7f3d0; color: #18241f; }
+
+  .card.tappable { cursor: pointer; transition: transform .15s; }
+  .card.tappable:hover { transform: translateY(-2px); }
+
+  .card.split-cta {
+    /* footer becomes a full-width bar */
+  }
+  .card.split-cta .cta-bar {
+    background: rgba(0,0,0,.04);
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    border: 0;
+    width: 100%;
+    font: inherit;
+    color: inherit;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .card.split-cta .cta-bar:hover { background: rgba(0,0,0,.08); }
+  .today .cta-bar { background: rgba(255,255,255,.08) !important; color: white; }
+  .today .cta-bar:hover { background: rgba(255,255,255,.14) !important; }
+
+  .note {
+    background: white;
+    border: 1px solid var(--hairline);
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 18px;
+  }
+  .note b { color: var(--ink-2); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Day-card CTA — pick a flavour</h1>
+  <p class="lead">Each option below is the same day card with a different click model. Tap things to feel the difference. The popups are just to confirm what fired.</p>
+
+  <!-- ============ OPTION A ============ -->
+  <h2>Option A · Whole card is tappable</h2>
+  <div class="note">Tapping anywhere on the card opens the day. Inner meal tiles still work for individual meals. The "Cook now →" text becomes a visual hint, not a separate target.</div>
+
+  <article class="card today tappable" onclick="alert('A · Today card tapped → open hero recipe')">
+    <div class="card-head">
+      <span class="pill">28 min total</span>
+      <p class="eyebrow">Chapter 1 · Wednesday · today</p>
+      <h3 class="title">Today's plate</h3>
+      <p class="sub">Cook this. The rest of the week can wait.</p>
+    </div>
+    <div class="meals">
+      <button class="meal" onclick="event.stopPropagation(); alert('A · Breakfast tapped')">
+        <div class="ico">🥣</div><div class="slot">Breakfast</div><div class="name">Oats & berries</div>
+      </button>
+      <button class="meal" onclick="event.stopPropagation(); alert('A · Lunch tapped')">
+        <div class="ico">🥗</div><div class="slot">Lunch</div><div class="name">Grain bowl</div>
+      </button>
+      <button class="meal" onclick="event.stopPropagation(); alert('A · Dinner tapped')">
+        <div class="ico">🍲</div><div class="slot">Dinner</div><div class="name">Salmon & greens ★</div>
+      </button>
+    </div>
+    <div class="footer">
+      <span class="nums">1840 kcal · 142g P</span>
+      <span class="cta-text">Cook now →</span>
+    </div>
+  </article>
+
+  <article class="card tappable" onclick="alert('A · Thursday card tapped → open day')">
+    <div class="card-head">
+      <span class="pill">22 min total</span>
+      <p class="eyebrow">Chapter 2 · Thursday</p>
+      <h3 class="title">Quick fixes</h3>
+      <p class="sub">Light prep, more time outside.</p>
+    </div>
+    <div class="meals">
+      <button class="meal" onclick="event.stopPropagation(); alert('A · Breakfast tapped')">
+        <div class="ico">🥚</div><div class="slot">Breakfast</div><div class="name">Eggs on toast</div>
+      </button>
+      <button class="meal" onclick="event.stopPropagation(); alert('A · Lunch tapped')">
+        <div class="ico">🥪</div><div class="slot">Lunch</div><div class="name">Wrap</div>
+      </button>
+      <button class="meal" onclick="event.stopPropagation(); alert('A · Dinner tapped')">
+        <div class="ico">🍝</div><div class="slot">Dinner</div><div class="name">Pasta</div>
+      </button>
+    </div>
+    <div class="footer">
+      <span class="nums">1780 kcal · 128g P</span>
+      <span class="cta-text">Open day →</span>
+    </div>
+  </article>
+
+  <!-- ============ OPTION B ============ -->
+  <h2>Option B · Only the CTA text is a button</h2>
+  <div class="note">Card stays static. Just the "Cook now / Open day" text is clickable. Cleanest separation, but the click target is small.</div>
+
+  <article class="card today">
+    <div class="card-head">
+      <span class="pill">28 min total</span>
+      <p class="eyebrow">Chapter 1 · Wednesday · today</p>
+      <h3 class="title">Today's plate</h3>
+      <p class="sub">Cook this. The rest of the week can wait.</p>
+    </div>
+    <div class="meals">
+      <button class="meal" onclick="alert('B · Breakfast tapped')">
+        <div class="ico">🥣</div><div class="slot">Breakfast</div><div class="name">Oats & berries</div>
+      </button>
+      <button class="meal" onclick="alert('B · Lunch tapped')">
+        <div class="ico">🥗</div><div class="slot">Lunch</div><div class="name">Grain bowl</div>
+      </button>
+      <button class="meal" onclick="alert('B · Dinner tapped')">
+        <div class="ico">🍲</div><div class="slot">Dinner</div><div class="name">Salmon & greens ★</div>
+      </button>
+    </div>
+    <div class="footer">
+      <span class="nums">1840 kcal · 142g P</span>
+      <button class="cta-btn" onclick="alert('B · Cook now button')">Cook now →</button>
+    </div>
+  </article>
+
+  <article class="card">
+    <div class="card-head">
+      <span class="pill">22 min total</span>
+      <p class="eyebrow">Chapter 2 · Thursday</p>
+      <h3 class="title">Quick fixes</h3>
+      <p class="sub">Light prep, more time outside.</p>
+    </div>
+    <div class="meals">
+      <button class="meal" onclick="alert('B · Breakfast tapped')">
+        <div class="ico">🥚</div><div class="slot">Breakfast</div><div class="name">Eggs on toast</div>
+      </button>
+      <button class="meal" onclick="alert('B · Lunch tapped')">
+        <div class="ico">🥪</div><div class="slot">Lunch</div><div class="name">Wrap</div>
+      </button>
+      <button class="meal" onclick="alert('B · Dinner tapped')">
+        <div class="ico">🍝</div><div class="slot">Dinner</div><div class="name">Pasta</div>
+      </button>
+    </div>
+    <div class="footer">
+      <span class="nums">1780 kcal · 128g P</span>
+      <button class="cta-btn" onclick="alert('B · Open day button')">Open day →</button>
+    </div>
+  </article>
+
+  <!-- ============ OPTION C ============ -->
+  <h2>Option C · CTA as a pill button</h2>
+  <div class="note">Same as B but the CTA is a pronounced pill. Bigger target, more obvious it's interactive.</div>
+
+  <article class="card today">
+    <div class="card-head">
+      <span class="pill">28 min total</span>
+      <p class="eyebrow">Chapter 1 · Wednesday · today</p>
+      <h3 class="title">Today's plate</h3>
+      <p class="sub">Cook this. The rest of the week can wait.</p>
+    </div>
+    <div class="meals">
+      <button class="meal" onclick="alert('C · Breakfast tapped')">
+        <div class="ico">🥣</div><div class="slot">Breakfast</div><div class="name">Oats & berries</div>
+      </button>
+      <button class="meal" onclick="alert('C · Lunch tapped')">
+        <div class="ico">🥗</div><div class="slot">Lunch</div><div class="name">Grain bowl</div>
+      </button>
+      <button class="meal" onclick="alert('C · Dinner tapped')">
+        <div class="ico">🍲</div><div class="slot">Dinner</div><div class="name">Salmon & greens ★</div>
+      </button>
+    </div>
+    <div class="footer">
+      <span class="nums">1840 kcal · 142g P</span>
+      <button class="cta-pill" onclick="alert('C · Cook now pill')">Cook now →</button>
+    </div>
+  </article>
+
+  <article class="card">
+    <div class="card-head">
+      <span class="pill">22 min total</span>
+      <p class="eyebrow">Chapter 2 · Thursday</p>
+      <h3 class="title">Quick fixes</h3>
+      <p class="sub">Light prep, more time outside.</p>
+    </div>
+    <div class="meals">
+      <button class="meal" onclick="alert('C · Breakfast tapped')">
+        <div class="ico">🥚</div><div class="slot">Breakfast</div><div class="name">Eggs on toast</div>
+      </button>
+      <button class="meal" onclick="alert('C · Lunch tapped')">
+        <div class="ico">🥪</div><div class="slot">Lunch</div><div class="name">Wrap</div>
+      </button>
+      <button class="meal" onclick="alert('C · Dinner tapped')">
+        <div class="ico">🍝</div><div class="slot">Dinner</div><div class="name">Pasta</div>
+      </button>
+    </div>
+    <div class="footer">
+      <span class="nums">1780 kcal · 128g P</span>
+      <button class="cta-pill" onclick="alert('C · Open day pill')">Open day →</button>
+    </div>
+  </article>
+
+  <!-- ============ OPTION D ============ -->
+  <h2>Option D · Full-width footer bar</h2>
+  <div class="note">The kcal/CTA row becomes a tinted full-width clickable bar at the bottom of the card. Big tap target, separate from the meal tiles, reads as "open this day".</div>
+
+  <article class="card today split-cta">
+    <div class="card-head">
+      <span class="pill">28 min total</span>
+      <p class="eyebrow">Chapter 1 · Wednesday · today</p>
+      <h3 class="title">Today's plate</h3>
+      <p class="sub">Cook this. The rest of the week can wait.</p>
+    </div>
+    <div class="meals">
+      <button class="meal" onclick="alert('D · Breakfast tapped')">
+        <div class="ico">🥣</div><div class="slot">Breakfast</div><div class="name">Oats & berries</div>
+      </button>
+      <button class="meal" onclick="alert('D · Lunch tapped')">
+        <div class="ico">🥗</div><div class="slot">Lunch</div><div class="name">Grain bowl</div>
+      </button>
+      <button class="meal" onclick="alert('D · Dinner tapped')">
+        <div class="ico">🍲</div><div class="slot">Dinner</div><div class="name">Salmon & greens ★</div>
+      </button>
+    </div>
+    <button class="cta-bar" onclick="alert('D · Cook now bar')">
+      <span>1840 kcal · 142g P</span>
+      <span>Cook now →</span>
+    </button>
+  </article>
+
+  <article class="card split-cta">
+    <div class="card-head">
+      <span class="pill">22 min total</span>
+      <p class="eyebrow">Chapter 2 · Thursday</p>
+      <h3 class="title">Quick fixes</h3>
+      <p class="sub">Light prep, more time outside.</p>
+    </div>
+    <div class="meals">
+      <button class="meal" onclick="alert('D · Breakfast tapped')">
+        <div class="ico">🥚</div><div class="slot">Breakfast</div><div class="name">Eggs on toast</div>
+      </button>
+      <button class="meal" onclick="alert('D · Lunch tapped')">
+        <div class="ico">🥪</div><div class="slot">Lunch</div><div class="name">Wrap</div>
+      </button>
+      <button class="meal" onclick="alert('D · Dinner tapped')">
+        <div class="ico">🍝</div><div class="slot">Dinner</div><div class="name">Pasta</div>
+      </button>
+    </div>
+    <button class="cta-bar" onclick="alert('D · Open day bar')">
+      <span>1780 kcal · 128g P</span>
+      <span>Open day →</span>
+    </button>
+  </article>
+
+  <h2>Pick one</h2>
+  <p class="lead" style="margin-bottom:0">
+    Tell me <b>A / B / C / D</b>, and what "Open day" should do for non-today cards:<br>
+    1. Open the hero meal recipe for that day<br>
+    2. Scroll/expand that day's card in place<br>
+    3. Navigate to a dedicated day-detail screen
+  </p>
+</div>
+</body>
+</html>

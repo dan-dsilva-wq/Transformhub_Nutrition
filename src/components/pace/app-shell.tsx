@@ -52,6 +52,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(href + "/");
+  const isCoachRoute = isActive("/you/coach");
 
   const initials = (() => {
     if (auth.kind === "signed-in" && auth.email) {
@@ -91,8 +92,17 @@ export function AppShell({ children }: { children: ReactNode }) {
       {/* Page content */}
       <main
         key={pathname}
-        className="fade-anim mx-auto max-w-md px-5 pt-5"
-        style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 96px)" }}
+        className={clsx(
+          "fade-anim mx-auto max-w-md",
+          isCoachRoute
+            ? "flex h-[calc(100dvh_-_env(safe-area-inset-top,0px)_-_env(safe-area-inset-bottom,0px)_-_120px)] min-h-0 flex-col overflow-hidden px-5 pt-3"
+            : "px-5 pt-5",
+        )}
+        style={{
+          paddingBottom: isCoachRoute
+            ? "0px"
+            : "calc(env(safe-area-inset-bottom, 0px) + 96px)",
+        }}
       >
         {children}
       </main>
@@ -248,4 +258,3 @@ function NavTab({
     </Link>
   );
 }
-

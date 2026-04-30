@@ -76,8 +76,15 @@ type SubscriptionStatus = "none" | "trial" | "active" | "expired";
 
 export interface Subscription {
   status: SubscriptionStatus;
+  provider?: "local" | "revenuecat" | "manual" | string;
+  providerAppUserId?: string;
+  entitlementId?: string;
+  productId?: string;
+  store?: string;
+  environment?: string;
   trialStartedAtIso?: string;
   trialEndsAtIso?: string;
+  currentPeriodEndsAtIso?: string;
   plan?: "monthly" | "yearly";
 }
 
@@ -143,6 +150,16 @@ export interface OnboardingExtras {
   weekSwaps?: Record<string, string>;
   /** Whether the user has run the first-time week generator. */
   weekGenerated?: boolean;
+  /** Ingredient names the user never wants suggested again (case-insensitive match). */
+  skippedIngredients?: string[];
+  /** Ingredient names the user has marked as already in their pantry — hidden from shopping list. */
+  pantryStaples?: string[];
+  /** Per-shopping-list-week, set of checked-off ingredient keys. Key is `${weekIdx}:${ingredientName}`. */
+  shoppingChecked?: string[];
+  /** Whether the user has dismissed the editorial-week walkthrough. */
+  hasSeenWeekIntro?: boolean;
+  /** Number of future weeks the user has manually generated beyond the current week. 0..4. */
+  weeksAhead?: number;
 }
 
 interface AppState {
@@ -209,9 +226,11 @@ export interface AppActions {
   deleteAccount(): Promise<{ ok: true } | { ok: false; error: string }>;
   setNotice(notice: string | null): void;
 
-  startTrial(): void;
-  cancelTrial(): void;
+  startTrial(): Promise<boolean>;
+  cancelTrial(): Promise<boolean>;
   expireTrial(): void;
+  refreshSubscription(): Promise<void>;
+  restoreSubscription(): Promise<boolean>;
   setOnboardingExtras(patch: Partial<OnboardingExtras>): void;
   commitTo(patch: Partial<OnboardingExtras["commitments"]>): void;
   completeTour(): void;

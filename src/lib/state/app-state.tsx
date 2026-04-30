@@ -15,6 +15,11 @@ import {
 } from "react";
 import { App as CapacitorApp } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
+import { BILLING_ENABLED } from "@/lib/billing/config";
+import {
+  purchaseRevenueCatSubscription,
+  restoreRevenueCatSubscription,
+} from "@/lib/billing/revenuecat-client";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import {
   demoMeals,
@@ -182,6 +187,14 @@ function todayIsoDate() {
   return new Date().toISOString().slice(0, 10);
 }
 
+function weightEntryForToday(weightKg: number): WeightEntry {
+  return {
+    date: todayLabel(),
+    isoDate: todayIsoDate(),
+    weightKg: Math.round(weightKg * 10) / 10,
+  };
+}
+
 const demoWeightSignatures = new Set([
   "Apr 1|82.4",
   "Apr 8|81.8",
@@ -291,7 +304,10 @@ function isoWeekKey(date = new Date()) {
   return `${d.getUTCFullYear()}-W${String(week).padStart(2, "0")}`;
 }
 
-const defaultSubscription: Subscription = { status: "none" };
+const defaultSubscription: Subscription = {
+  status: "none",
+  provider: BILLING_ENABLED ? "revenuecat" : "local",
+};
 
 const defaultOnboardingExtras: OnboardingExtras = {
   dietaryPreferences: [],
@@ -354,6 +370,28 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [lastCoachResponse, setLastCoachResponse] = useState<CoachResponse | null>(null);
 
   const dayKeyRef = useRef<string>(todayDayKey());
+
+  const refreshSubscription = useCallback<AppActions["refreshSubscription"]>(async () => {
+    if (!BILLING_ENABLED) return;
+    try {
+      const res = await fetch("/api/billing/entitlement", {
+        method: "GET",
+        credentials: "include",
+      });
+      if (!res.ok) return;
+      const json = (await res.json()) as {
+        enabled?: boolean;
+        subscription?: Subscription | null;
+      };
+      if (json.enabled && json.subscription) {
+        setSubscriptionState(json.subscription);
+      } else if (json.enabled) {
+        setSubscriptionState(defaultSubscription);
+      }
+    } catch {
+      /* entitlement refresh is best-effort; RevenueCat/webhook remains authoritative */
+    }
+  }, []);
 
   // Hydrate from localStorage whenever the storage scope resolves or changes
   // (e.g. user signs in / signs out / switches accounts). We reset every
@@ -436,13 +474,15 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     if (persisted.approvedFoods) setApprovedFoodsState(persisted.approvedFoods);
     if (persisted.reminderState) setReminderStateState(persisted.reminderState);
     if (persisted.hasOnboarded) setHasOnboarded(true);
-    if (persisted.subscription) {
+    if (persisted.subscription && !BILLING_ENABLED) {
       const sub = persisted.subscription;
       const isExpired =
         sub.status === "trial" &&
         sub.trialEndsAtIso &&
         Date.now() > Date.parse(sub.trialEndsAtIso);
       setSubscriptionState(isExpired ? { ...sub, status: "expired" } : sub);
+    } else if (BILLING_ENABLED) {
+      setSubscriptionState(defaultSubscription);
     }
     if (persisted.onboardingExtras) {
       setOnboardingExtrasState({
@@ -539,6 +579,11 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     hasOnboarded,
     onboardingExtras.name,
   ]);
+
+  useEffect(() => {
+    if (!BILLING_ENABLED || auth.kind !== "signed-in" || !hasHydrated) return;
+    void refreshSubscription();
+  }, [auth.kind, hasHydrated, refreshSubscription]);
 
   // Reload the WebView when the app returns to foreground after a long
   // background, so testers always see the latest Vercel deploy without
@@ -663,6 +708,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       /* guardrail  -  still mark onboarded so user can edit later */
     }
     setWorkoutPlan(createBusyHomeWorkoutPlan(draft.equipment));
+    setWeights((prev) => {
+      if (prev.length > 0) return prev;
+      return [weightEntryForToday(next.currentWeightKg)];
+    });
     setHasOnboarded(true);
     trackTesterEvent("onboarding_completed", {
       currentWeightKg: next.currentWeightKg,
@@ -738,11 +787,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
   const addWeight = useCallback<AppActions["addWeight"]>((weightKg) => {
     if (!Number.isFinite(weightKg) || weightKg <= 0) return;
-    const entry: WeightEntry = {
-      date: todayLabel(),
-      isoDate: todayIsoDate(),
-      weightKg: Math.round(weightKg * 10) / 10,
-    };
+    const entry = weightEntryForToday(weightKg);
     trackTesterEvent("weight_logged", { weightKg: entry.weightKg });
     const nextProfile = { ...profile, currentWeightKg: entry.weightKg };
     setWeights((prev) => [...prev, entry]);
@@ -839,23 +884,79 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     return { ok: true };
   }, [supabase, storageScope]);
 
-  const startTrial = useCallback<AppActions["startTrial"]>(() => {
+  const startTrial = useCallback<AppActions["startTrial"]>(async () => {
+    if (BILLING_ENABLED) {
+      if (auth.kind !== "signed-in") {
+        setNotice("Sign in before starting a subscription.");
+        return false;
+      }
+      try {
+        const nextSubscription = await purchaseRevenueCatSubscription({
+          userId: auth.userId,
+          email: auth.email,
+        });
+        setSubscriptionState(nextSubscription);
+        setNotice(null);
+        return true;
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Could not start subscription.";
+        setNotice(message);
+        return false;
+      }
+    }
+
     const now = new Date();
     const ends = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
     setSubscriptionState({
       status: "trial",
+      provider: "local",
       trialStartedAtIso: now.toISOString(),
       trialEndsAtIso: ends.toISOString(),
     });
-  }, []);
+    return true;
+  }, [auth]);
 
-  const cancelTrial = useCallback<AppActions["cancelTrial"]>(() => {
-    setSubscriptionState({ status: "none" });
+  const cancelTrial = useCallback<AppActions["cancelTrial"]>(async () => {
+    if (BILLING_ENABLED) {
+      setNotice("Manage or cancel your subscription in the app store.");
+      return false;
+    }
+    setSubscriptionState(defaultSubscription);
+    return true;
   }, []);
 
   const expireTrial = useCallback<AppActions["expireTrial"]>(() => {
     setSubscriptionState((prev) => ({ ...prev, status: "expired" }));
   }, []);
+
+  const restoreSubscription = useCallback<AppActions["restoreSubscription"]>(async () => {
+    if (!BILLING_ENABLED) {
+      return false;
+    }
+    if (auth.kind !== "signed-in") {
+      setNotice("Sign in before restoring purchases.");
+      return false;
+    }
+    try {
+      const nextSubscription = await restoreRevenueCatSubscription({
+        userId: auth.userId,
+        email: auth.email,
+      });
+      setSubscriptionState(nextSubscription);
+      setNotice(
+        nextSubscription.status === "active" || nextSubscription.status === "trial"
+          ? null
+          : "No active subscription was found for this store account.",
+      );
+      return true;
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Could not restore purchases.";
+      setNotice(message);
+      return false;
+    }
+  }, [auth]);
 
   const setOnboardingExtras = useCallback<AppActions["setOnboardingExtras"]>(
     (patch) => {
@@ -938,6 +1039,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       startTrial,
       cancelTrial,
       expireTrial,
+      refreshSubscription,
+      restoreSubscription,
       setOnboardingExtras,
       commitTo,
       completeTour,
@@ -965,6 +1068,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       startTrial,
       cancelTrial,
       expireTrial,
+      refreshSubscription,
+      restoreSubscription,
       setOnboardingExtras,
       commitTo,
       completeTour,

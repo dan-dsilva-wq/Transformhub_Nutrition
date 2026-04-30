@@ -2,19 +2,65 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { LogOut, Sparkles, Trash2, AlertTriangle } from "lucide-react";
+import {
+  LogOut,
+  Sparkles,
+  Trash2,
+  AlertTriangle,
+  Ban,
+  Home as HomeIcon,
+  Plus,
+  X,
+} from "lucide-react";
+import { BILLING_ENABLED } from "@/lib/billing/config";
 import { useAppState } from "@/lib/state/app-state";
 import { Button, Card, IconBadge, SectionHeader, Stat } from "./primitives";
+import { DEFAULT_PANTRY } from "./foods/shopping";
 import { trialDaysLeft } from "@/lib/entitlement";
 import { useAppVersion } from "@/lib/app-version";
 
 export function SettingsScreen() {
   const router = useRouter();
-  const { auth, profile, targets, subscription, actions } = useAppState();
+  const { auth, profile, targets, subscription, onboardingExtras, notice, actions } =
+    useAppState();
   const daysLeft = trialDaysLeft(subscription.trialEndsAtIso);
   const appVersion = useAppVersion();
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [subscriptionBusy, setSubscriptionBusy] = useState(false);
+
+  const skippedIngredients = onboardingExtras.skippedIngredients ?? [];
+  const pantryStaples = onboardingExtras.pantryStaples ?? DEFAULT_PANTRY;
+  const [pantryDraft, setPantryDraft] = useState("");
+
+  async function runSubscriptionAction(action: () => Promise<boolean>) {
+    setSubscriptionBusy(true);
+    await action();
+    setSubscriptionBusy(false);
+  }
+
+  function removeSkipped(name: string) {
+    const next = skippedIngredients.filter((s) => s !== name);
+    actions.setOnboardingExtras({ skippedIngredients: next });
+  }
+
+  function removePantry(name: string) {
+    const next = pantryStaples.filter((p) => p !== name);
+    actions.setOnboardingExtras({ pantryStaples: next });
+  }
+
+  function addPantry() {
+    const name = pantryDraft.trim();
+    if (!name) return;
+    if (pantryStaples.some((p) => p.toLowerCase() === name.toLowerCase())) {
+      setPantryDraft("");
+      return;
+    }
+    actions.setOnboardingExtras({
+      pantryStaples: [...pantryStaples, name],
+    });
+    setPantryDraft("");
+  }
 
   async function clearLocal() {
     if (typeof window === "undefined") return;
@@ -91,20 +137,65 @@ export function SettingsScreen() {
           </div>
         </div>
         <div className="mt-4 flex gap-3">
-          {subscription.status === "none" ? (
-            <Button onClick={() => actions.startTrial()}>Start free 7-day trial</Button>
+          {BILLING_ENABLED ? (
+            <>
+              {subscription.status === "active" || subscription.status === "trial" ? (
+                <Button
+                  variant="secondary"
+                  loading={subscriptionBusy}
+                  onClick={() => runSubscriptionAction(actions.cancelTrial)}
+                >
+                  Manage in app store
+                </Button>
+              ) : (
+                <Button
+                  loading={subscriptionBusy}
+                  onClick={() => runSubscriptionAction(actions.startTrial)}
+                >
+                  {subscription.status === "expired" ? "Subscribe" : "Start free trial"}
+                </Button>
+              )}
+              <Button
+                variant="secondary"
+                loading={subscriptionBusy}
+                onClick={() => runSubscriptionAction(actions.restoreSubscription)}
+              >
+                Restore
+              </Button>
+            </>
+          ) : subscription.status === "none" ? (
+            <Button
+              loading={subscriptionBusy}
+              onClick={() => runSubscriptionAction(actions.startTrial)}
+            >
+              Start free 7-day trial
+            </Button>
           ) : subscription.status === "trial" ? (
-            <Button variant="secondary" onClick={() => actions.cancelTrial()}>
+            <Button
+              variant="secondary"
+              loading={subscriptionBusy}
+              onClick={() => runSubscriptionAction(actions.cancelTrial)}
+            >
               Cancel trial
             </Button>
           ) : subscription.status === "expired" ? (
-            <Button onClick={() => actions.startTrial()}>Resubscribe</Button>
+            <Button
+              loading={subscriptionBusy}
+              onClick={() => runSubscriptionAction(actions.startTrial)}
+            >
+              Resubscribe
+            </Button>
           ) : (
-            <Button variant="secondary" onClick={() => actions.cancelTrial()}>
+            <Button
+              variant="secondary"
+              loading={subscriptionBusy}
+              onClick={() => runSubscriptionAction(actions.cancelTrial)}
+            >
               Manage subscription
             </Button>
           )}
         </div>
+        {notice ? <p className="mt-3 text-sm text-muted">{notice}</p> : null}
       </Card>
 
       <Card>
@@ -138,6 +229,91 @@ export function SettingsScreen() {
         <p className="mt-3 text-xs text-muted">
           Change these in <a className="underline-offset-4 hover:underline" href="/you/plan">Plan & targets</a>.
         </p>
+      </Card>
+
+      <Card>
+        <div id="foods-to-skip" />
+        <SectionHeader eyebrow="Food preferences" title="Foods to skip" />
+        <div className="flex items-start gap-3">
+          <IconBadge tone="clay">
+            <Ban size={16} aria-hidden />
+          </IconBadge>
+          <p className="flex-1 text-sm text-muted">
+            Ingredients we&rsquo;ll never put in your weekly plan. Tap any
+            ingredient in a recipe to add it here.
+          </p>
+        </div>
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {skippedIngredients.length === 0 ? (
+            <span className="rounded-full bg-paper px-3 py-1.5 text-xs text-faint">
+              Nothing skipped — long-press an ingredient on a recipe to add one.
+            </span>
+          ) : (
+            skippedIngredients.map((s) => (
+              <button
+                key={s}
+                type="button"
+                data-tap
+                onClick={() => removeSkipped(s)}
+                className="tap-bounce inline-flex items-center gap-1.5 rounded-full bg-clay/10 px-3 py-1.5 text-xs font-medium text-clay"
+                aria-label={`Remove ${s} from skipped foods`}
+              >
+                {s}
+                <X size={11} aria-hidden />
+              </button>
+            ))
+          )}
+        </div>
+      </Card>
+
+      <Card>
+        <SectionHeader eyebrow="Food preferences" title="Already at home" />
+        <div className="flex items-start gap-3">
+          <IconBadge tone="forest">
+            <HomeIcon size={16} aria-hidden />
+          </IconBadge>
+          <p className="flex-1 text-sm text-muted">
+            Pantry staples — kept in recipes, hidden from the shopping list.
+          </p>
+        </div>
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {pantryStaples.map((p) => (
+            <button
+              key={p}
+              type="button"
+              data-tap
+              onClick={() => removePantry(p)}
+              className="tap-bounce inline-flex items-center gap-1.5 rounded-full bg-forest/10 px-3 py-1.5 text-xs font-medium text-forest"
+              aria-label={`Remove ${p} from pantry`}
+            >
+              {p}
+              <X size={11} aria-hidden />
+            </button>
+          ))}
+        </div>
+        <form
+          className="mt-3 flex gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            addPantry();
+          }}
+        >
+          <input
+            type="text"
+            value={pantryDraft}
+            onChange={(e) => setPantryDraft(e.target.value)}
+            placeholder="Add a staple — e.g. Garlic"
+            className="flex-1 rounded-full border border-hairline bg-paper px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-forest"
+          />
+          <button
+            type="submit"
+            data-tap
+            disabled={!pantryDraft.trim()}
+            className="tap-bounce inline-flex h-10 items-center gap-1 rounded-full bg-forest px-4 text-sm font-medium text-white disabled:bg-stone-2 disabled:text-faint"
+          >
+            <Plus size={14} aria-hidden /> Add
+          </button>
+        </form>
       </Card>
 
       <Card>

@@ -106,22 +106,22 @@ export function CoachScreen() {
   }
 
   return (
-    <div className="stagger-up space-y-6">
-      <header>
+    <div className="stagger-up flex h-full min-h-0 flex-col">
+      <header className="shrink-0">
         <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-muted">
           YOU · COACH
         </p>
-        <h1 className="font-display mt-2 text-[38px] leading-[1.05] text-ink-2">
+        <h1 className="font-display mt-1.5 text-[30px] leading-[1.05] text-ink-2">
           Talk it <span className="text-forest">through.</span>
         </h1>
-        <p className="mt-2 text-sm text-muted">
+        <p className="mt-1 text-sm text-muted">
           Practical, calm. Not a cheerleader, not a drill sergeant.
         </p>
       </header>
 
       <div
         ref={scrollRef}
-        className="space-y-3 max-h-[55vh] overflow-y-auto pr-1"
+        className="mt-4 min-h-0 flex-1 space-y-3 overflow-y-auto pr-1"
       >
         {chat.map((m, i) => (
           <Bubble
@@ -152,14 +152,16 @@ export function CoachScreen() {
         ) : null}
       </div>
 
-      {error ? <p className="text-sm text-clay">{error}</p> : null}
+      {error ? <p className="shrink-0 pt-2 text-sm text-clay">{error}</p> : null}
 
-      <Card>
+      <Card className="mt-3 shrink-0 !p-4">
         <Field label="Your message">
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Hard day, easy day, off-plan, on-plan. Just write."
+            rows={2}
+            className="min-h-[76px]"
             onKeyDown={(e) => {
               if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
                 e.preventDefault();

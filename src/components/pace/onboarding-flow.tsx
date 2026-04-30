@@ -86,6 +86,10 @@ export function OnboardingFlow() {
 
   const showBack = step > 0 && step !== Step.CALCULATING;
 
+  if (hasOnboarded || !hasLoadedStep) {
+    return <OnboardingSplash />;
+  }
+
   return (
     <div className="flex min-h-[100dvh] flex-col">
       <header
@@ -141,6 +145,14 @@ export function OnboardingFlow() {
           <TrialOffer onNext={onNext} />
         )}
       </main>
+    </div>
+  );
+}
+
+function OnboardingSplash() {
+  return (
+    <div className="flex min-h-[100dvh] items-center justify-center">
+      <Wordmark size="lg" />
     </div>
   );
 }

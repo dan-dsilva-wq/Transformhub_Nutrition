@@ -23,11 +23,11 @@ import type { DailyTargets } from "@/lib/targets";
 import type { DietaryPref } from "@/lib/state/types";
 import { LockedState } from "./paywall-sheet";
 import {
-  mealIcoFor,
   recipeKeys,
   recipes,
   type Recipe,
 } from "./foods/food-data";
+import { RecipeIcon } from "./foods/recipe-icon";
 import {
   dayPlannedNutrition,
   ingredientMatchesSkip,
@@ -41,6 +41,7 @@ import {
 } from "./foods/planning";
 import { DEFAULT_PANTRY } from "./foods/shopping";
 import { trackTesterEvent } from "@/lib/tester/track";
+import { AmbientDrift, RecipeSteam, TiltCard } from "./personality";
 
 interface DayPlan {
   name: string;
@@ -209,10 +210,26 @@ export function FoodsScreen() {
   const todayIdx = 0;
   const isLastWeek = weekIndex === weeks.length - 1;
   const canGenerateMore = weeksAhead < MAX_WEEKS_AHEAD;
+  const [generating, setGenerating] = useState<null | "next" | "reroll">(null);
   function generateNextWeek() {
-    if (!canGenerateMore) return;
-    actions.setOnboardingExtras({ weeksAhead: weeksAhead + 1 });
-    setWeekIndex(weekIndex + 1);
+    if (!canGenerateMore || generating) return;
+    setGenerating("next");
+    setTimeout(() => {
+      actions.setOnboardingExtras({ weeksAhead: weeksAhead + 1 });
+      setWeekIndex((i) => i + 1);
+      setGenerating(null);
+    }, 1800);
+  }
+  function rerollWeek() {
+    if (generating) return;
+    setGenerating("reroll");
+    setTimeout(() => {
+      actions.setOnboardingExtras({
+        weekPlanSeed: planSeed + 1,
+        shoppingChecked: [],
+      });
+      setGenerating(null);
+    }, 1800);
   }
 
   function step(dir: number) {
@@ -309,20 +326,32 @@ export function FoodsScreen() {
   return (
     <LockedState feature="nutrition-guide">
       <div className="stagger-up space-y-4 pb-32">
-        <header>
-          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-muted">
-            YOUR FOOD WEEK
-          </p>
-          <h1 className="font-display mt-1 text-[34px] leading-[1.04] text-ink-2">
-            {week.name === "This week" ? (
-              <>
-                This <span className="text-forest">week.</span>
-              </>
-            ) : (
-              week.name
-            )}
-          </h1>
-          <p className="mt-1 text-xs text-muted">{week.range} · {mealsPerDay} meals/day</p>
+        <header className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-muted">
+              YOUR FOOD WEEK
+            </p>
+            <h1 className="font-display mt-1 text-[34px] leading-[1.04] text-ink-2">
+              {week.name === "This week" ? (
+                <>
+                  This <span className="text-forest">week.</span>
+                </>
+              ) : (
+                week.name
+              )}
+            </h1>
+            <p className="mt-1 text-xs text-muted">{week.range}</p>
+          </div>
+          <button
+            type="button"
+            data-tap
+            onClick={() => setMealCountOpen(true)}
+            aria-haspopup="dialog"
+            className="tap-bounce mt-1 inline-flex h-8 shrink-0 items-center gap-1 rounded-full bg-white px-3 text-[11px] font-medium text-ink-2 shadow-sm"
+            aria-label="Change meals per day"
+          >
+            <Utensils size={12} aria-hidden /> {mealsPerDay}/day
+          </button>
         </header>
 
         {week.showShop ? (
@@ -353,7 +382,7 @@ export function FoodsScreen() {
           >
             <ChevronLeft size={16} aria-hidden />
           </button>
-          <div className="flex flex-1 items-center justify-center gap-1.5">
+          <div className="flex flex-1 items-center justify-center gap-2">
             <span
               className={clsx(
                 "rounded-full px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-[0.14em]",
@@ -365,27 +394,17 @@ export function FoodsScreen() {
             <button
               type="button"
               data-tap
-              onClick={() => setMealCountOpen(true)}
-              aria-haspopup="dialog"
-              className="tap-bounce inline-flex h-7 items-center gap-1 rounded-full bg-white px-2.5 text-[11px] font-medium text-ink-2 shadow-sm"
-              aria-label="Change meals per day"
-            >
-              <Utensils size={11} aria-hidden /> {mealsPerDay}/day
-            </button>
-            <button
-              type="button"
-              data-tap
-              onClick={() =>
-                actions.setOnboardingExtras({
-                  weekPlanSeed: planSeed + 1,
-                  shoppingChecked: [],
-                })
-              }
-              className="tap-bounce grid h-7 w-7 place-items-center rounded-full bg-white text-ink-2 shadow-sm"
+              onClick={rerollWeek}
+              disabled={generating !== null}
+              className="tap-bounce grid h-7 w-7 place-items-center rounded-full bg-white text-ink-2 shadow-sm disabled:opacity-50"
               aria-label="Re-roll the week"
               title="Re-roll the week"
             >
-              <RefreshCw size={12} aria-hidden />
+              <RefreshCw
+                size={12}
+                aria-hidden
+                className={generating === "reroll" ? "animate-spin" : ""}
+              />
             </button>
           </div>
           {isLastWeek && canGenerateMore ? (
@@ -393,10 +412,20 @@ export function FoodsScreen() {
               type="button"
               data-tap
               onClick={generateNextWeek}
-              className="tap-bounce inline-flex h-9 items-center gap-1 rounded-full bg-forest px-3 text-xs font-medium text-white shadow-sm"
+              disabled={generating !== null}
+              className="tap-bounce inline-flex h-9 shrink-0 items-center gap-1 rounded-full bg-forest px-3.5 text-xs font-medium text-white shadow-sm disabled:opacity-70"
               aria-label="Generate next week"
             >
-              <Plus size={14} aria-hidden /> Generate
+              {generating === "next" ? (
+                <>
+                  <Sparkles size={14} className="animate-pulse" aria-hidden />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Plus size={14} aria-hidden /> Generate
+                </>
+              )}
             </button>
           ) : (
             <button
@@ -666,7 +695,9 @@ function ChapterCard({
                 }}
                 aria-label={`${slotLabel}: ${m.key}`}
               >
-                <div className="text-[20px] leading-none">{mealIcoFor(m.key)}</div>
+                <div className="flex justify-center">
+                  <RecipeIcon recipeKey={m.key} size={40} rounded={12} />
+                </div>
                 <div
                   className="mt-1 text-[10px] truncate"
                   style={{
@@ -717,12 +748,13 @@ function ChapterCard({
                     {slotLabel}
                   </div>
                   <div
-                    className="text-[11px] font-medium leading-tight"
+                    className="flex items-center gap-2 text-[11px] font-medium leading-tight"
                     style={{
                       color: isToday ? "white" : "var(--ink-2, #18241f)",
                     }}
                   >
-                    {mealIcoFor(m.key)} {m.key}
+                    <RecipeIcon recipeKey={m.key} size={28} rounded={9} />
+                    <span className="min-w-0 truncate">{m.key}</span>
                   </div>
                 </button>
               );
@@ -892,6 +924,14 @@ function RecipeSheet({
   const pantrySet = new Set(pantry.map((p) => p.toLowerCase()));
   const planned = plannedNutritionForRecipe(recipe, slotIdx, mealsPerDay, targets);
 
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
+
   function startDrag(event: PointerEvent<HTMLDivElement>) {
     dragStartY.current = event.clientY;
     event.currentTarget.setPointerCapture(event.pointerId);
@@ -903,7 +943,7 @@ function RecipeSheet({
   }
 
   function endDrag() {
-    const shouldClose = dragY > 84;
+    const shouldClose = dragY > 60;
     dragStartY.current = null;
     setDragY(0);
     if (shouldClose) onClose();
@@ -918,31 +958,53 @@ function RecipeSheet({
         onClick={onClose}
       />
       <div
-        className="sheet-anim relative mx-auto max-h-[92vh] w-full max-w-[480px] overflow-y-auto rounded-t-[28px] bg-white px-5 pt-3 shadow-elevated"
+        className="sheet-anim relative mx-auto flex max-h-[92vh] w-full max-w-[480px] flex-col rounded-t-[28px] bg-white shadow-elevated"
         style={{
-          paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 22px)",
           transform: dragY ? `translateY(${dragY}px)` : undefined,
         }}
       >
         <div
-          className="mx-auto mb-3 flex h-7 w-24 touch-none cursor-grab items-start justify-center pt-2 active:cursor-grabbing"
+          className="flex h-10 w-full touch-none cursor-grab items-center justify-center active:cursor-grabbing"
           onPointerDown={startDrag}
           onPointerMove={moveDrag}
           onPointerUp={endDrag}
           onPointerCancel={endDrag}
           aria-label="Swipe down to close"
         >
-          <div className="h-1 w-10 rounded-full bg-stone-2" />
+          <div className="h-1.5 w-12 rounded-full bg-stone-2" />
         </div>
-        <div className="flex items-center gap-3">
-          <span className="text-[44px] leading-none">{mealIcoFor(name)}</span>
-          <div>
-            <h3 className="font-display text-2xl text-ink-2">{name}</h3>
-            <p className="text-xs text-muted">
-              {day} · {slot} · {recipe.time}
-            </p>
+        <div
+          className="flex-1 overflow-y-auto overscroll-contain px-5 pt-1"
+          style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 22px)" }}
+        >
+        <TiltCard
+          intensity={8}
+          className="overflow-hidden rounded-2xl p-4"
+          style={{
+            background:
+              "linear-gradient(135deg,#fde68a,#fdba74 60%,#f87171)",
+            color: "#1d2a22",
+            boxShadow: "0 18px 40px rgba(244,114,82,0.28)",
+          }}
+        >
+          <div className="flex items-center gap-3">
+            <span className="relative inline-block shrink-0" aria-hidden>
+              <RecipeIcon recipeKey={name} size={64} rounded={18} />
+              <RecipeSteam
+                key={name}
+                trigger={name}
+                count={8}
+                topOffset={-8}
+              />
+            </span>
+            <div className="min-w-0">
+              <h3 className="font-display text-2xl leading-tight">{name}</h3>
+              <p className="text-xs opacity-75">
+                {day} · {slot} · {recipe.time}
+              </p>
+            </div>
           </div>
-        </div>
+        </TiltCard>
 
         <div className="mt-4 grid grid-cols-4 gap-2">
           <Stat label="Kcal" value={planned.calories} />
@@ -1041,6 +1103,7 @@ function RecipeSheet({
           >
             Done
           </button>
+        </div>
         </div>
       </div>
     </div>
@@ -1228,7 +1291,7 @@ function SwapSheet({
                     onClick={() => onPick(key)}
                     className="tap-bounce flex min-w-0 flex-1 items-center gap-3 text-left"
                   >
-                    <span className="text-2xl leading-none">{mealIcoFor(key)}</span>
+                    <RecipeIcon recipeKey={key} size={40} rounded={12} />
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-sm font-medium">{key}</div>
                       <div className="text-[11px] text-muted">
@@ -1319,7 +1382,8 @@ function GenerateWeek({
   }, [phase, onDone]);
 
   return (
-    <div className="stagger-up space-y-4 pb-32">
+    <div className="stagger-up relative space-y-4 pb-32">
+      <AmbientDrift density={5} className="rounded-3xl opacity-60" />
       <header>
         <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-muted">
           YOUR FOOD WEEK

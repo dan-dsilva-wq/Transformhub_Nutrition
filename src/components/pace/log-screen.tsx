@@ -8,7 +8,6 @@ import {
   ChevronDown,
   ChevronUp,
   Image as ImageIcon,
-  Loader2,
   Search,
   ScanBarcode,
   Trash2,
@@ -40,6 +39,11 @@ import {
   CameraResultType,
   CameraSource,
 } from "@capacitor/camera";
+import {
+  ConfettiBurst,
+  MagicCameraOverlay,
+  StickerFlick,
+} from "./personality";
 
 async function captureNative(source: CameraSource): Promise<string | null> {
   try {
@@ -70,9 +74,16 @@ export function LogScreen() {
   const router = useRouter();
   const { actions } = useAppState();
   const meals = useTodayMeals();
+  const [savedBurst, setSavedBurst] = useState<number | null>(null);
+  const wasMealCount = useRef(meals.length);
+  useEffect(() => {
+    if (meals.length > wasMealCount.current) setSavedBurst(Date.now());
+    wasMealCount.current = meals.length;
+  }, [meals.length]);
 
   return (
     <div className="stagger-up space-y-4">
+      <ConfettiBurst trigger={savedBurst} withCheck={true} withSplash={true} />
       <header>
         <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-muted">
           LOG · TODAY
@@ -111,11 +122,12 @@ export function LogScreen() {
       {meals.length > 0 ? (
         <section className="pt-2">
           <SectionHeader eyebrow="Logged" title="Today's meals" />
+          <ReactionsBar />
           <ul className="space-y-2">
-            {meals.map((m) => (
+            {meals.map((m, idx) => (
               <li
                 key={m.id}
-                className="card-flat flex items-center gap-3.5 px-4 py-3"
+                className={"card-flat flex items-center gap-3.5 px-4 py-3 " + (idx === 0 ? "wiggle-anim" : "")}
               >
                 {m.imageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -333,16 +345,26 @@ function PhotoFlow({ onTypeFood }: { onTypeFood: () => void }) {
     <div className="space-y-4">
       {!estimate ? (
         <Card className="!p-4">
-          <div className="flex items-center gap-3">
-            <div className="relative h-16 w-16 shrink-0">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={preview} alt="" className="h-16 w-16 rounded-2xl object-cover" />
-              {busy ? (
-                <div className="absolute inset-0 grid place-items-center rounded-2xl bg-black/35">
-                  <Loader2 size={22} className="animate-spin text-white" aria-hidden />
-                </div>
-              ) : null}
-            </div>
+          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border-[6px] border-stone-2 bg-black">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={preview}
+              alt=""
+              className="h-full w-full object-cover"
+              style={{ filter: busy ? "saturate(1.1) brightness(0.86)" : undefined }}
+            />
+            <MagicCameraOverlay active={busy} label="Reading your plate…" />
+            <button
+              type="button"
+              data-tap
+              onClick={discard}
+              aria-label="Discard"
+              className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-black/55 text-white backdrop-blur"
+            >
+              <X size={16} />
+            </button>
+          </div>
+          <div className="mt-3 flex items-start gap-3">
             <div className="min-w-0 flex-1">
               <h2 className="font-display text-xl text-ink-2">
                 {busy ? "Estimating your meal…" : "Photo ready"}
@@ -354,15 +376,6 @@ function PhotoFlow({ onTypeFood }: { onTypeFood: () => void }) {
               </p>
               {error ? <p className="mt-1 text-sm text-clay">{error}</p> : null}
             </div>
-            <button
-              type="button"
-              data-tap
-              onClick={discard}
-              aria-label="Discard"
-              className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted hover:bg-white/60"
-            >
-              <X size={16} />
-            </button>
           </div>
         </Card>
       ) : (
@@ -1332,6 +1345,20 @@ function BarcodeScanner({
 }
 
 /* ───────────────────────── helpers ───────────────────────── */
+
+function ReactionsBar() {
+  return (
+    <div className="mb-3 rounded-3xl border border-white/60 bg-white/40 p-3 backdrop-blur-xl">
+      <div className="mb-2 text-center text-[10px] font-medium uppercase tracking-[0.18em] text-muted">
+        How did that meal feel?
+      </div>
+      <StickerFlick
+        stickers={["💪", "🥗", "🔥", "😋", "☀️"]}
+        className="min-h-[68px]"
+      />
+    </div>
+  );
+}
 
 function fileToDataUrl(file: File) {
   return new Promise<string>((resolve, reject) => {

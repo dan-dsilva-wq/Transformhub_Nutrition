@@ -1,0 +1,1545 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Pace · Life &amp; Personality</title>
+<style>
+  :root {
+    --forest:   #2f5d3a;
+    --forest-2: #3f7a4d;
+    --leaf:     #5ea36a;
+    --moss:     #7ab080;
+    --cream:    #f7f3ec;
+    --cream-2:  #efe7d7;
+    --stone:    #e8e2d6;
+    --stone-2:  #d6cfbf;
+    --ink:      #1d2a22;
+    --ink-2:    #2a3a30;
+    --muted:    #6e7a72;
+    --sun:      #f3b04a;
+    --sun-2:    #f6c875;
+    --honey:    #e69b3a;
+    --berry:    #c4527c;
+    --rose:     #e29bb5;
+    --sky:      #c8def0;
+    --sky-2:    #9dc5e3;
+    --dusk:     #e8b6a8;
+    --gold:     #c9a25b;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+    background:
+      radial-gradient(1200px 600px at 80% -20%, rgba(243,176,74,0.12), transparent 60%),
+      radial-gradient(900px 500px at -10% 110%, rgba(94,163,106,0.12), transparent 60%),
+      var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 0 0 96px;
+  }
+  .page-pad { padding: 0 20px; max-width: 1240px; margin: 0 auto; }
+  .display { font-family: "Cormorant Garamond", "Times New Roman", Georgia, serif; font-weight: 500; letter-spacing: -0.01em; }
+
+  /* ============ HERO ============ */
+  .hero {
+    position: relative;
+    height: 420px;
+    margin: 0 0 28px;
+    overflow: hidden;
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+    background:
+      linear-gradient(180deg, var(--sky) 0%, #e5d6c5 60%, var(--cream) 100%);
+  }
+  .hero .sun {
+    position: absolute;
+    width: 140px; height: 140px;
+    top: 60px; left: 50%;
+    transform: translateX(-50%);
+    background: radial-gradient(circle at 50% 50%, #fff5d8 0%, var(--sun-2) 40%, var(--sun) 70%, rgba(243,176,74,0) 80%);
+    border-radius: 50%;
+    filter: blur(0.5px);
+    animation: sunArc 24s linear infinite;
+  }
+  @keyframes sunArc {
+    0%   { transform: translateX(-50%) translateY(0) scale(1); }
+    50%  { transform: translateX(-50%) translateY(-20px) scale(1.04); }
+    100% { transform: translateX(-50%) translateY(0) scale(1); }
+  }
+  .hero .cloud {
+    position: absolute;
+    background: white;
+    border-radius: 999px;
+    filter: blur(8px);
+    opacity: 0.7;
+    animation: drift-cloud 50s linear infinite;
+  }
+  @keyframes drift-cloud {
+    from { transform: translateX(-200px); }
+    to   { transform: translateX(120vw); }
+  }
+  .hero .hills {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 220px;
+  }
+  .hero .ground {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 100px;
+    background:
+      radial-gradient(120% 80% at 50% 100%, rgba(94,163,106,0.7), rgba(94,163,106,0.0) 70%),
+      linear-gradient(180deg, transparent, rgba(0,0,0,0.05));
+  }
+  .hero .hero-content {
+    position: relative; z-index: 2;
+    height: 100%;
+    display: grid; grid-template-columns: 1.2fr 1fr;
+    gap: 32px; align-items: center;
+    padding: 32px 32px 0;
+  }
+  .hero .hero-text { max-width: 540px; }
+  .hero .eyebrow {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.32em;
+    text-transform: uppercase; color: var(--ink-2); opacity: 0.7;
+  }
+  .hero h1 {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-weight: 500;
+    font-size: clamp(40px, 6vw, 68px);
+    line-height: 1.0; margin: 8px 0 12px;
+    color: var(--ink);
+  }
+  .hero h1 em {
+    font-style: italic; color: var(--forest); font-weight: 500;
+  }
+  .hero p.lead {
+    font-size: 15px; max-width: 460px; color: var(--ink-2);
+    margin: 0 0 18px;
+  }
+  .hero .pills {
+    display: flex; gap: 8px; flex-wrap: wrap;
+  }
+  .pill {
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    padding: 8px 14px; border-radius: 999px;
+    font-size: 12px; font-weight: 500; color: var(--ink-2);
+    border: 1px solid rgba(255,255,255,0.6);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+  }
+  .pill .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--forest); margin-right: 6px; vertical-align: middle; }
+
+  /* ============ Sprout HD (SVG) ============ */
+  .sprout-stage {
+    position: relative;
+    height: 100%;
+    display: flex; align-items: flex-end; justify-content: center;
+    padding-bottom: 20px;
+  }
+  .sprout-shadow {
+    position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%);
+    width: 180px; height: 18px;
+    background: radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0.22), transparent 70%);
+    filter: blur(2px);
+    animation: shadow-bob 4.6s ease-in-out infinite;
+  }
+  @keyframes shadow-bob {
+    0%,100% { transform: translateX(-50%) scaleX(1); opacity: 0.45; }
+    50%     { transform: translateX(-50%) scaleX(0.92); opacity: 0.3; }
+  }
+  .sprout-svg {
+    width: 240px; height: auto;
+    animation: float 4.6s ease-in-out infinite;
+    filter: drop-shadow(0 16px 28px rgba(47,93,58,0.18));
+  }
+  @keyframes float {
+    0%,100% { transform: translateY(0) rotate(-1.5deg); }
+    50%     { transform: translateY(-8px) rotate(1.5deg); }
+  }
+  .sprout-svg .leaf {
+    transform-origin: 50% 100%;
+    animation: sway 4.6s ease-in-out infinite;
+  }
+  .sprout-svg .leaf.r { animation-delay: -2.3s; }
+  @keyframes sway {
+    0%,100% { transform: rotate(-3deg); }
+    50%     { transform: rotate(3deg); }
+  }
+  .sprout-svg .eye-shine { animation: blink-svg 5s infinite; transform-origin: center; transform-box: fill-box; }
+  @keyframes blink-svg {
+    0%, 92%, 100% { transform: scaleY(1); }
+    95% { transform: scaleY(0.1); }
+  }
+  .speech {
+    position: absolute; top: 30px; left: 50%; transform: translateX(-30%);
+    background: white; padding: 12px 16px; border-radius: 18px 18px 4px 18px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.10);
+    font-size: 13px; color: var(--ink-2); font-weight: 500;
+    max-width: 240px;
+    animation: bubble-in 0.6s cubic-bezier(.34,1.56,.64,1);
+  }
+  .speech .name { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--forest); font-weight: 700; margin-bottom: 3px; }
+  @keyframes bubble-in {
+    from { opacity: 0; transform: translateX(-30%) translateY(8px) scale(0.9); }
+    to   { opacity: 1; transform: translateX(-30%) translateY(0) scale(1); }
+  }
+
+  /* ============ Section heading ============ */
+  .section-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin: 24px 0 16px;
+  }
+  .section-head h2 {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-weight: 500; font-size: 28px; margin: 0; color: var(--ink);
+  }
+  .section-head .sub { color: var(--muted); font-size: 13px; max-width: 440px; }
+
+  /* ============ Card grid ============ */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 18px;
+  }
+  .card {
+    background: white;
+    border-radius: 28px;
+    padding: 22px;
+    box-shadow:
+      0 1px 2px rgba(20,30,25,0.04),
+      0 12px 36px rgba(20,30,25,0.06);
+    position: relative;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    min-height: 320px;
+  }
+  .card.span4 { grid-column: span 4; }
+  .card.span6 { grid-column: span 6; }
+  .card.span8 { grid-column: span 8; }
+  .card.span12 { grid-column: span 12; }
+  @media (max-width: 1000px) {
+    .card.span4, .card.span6, .card.span8 { grid-column: span 6; }
+  }
+  @media (max-width: 720px) {
+    .card.span4, .card.span6, .card.span8 { grid-column: span 12; }
+    .hero { height: auto; padding-bottom: 24px; }
+    .hero .hero-content { grid-template-columns: 1fr; padding: 24px 20px 0; }
+    .sprout-stage { height: 280px; }
+  }
+  .card .label {
+    font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase;
+    color: var(--muted); font-weight: 700;
+  }
+  .card h3 { font-family: "Cormorant Garamond", Georgia, serif; font-weight: 500; margin: 6px 0 6px; font-size: 24px; color: var(--ink); letter-spacing: -0.005em; }
+  .card .desc { font-size: 13px; color: var(--muted); margin: 0 0 14px; line-height: 1.5; }
+  .card .stage {
+    flex: 1;
+    border-radius: 22px;
+    background:
+      radial-gradient(120% 80% at 50% 0%, rgba(255,255,255,0.6), transparent 60%),
+      linear-gradient(180deg, #fbf8f1, #ece4d3);
+    position: relative; overflow: hidden;
+    min-height: 220px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .stage.dark {
+    background: linear-gradient(180deg, #1c1f2c, #2a2540);
+  }
+  .stage.dusk {
+    background:
+      radial-gradient(140% 80% at 50% 100%, rgba(243,176,74,0.4), transparent 60%),
+      linear-gradient(180deg, #4a3868 0%, #c46e5a 60%, #f3b04a 100%);
+  }
+  .btn {
+    align-self: flex-start;
+    margin-top: 14px;
+    background: var(--forest);
+    color: white;
+    border: 0;
+    padding: 10px 16px;
+    border-radius: 999px;
+    font-size: 12px; font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 6px 16px rgba(47,93,58,0.28);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    font-family: inherit;
+  }
+  .btn:hover { box-shadow: 0 8px 20px rgba(47,93,58,0.32); }
+  .btn:active { transform: scale(0.96); }
+  .btn.ghost {
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    color: var(--ink-2);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    border: 1px solid rgba(0,0,0,0.04);
+  }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+
+  /* ============ DEMO: Confetti / splash ============ */
+  .confetti-stage { cursor: pointer; }
+  .confetti {
+    position: absolute; width: 10px; height: 14px; border-radius: 2px;
+    pointer-events: none; will-change: transform, opacity;
+  }
+  @keyframes confetti-fall {
+    0%   { transform: translate(var(--x0), -20px) rotate(0deg); opacity: 1; }
+    100% { transform: translate(calc(var(--x0) + var(--xd)), 240px) rotate(720deg); opacity: 0; }
+  }
+  .splash-ring {
+    position: absolute; width: 60px; height: 60px;
+    border-radius: 50%;
+    border: 3px solid var(--forest);
+    pointer-events: none;
+    animation: splash-out 0.9s ease-out forwards;
+  }
+  @keyframes splash-out {
+    from { transform: scale(0.4); opacity: 0.9; }
+    to   { transform: scale(3); opacity: 0; }
+  }
+  .check-burst {
+    width: 84px; height: 84px;
+    background: linear-gradient(180deg, var(--forest-2), var(--forest));
+    border-radius: 50%;
+    display: grid; place-items: center;
+    color: white; font-size: 42px; font-weight: 700;
+    box-shadow: 0 12px 32px rgba(47,93,58,0.4), inset 0 -4px 0 rgba(0,0,0,0.15);
+    animation: check-pop 0.6s cubic-bezier(.34,1.56,.64,1);
+    z-index: 2;
+  }
+  @keyframes check-pop {
+    0%   { transform: scale(0) rotate(-90deg); }
+    60%  { transform: scale(1.18) rotate(8deg); }
+    100% { transform: scale(1) rotate(0); }
+  }
+
+  /* ============ DEMO: Streak flame with embers ============ */
+  .flame {
+    position: relative;
+    width: 120px; height: 160px;
+  }
+  .flame .core {
+    position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 70px; height: 110px;
+    background: radial-gradient(ellipse at 50% 80%, #fff7c2 0%, #ffd24a 30%, #ff8a3d 60%, #e84e2c 100%);
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    animation: flicker 1.4s ease-in-out infinite alternate;
+    filter: drop-shadow(0 0 18px rgba(255,138,61,0.65));
+  }
+  .flame .inner {
+    position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%);
+    width: 32px; height: 56px;
+    background: radial-gradient(ellipse at 50% 80%, #fffce8 0%, #ffd24a 70%, transparent 100%);
+    border-radius: 50%;
+    animation: flicker 0.9s ease-in-out infinite alternate-reverse;
+    mix-blend-mode: screen;
+  }
+  @keyframes flicker {
+    0%   { transform: translateX(-50%) scale(1, 1) rotate(-2deg); }
+    100% { transform: translateX(-50%) scale(1.05, 1.10) rotate(2deg); }
+  }
+  .ember {
+    position: absolute; bottom: 80px; left: 50%;
+    width: 4px; height: 4px;
+    background: radial-gradient(circle, #ffd24a, #e84e2c 70%, transparent 100%);
+    border-radius: 50%;
+    animation: ember-rise 2.4s ease-out infinite;
+    opacity: 0;
+  }
+  @keyframes ember-rise {
+    0%   { transform: translate(-50%, 0) scale(1); opacity: 1; }
+    100% { transform: translate(calc(-50% + var(--ex)), -120px) scale(0.2); opacity: 0; }
+  }
+  .streak-num {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 64px; font-weight: 500;
+    line-height: 1;
+    background: linear-gradient(180deg, #ffd676, #ff8a3d);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    text-align: center;
+  }
+  .streak-lbl { font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); text-align: center; margin-top: 4px; }
+
+  /* ============ DEMO: Liquid macro orbs ============ */
+  .orbs { display: flex; gap: 22px; align-items: flex-end; }
+  .orb {
+    position: relative;
+    width: 88px; height: 88px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: radial-gradient(circle at 32% 30%, rgba(255,255,255,0.6), rgba(0,0,0,0.05) 60%);
+    box-shadow:
+      inset -6px -10px 16px rgba(0,0,0,0.08),
+      inset 4px 8px 12px rgba(255,255,255,0.4),
+      0 8px 22px rgba(0,0,0,0.12);
+  }
+  .orb .liquid {
+    position: absolute; left: -25%; right: -25%; bottom: 0;
+    height: 100%;
+    border-radius: 50% 50% 0 0 / 12% 12% 0 0;
+    transform-origin: 50% 100%;
+  }
+  .orb.p .liquid {
+    background: linear-gradient(180deg, var(--leaf), var(--forest));
+    height: 78%;
+    animation: wave-orb 4s ease-in-out infinite;
+  }
+  .orb.c .liquid {
+    background: linear-gradient(180deg, var(--sun-2), var(--honey));
+    height: 52%;
+    animation: wave-orb 4.6s ease-in-out infinite;
+  }
+  .orb.f .liquid {
+    background: linear-gradient(180deg, var(--rose), var(--berry));
+    height: 64%;
+    animation: wave-orb 5.2s ease-in-out infinite;
+  }
+  @keyframes wave-orb {
+    0%,100% { transform: translateX(-2%) rotate(-1.5deg); }
+    50%     { transform: translateX(2%) rotate(1.5deg); }
+  }
+  .orb .cap {
+    position: absolute; bottom: 12px; left: 0; right: 0; text-align: center;
+    color: white; font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.25);
+  }
+  .orb .num {
+    position: absolute; top: 16px; left: 0; right: 0; text-align: center;
+    color: white; font-family: "Cormorant Garamond", Georgia, serif; font-size: 22px; font-weight: 600;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.25);
+  }
+
+  /* ============ DEMO: Progress ring ============ */
+  .ring-wrap { position: relative; width: 180px; height: 180px; }
+  .ring-wrap svg { transform: rotate(-90deg); display: block; }
+  .ring-track { fill: none; stroke: rgba(0,0,0,0.06); stroke-width: 14; }
+  .ring-fill {
+    fill: none; stroke: url(#ringGrad); stroke-width: 14; stroke-linecap: round;
+    stroke-dasharray: 502;
+    stroke-dashoffset: 502;
+    animation: fill-ring 1.8s cubic-bezier(.5,0,.2,1) forwards;
+    filter: drop-shadow(0 4px 10px rgba(47,93,58,0.25));
+  }
+  @keyframes fill-ring { to { stroke-dashoffset: 130; } }
+  .ring-center {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .ring-center .v {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 56px; font-weight: 500; line-height: 1;
+    color: var(--ink);
+  }
+  .ring-center .v sup { font-size: 22px; color: var(--muted); margin-left: 2px; vertical-align: top; }
+  .ring-center .l { font-size: 10px; color: var(--muted); letter-spacing: 0.22em; text-transform: uppercase; margin-top: 2px; }
+
+  /* ============ DEMO: Garden grows ============ */
+  .garden {
+    position: relative; width: 100%; height: 100%;
+    display: flex; align-items: flex-end; justify-content: center;
+  }
+  .garden .ground-plot {
+    position: absolute; left: 8%; right: 8%; bottom: 16%; height: 30px;
+    background: linear-gradient(180deg, #8d6a4c 0%, #6d4f37 100%);
+    border-radius: 12px;
+    box-shadow: inset 0 -4px 0 rgba(0,0,0,0.18);
+  }
+  .garden .ground-plot::before {
+    content: ""; position: absolute; left: 0; right: 0; top: -8px; height: 14px;
+    background:
+      radial-gradient(circle at 10% 50%, #4a3320 6px, transparent 7px),
+      radial-gradient(circle at 30% 50%, #3a2818 5px, transparent 6px),
+      radial-gradient(circle at 50% 50%, #4a3320 7px, transparent 8px),
+      radial-gradient(circle at 70% 50%, #3a2818 5px, transparent 6px),
+      radial-gradient(circle at 90% 50%, #4a3320 6px, transparent 7px);
+  }
+  .veg {
+    position: absolute; bottom: 16%;
+    transform-origin: 50% 100%;
+    transform: scale(0);
+    animation: pop-up 0.7s cubic-bezier(.34,1.56,.64,1) forwards;
+  }
+  @keyframes pop-up {
+    0%   { transform: scale(0) translateY(10px); }
+    60%  { transform: scale(1.1) translateY(-4px); }
+    100% { transform: scale(1) translateY(0); }
+  }
+  .veg svg { display: block; }
+  .garden .sun-mini {
+    position: absolute; top: 18px; right: 22px;
+    width: 44px; height: 44px;
+    background: radial-gradient(circle, #fff5d8, var(--sun));
+    border-radius: 50%;
+    box-shadow: 0 0 32px rgba(243,176,74,0.5);
+    animation: sun-pulse 4s ease-in-out infinite;
+  }
+  @keyframes sun-pulse {
+    0%,100% { transform: scale(1); }
+    50%     { transform: scale(1.06); }
+  }
+
+  /* ============ DEMO: Recipe card with steam ============ */
+  .recipe-stage { perspective: 1000px; }
+  .recipe-card {
+    width: 220px; height: 260px;
+    background: linear-gradient(180deg, #fff 0%, #f9f3e6 100%);
+    border-radius: 24px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.14);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transform-style: preserve-3d;
+    transition: transform 0.5s cubic-bezier(.4,0,.2,1);
+  }
+  .recipe-card:hover { transform: rotateY(-6deg) rotateX(4deg); }
+  .recipe-card .photo {
+    height: 140px;
+    background:
+      radial-gradient(circle at 30% 40%, #f3b04a, #c4527c 80%);
+    position: relative;
+    overflow: hidden;
+  }
+  .recipe-card .photo::before {
+    content: "🍲";
+    position: absolute; inset: 0; display: grid; place-items: center;
+    font-size: 64px;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+  }
+  .recipe-card .body { padding: 14px 16px; }
+  .recipe-card .name { font-family: "Cormorant Garamond", Georgia, serif; font-weight: 500; font-size: 20px; margin-bottom: 2px; }
+  .recipe-card .meta { font-size: 11px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+  .steam {
+    position: absolute; left: 50%; top: 80px; transform: translateX(-50%);
+    width: 6px; height: 30px;
+    background: radial-gradient(ellipse, rgba(255,255,255,0.85), transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: steam-rise 1.6s ease-out forwards;
+    opacity: 0;
+  }
+  @keyframes steam-rise {
+    0%   { transform: translate(-50%, 0) scale(1); opacity: 0.9; }
+    100% { transform: translate(calc(-50% + var(--sx)), -110px) scale(2.5); opacity: 0; }
+  }
+
+  /* ============ DEMO: Tap pulse ============ */
+  .tap-target {
+    width: 100px; height: 100px;
+    background: linear-gradient(180deg, var(--forest-2), var(--forest));
+    color: white;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 38px; font-weight: 300;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.12s ease;
+    box-shadow:
+      0 14px 30px rgba(47,93,58,0.35),
+      inset 0 -6px 0 rgba(0,0,0,0.2);
+  }
+  .tap-target::before {
+    content: ""; position: absolute; inset: 4px; border-radius: 50%;
+    background: radial-gradient(circle at 30% 25%, rgba(255,255,255,0.35), transparent 50%);
+    pointer-events: none;
+  }
+  .tap-target:active { transform: scale(0.92); }
+  .tap-target.ripple::after {
+    content: ""; position: absolute; inset: 0; border-radius: 50%;
+    border: 2px solid var(--forest-2);
+    animation: ripple 0.8s ease-out forwards;
+  }
+  @keyframes ripple {
+    from { transform: scale(1); opacity: 0.7; }
+    to   { transform: scale(2.6); opacity: 0; }
+  }
+
+  /* ============ DEMO: Sticker flick ============ */
+  .stickers { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  .sticker {
+    width: 64px; height: 64px;
+    background: white;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 32px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.10);
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(.34,1.56,.64,1);
+    border: 1px solid rgba(0,0,0,0.04);
+  }
+  .sticker:hover { transform: translateY(-6px) rotate(-8deg) scale(1.08); }
+  .sticker.flying {
+    position: absolute;
+    animation: fly 1.2s cubic-bezier(.4,0,.2,1) forwards;
+    pointer-events: none;
+  }
+  @keyframes fly {
+    0%   { transform: translate(0,0) scale(1) rotate(0deg); opacity: 1; }
+    50%  { transform: translate(calc(var(--fx) * 0.5),-100px) scale(1.4) rotate(20deg); opacity: 1; }
+    100% { transform: translate(var(--fx), -200px) scale(1.8) rotate(60deg); opacity: 0; }
+  }
+
+  /* ============ DEMO: Ambient food bits ============ */
+  .ambient {
+    width: 100%; height: 100%; position: absolute; inset: 0;
+    overflow: hidden;
+  }
+  .ambient .dot {
+    position: absolute;
+    font-size: 26px;
+    animation: drift 16s linear infinite;
+    opacity: 0.55;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.08));
+  }
+  @keyframes drift {
+    from { transform: translate(0,260px) rotate(-20deg); }
+    to   { transform: translate(60px,-80px) rotate(360deg); }
+  }
+
+  /* ============ DEMO: Coach with character ============ */
+  .coach-row {
+    display: flex; align-items: flex-end; gap: 12px;
+    padding: 16px;
+    width: 100%;
+  }
+  .coach-avatar-svg { width: 52px; height: 52px; flex-shrink: 0; }
+  .coach-bubble {
+    background: white; padding: 14px 16px; border-radius: 20px 20px 20px 4px;
+    font-size: 13px; color: var(--ink-2);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    max-width: 240px;
+    line-height: 1.5;
+  }
+  .typing-dots { display: inline-flex; gap: 4px; padding: 4px 0; }
+  .typing-dots span {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--muted);
+    animation: bounce-dot 1.2s ease-in-out infinite;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes bounce-dot {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30%           { transform: translateY(-6px); opacity: 1; }
+  }
+
+  /* ============ DEMO: Odometer counter ============ */
+  .odometer {
+    display: inline-flex; gap: 4px;
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 84px; font-weight: 500;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .digit {
+    display: inline-block;
+    width: 0.6em; height: 1em;
+    overflow: hidden;
+    background: linear-gradient(180deg, #fff 0%, #f4eddd 100%);
+    border-radius: 8px;
+    box-shadow: inset 0 4px 8px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.6);
+    position: relative;
+  }
+  .digit .reel {
+    display: block;
+    transition: transform 1.2s cubic-bezier(.4,0,.2,1);
+  }
+  .digit .reel span {
+    display: block; height: 1em; text-align: center;
+  }
+  .ko { font-size: 12px; color: var(--muted); letter-spacing: 0.2em; text-transform: uppercase; margin-top: 12px; }
+
+  /* ============ DEMO: Glassmorphic toast ============ */
+  .toast-stage {
+    background: linear-gradient(135deg, #2a3a30, #4a3868) !important;
+    overflow: hidden;
+  }
+  .toast-stage::before {
+    content: "";
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(243,176,74,0.4), transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(196,82,124,0.3), transparent 50%);
+  }
+  .toast {
+    position: relative;
+    background: rgba(255,255,255,0.16);
+    backdrop-filter: blur(20px) saturate(160%); -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 18px;
+    padding: 14px 18px;
+    color: white;
+    display: flex; align-items: center; gap: 12px;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+    max-width: 300px;
+    animation: toast-in 0.6s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes toast-in {
+    from { opacity: 0; transform: translateY(20px) scale(0.92); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .toast .ico {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(255,255,255,0.18);
+    display: grid; place-items: center;
+    flex-shrink: 0;
+  }
+  .toast .t { font-size: 14px; font-weight: 600; }
+  .toast .s { font-size: 12px; opacity: 0.8; margin-top: 1px; }
+
+  /* ============ DEMO: Tilt card ============ */
+  .tilt-card {
+    width: 220px; height: 280px;
+    border-radius: 24px;
+    background:
+      linear-gradient(135deg, #2a3a30 0%, #3f7a4d 60%, #5ea36a 100%);
+    color: white;
+    padding: 24px;
+    transform-style: preserve-3d;
+    transition: transform 0.15s ease-out;
+    box-shadow: 0 24px 60px rgba(47,93,58,0.35);
+    position: relative;
+    overflow: hidden;
+  }
+  .tilt-card::before {
+    content: "";
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at var(--mx,30%) var(--my,20%), rgba(255,255,255,0.3) 0%, transparent 40%);
+    pointer-events: none;
+    transition: background 0.15s;
+  }
+  .tilt-card .lvl {
+    font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase;
+    color: var(--sun-2); font-weight: 700;
+  }
+  .tilt-card h4 {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-weight: 500; font-size: 32px; margin: 8px 0 0; line-height: 1.05;
+  }
+  .tilt-card .dish {
+    position: absolute; bottom: -20px; right: -20px;
+    font-size: 140px;
+    transform: translateZ(40px);
+    opacity: 0.95;
+    filter: drop-shadow(0 12px 24px rgba(0,0,0,0.3));
+  }
+  .tilt-card .row {
+    position: absolute; bottom: 22px; left: 24px;
+    transform: translateZ(30px);
+  }
+  .tilt-card .row .stat { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.7; }
+  .tilt-card .row .num { font-family: "Cormorant Garamond", Georgia, serif; font-size: 28px; }
+
+  /* ============ DEMO: Day cycle ============ */
+  .daycycle-wrap {
+    width: 100%; height: 100%;
+    position: absolute; inset: 0;
+    transition: background 1.2s ease;
+  }
+  .daycycle-arc {
+    position: absolute; left: -10%; right: -10%; top: 30%;
+    height: 200px;
+    border-top: 2px dashed rgba(255,255,255,0.4);
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  }
+  .celestial {
+    position: absolute; top: 50px;
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    transition: left 1.2s ease, top 1.2s ease, background 1.2s ease, box-shadow 1.2s ease;
+  }
+
+  /* ============ DEMO: Magic camera ============ */
+  .cam-frame {
+    width: 200px; height: 200px;
+    border-radius: 24px;
+    background: #1a1a1a;
+    position: relative;
+    overflow: hidden;
+    border: 8px solid #2a2a2a;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+  }
+  .cam-frame .feed {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 30% 40%, rgba(243,176,74,0.4), transparent 50%),
+      radial-gradient(circle at 70% 60%, rgba(196,82,124,0.3), transparent 50%),
+      linear-gradient(135deg, #2a3a30, #1a1f1a);
+    display: grid; place-items: center;
+    font-size: 80px;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+  }
+  .cam-scan {
+    position: absolute; left: 0; right: 0; top: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--leaf), transparent);
+    box-shadow: 0 0 12px var(--leaf);
+    animation: scan 2s ease-in-out infinite;
+  }
+  @keyframes scan {
+    0%,100% { top: 0%; opacity: 0; }
+    10%     { opacity: 1; }
+    50%     { top: 100%; opacity: 1; }
+    60%     { opacity: 0; }
+  }
+  .cam-corner {
+    position: absolute; width: 22px; height: 22px;
+    border: 3px solid var(--sun);
+    box-shadow: 0 0 12px var(--sun);
+  }
+  .cam-corner.tl { top: 40%; left: 30%; border-right: 0; border-bottom: 0; animation: corner-pulse 1.4s ease-in-out infinite; }
+  .cam-corner.tr { top: 40%; right: 30%; border-left: 0; border-bottom: 0; animation: corner-pulse 1.4s ease-in-out infinite 0.1s; }
+  .cam-corner.bl { bottom: 30%; left: 30%; border-right: 0; border-top: 0; animation: corner-pulse 1.4s ease-in-out infinite 0.2s; }
+  .cam-corner.br { bottom: 30%; right: 30%; border-left: 0; border-top: 0; animation: corner-pulse 1.4s ease-in-out infinite 0.3s; }
+  @keyframes corner-pulse {
+    0%,100% { transform: scale(1); opacity: 1; }
+    50%     { transform: scale(0.85); opacity: 0.6; }
+  }
+  .cam-tag {
+    position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(10px);
+    padding: 5px 12px; border-radius: 999px;
+    font-size: 11px; font-weight: 600; color: var(--ink-2);
+    animation: tag-fade 4s ease-in-out infinite;
+  }
+  @keyframes tag-fade {
+    0%, 30%, 100% { opacity: 0; transform: translateX(-50%) translateY(8px); }
+    40%, 90%      { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+
+  /* ============ DEMO: Meal log ============ */
+  .meal-card {
+    background: white; border-radius: 20px; padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    cursor: pointer;
+    width: 100%; max-width: 280px;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .meal-card:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(0,0,0,0.12); }
+  .meal-card.logged {
+    animation: wiggle 0.6s ease;
+  }
+  @keyframes wiggle {
+    0%,100% { transform: translateX(0) rotate(0); }
+    20%     { transform: translateX(-5px) rotate(-1.5deg); }
+    40%     { transform: translateX(5px) rotate(1.5deg); }
+    60%     { transform: translateX(-3px) rotate(-1deg); }
+    80%     { transform: translateX(3px) rotate(1deg); }
+  }
+  .meal-thumb {
+    width: 52px; height: 52px; border-radius: 14px;
+    background: linear-gradient(135deg, var(--sun), var(--berry));
+    display: grid; place-items: center;
+    font-size: 28px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+  }
+  .meal-info .n { font-weight: 600; font-size: 14px; }
+  .meal-info .m { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .meal-card .check {
+    margin-left: auto; width: 32px; height: 32px; border-radius: 50%;
+    background: var(--stone); display: grid; place-items: center;
+    color: white; transition: background 0.4s, transform 0.4s; font-weight: 700;
+  }
+  .meal-card.logged .check {
+    background: linear-gradient(135deg, var(--leaf), var(--forest));
+    transform: scale(1.15);
+    box-shadow: 0 4px 12px rgba(47,93,58,0.4);
+  }
+
+  /* ============ DEMO: Level-up burst ============ */
+  .levelup-stage {
+    cursor: pointer;
+    background: linear-gradient(180deg, #1c1f2c, #2a2540) !important;
+  }
+  .levelup-stage::before {
+    content: "";
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 50% 60%, rgba(243,176,74,0.4) 0%, transparent 50%);
+  }
+  .badge {
+    width: 110px; height: 110px;
+    background: linear-gradient(180deg, var(--sun-2), var(--honey));
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 44px; font-weight: 600;
+    color: var(--ink);
+    box-shadow:
+      0 0 0 6px rgba(243,176,74,0.2),
+      0 0 60px rgba(243,176,74,0.5),
+      inset 0 -6px 0 rgba(0,0,0,0.15);
+    position: relative;
+    z-index: 2;
+  }
+  .badge.burst { animation: badge-pop 1s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes badge-pop {
+    0%   { transform: scale(0) rotate(-180deg); }
+    60%  { transform: scale(1.2) rotate(15deg); }
+    100% { transform: scale(1) rotate(0); }
+  }
+  .ray {
+    position: absolute; top: 50%; left: 50%;
+    width: 4px; height: 80px;
+    background: linear-gradient(180deg, transparent, var(--sun), transparent);
+    transform-origin: 50% 0;
+    pointer-events: none;
+    opacity: 0;
+  }
+  .ray.show { animation: ray-show 1.4s ease-out forwards; }
+  @keyframes ray-show {
+    0%   { opacity: 0; transform: translate(-50%, 0) rotate(var(--rot)) scaleY(0.2); }
+    50%  { opacity: 0.8; transform: translate(-50%, 0) rotate(var(--rot)) scaleY(1.2); }
+    100% { opacity: 0; transform: translate(-50%, 0) rotate(var(--rot)) scaleY(1.6); }
+  }
+  .levelup-label {
+    position: absolute; bottom: 18px; left: 0; right: 0; text-align: center;
+    font-size: 10px; letter-spacing: 0.32em; text-transform: uppercase;
+    color: rgba(255,255,255,0.6); font-weight: 700;
+  }
+
+  /* ============ Footer ============ */
+  footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 48px; }
+  footer .meta { font-size: 11px; margin-top: 6px; opacity: 0.7; }
+</style>
+</head>
+<body>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="cloud" style="top: 60px; left: -100px; width: 160px; height: 36px; animation-duration: 60s;"></div>
+  <div class="cloud" style="top: 120px; left: -200px; width: 220px; height: 44px; animation-duration: 80s; animation-delay: -20s;"></div>
+  <div class="cloud" style="top: 40px; left: -150px; width: 100px; height: 22px; animation-duration: 45s; animation-delay: -10s; opacity: 0.5;"></div>
+  <div class="sun"></div>
+  <div class="ground"></div>
+
+  <div class="hero-content">
+    <div class="hero-text">
+      <div class="eyebrow">Pace · Personality system</div>
+      <h1>Make every tap feel <em>alive</em>.</h1>
+      <p class="lead">A living mascot, choreographed micro-moments, and surfaces that breathe. Tap any demo below to feel it. Tell me which ones make the cut.</p>
+      <div class="pills">
+        <span class="pill"><span class="dot"></span> Sprout · the mascot</span>
+        <span class="pill"><span class="dot"></span> 14 demos</span>
+        <span class="pill"><span class="dot"></span> Pure CSS · no deps</span>
+      </div>
+    </div>
+
+    <div class="sprout-stage">
+      <div class="sprout-shadow"></div>
+      <div class="speech" id="heroSpeech">
+        <div class="name">Sprout</div>
+        Morning! Looks like a 5-day streak day. Want to keep it gentle?
+      </div>
+      <svg class="sprout-svg" id="sproutHero" viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
+        <!-- pot -->
+        <defs>
+          <linearGradient id="potGrad" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#c89372"/>
+            <stop offset="100%" stop-color="#8e5e44"/>
+          </linearGradient>
+          <linearGradient id="leafGrad" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#7ab080"/>
+            <stop offset="100%" stop-color="#3f7a4d"/>
+          </linearGradient>
+          <linearGradient id="bodyGrad" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#7ab080"/>
+            <stop offset="100%" stop-color="#3f7a4d"/>
+          </linearGradient>
+          <radialGradient id="cheekGrad" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0%" stop-color="#f3a8c0" stop-opacity="0.9"/>
+            <stop offset="100%" stop-color="#f3a8c0" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+
+        <!-- pot -->
+        <path d="M50 200 L150 200 L142 232 Q142 240 134 240 L66 240 Q58 240 58 232 Z" fill="url(#potGrad)"/>
+        <ellipse cx="100" cy="200" rx="50" ry="6" fill="#3a2818"/>
+        <rect x="46" y="194" width="108" height="10" rx="2" fill="#a87a5a"/>
+
+        <!-- left leaf -->
+        <g class="leaf">
+          <path d="M100 130 Q60 120 50 90 Q70 100 96 120 Z" fill="url(#leafGrad)"/>
+          <path d="M100 130 Q70 120 56 96" stroke="rgba(0,0,0,0.15)" stroke-width="1.4" fill="none"/>
+        </g>
+        <!-- right leaf -->
+        <g class="leaf r">
+          <path d="M100 138 Q140 130 152 102 Q132 110 105 130 Z" fill="url(#leafGrad)"/>
+          <path d="M100 138 Q130 130 148 108" stroke="rgba(0,0,0,0.15)" stroke-width="1.4" fill="none"/>
+        </g>
+
+        <!-- body / face (round leaf head) -->
+        <ellipse cx="100" cy="100" rx="56" ry="52" fill="url(#bodyGrad)"/>
+        <!-- highlight -->
+        <ellipse cx="78" cy="80" rx="22" ry="14" fill="rgba(255,255,255,0.18)"/>
+
+        <!-- cheeks -->
+        <ellipse cx="68" cy="112" rx="11" ry="6" fill="url(#cheekGrad)"/>
+        <ellipse cx="132" cy="112" rx="11" ry="6" fill="url(#cheekGrad)"/>
+
+        <!-- eyes -->
+        <g class="eye-shine">
+          <ellipse cx="82" cy="96" rx="6" ry="8" fill="#1d2a22"/>
+          <ellipse cx="84" cy="92" rx="2" ry="3" fill="#fff"/>
+        </g>
+        <g class="eye-shine">
+          <ellipse cx="118" cy="96" rx="6" ry="8" fill="#1d2a22"/>
+          <ellipse cx="120" cy="92" rx="2" ry="3" fill="#fff"/>
+        </g>
+
+        <!-- mouth -->
+        <path id="sproutMouth" d="M88 118 Q100 130 112 118" stroke="#1d2a22" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+
+        <!-- top sprig -->
+        <path d="M100 50 Q96 32 88 26 Q98 30 100 44 Q102 30 112 26 Q104 32 100 50 Z" fill="url(#leafGrad)"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<div class="page-pad">
+
+  <div class="section-head">
+    <h2>Moments that earn personality</h2>
+    <div class="sub">Each demo is a candidate moment. Tap to feel the motion. Anything you don't like, we cut.</div>
+  </div>
+
+  <!-- ============ Card grid ============ -->
+  <div class="grid">
+
+    <!-- Day cycle -->
+    <div class="card span6">
+      <span class="label">Time of day</span>
+      <h3>The screen knows what time it is</h3>
+      <p class="desc">Background, lighting, and Sprout's greeting all shift through dawn → noon → dusk → night. Subtle, not gimmicky.</p>
+      <div class="stage" id="dayStage" style="padding: 0;">
+        <div class="daycycle-wrap" id="daycycleBg"></div>
+        <div class="daycycle-arc"></div>
+        <div class="celestial" id="celestial"></div>
+        <div style="position: relative; z-index: 2; color: white; text-align: center; text-shadow: 0 2px 12px rgba(0,0,0,0.3);">
+          <div id="dayGreet" style="font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 500;">Good morning</div>
+          <div id="dayMsg" style="font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; margin-top: 6px; opacity: 0.85;">Light breakfast?</div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn ghost" onclick="setDayPart('dawn')">Dawn</button>
+        <button class="btn ghost" onclick="setDayPart('noon')">Noon</button>
+        <button class="btn ghost" onclick="setDayPart('dusk')">Dusk</button>
+        <button class="btn ghost" onclick="setDayPart('night')">Night</button>
+      </div>
+    </div>
+
+    <!-- Confetti / goal hit -->
+    <div class="card span6">
+      <span class="label">Celebration</span>
+      <h3>Goal-hit splash</h3>
+      <p class="desc">Confetti + ring pulse + check stamp when the user closes their daily macros. The moment should feel earned.</p>
+      <div class="stage confetti-stage" id="confStage" onclick="fireConfetti(this)">
+        <div id="checkBurstWrap"></div>
+        <span style="position:absolute; bottom: 14px; font-size: 11px; color: var(--muted); letter-spacing: 0.18em; text-transform: uppercase;">Tap to celebrate</span>
+      </div>
+    </div>
+
+    <!-- Streak flame -->
+    <div class="card span4">
+      <span class="label">Streak</span>
+      <h3>Living flame</h3>
+      <p class="desc">Embers rise as the streak grows. Misses dim it softly — never extinguish on day 1 of a slip.</p>
+      <div class="stage" id="flameStage" style="flex-direction: column; gap: 8px;">
+        <div class="flame">
+          <div class="core"></div>
+          <div class="inner"></div>
+        </div>
+        <div class="streak-num">12</div>
+        <div class="streak-lbl">Day streak</div>
+      </div>
+    </div>
+
+    <!-- Progress ring -->
+    <div class="card span4">
+      <span class="label">Daily ring</span>
+      <h3>Counts up on open</h3>
+      <p class="desc">Replaces flat numbers with a gradient ring that fills + counts each time the screen opens.</p>
+      <div class="stage" id="ringStage">
+        <div class="ring-wrap">
+          <svg width="180" height="180">
+            <defs>
+              <linearGradient id="ringGrad" x1="0" x2="1" y1="0" y2="1">
+                <stop offset="0%"  stop-color="#5ea36a"/>
+                <stop offset="100%" stop-color="#f3b04a"/>
+              </linearGradient>
+            </defs>
+            <circle class="ring-track" cx="90" cy="90" r="80"/>
+            <circle class="ring-fill"  cx="90" cy="90" r="80"/>
+          </svg>
+          <div class="ring-center">
+            <div class="v" id="ringV">76<sup>%</sup></div>
+            <div class="l">of goal</div>
+          </div>
+        </div>
+      </div>
+      <button class="btn ghost" onclick="replayRing()">Replay</button>
+    </div>
+
+    <!-- Liquid macro orbs -->
+    <div class="card span4">
+      <span class="label">Macros</span>
+      <h3>Liquid orbs</h3>
+      <p class="desc">Protein, carbs, fats as bobbing liquid spheres. Glance value, no chart fatigue.</p>
+      <div class="stage">
+        <div class="orbs">
+          <div class="orb p"><div class="liquid"></div><div class="num">78</div><div class="cap">P</div></div>
+          <div class="orb c"><div class="liquid"></div><div class="num">52</div><div class="cap">C</div></div>
+          <div class="orb f"><div class="liquid"></div><div class="num">64</div><div class="cap">F</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Garden grows -->
+    <div class="card span6">
+      <span class="label">Reward</span>
+      <h3>The garden grows with you</h3>
+      <p class="desc">Each healthy day plants a vegetable. By week's end, a full plot. A persistent visual reward that compounds.</p>
+      <div class="stage">
+        <div class="garden" id="garden">
+          <div class="sun-mini"></div>
+          <div class="ground-plot"></div>
+          <div id="vegSlots" style="position: absolute; inset: 0;"></div>
+          <span style="position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); font-size: 11px; color: var(--muted); letter-spacing: 0.18em; text-transform: uppercase;">Tap "log a day"</span>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" onclick="logDay()">Log a day</button>
+        <button class="btn ghost" onclick="resetGarden()">Reset</button>
+      </div>
+    </div>
+
+    <!-- Recipe steam -->
+    <div class="card span6">
+      <span class="label">Recipe</span>
+      <h3>Recipes that "cook"</h3>
+      <p class="desc">Hover or tap a recipe and it tilts in 3D + steams. Brings static cards to life.</p>
+      <div class="stage recipe-stage" id="recipeStage">
+        <div class="recipe-card" id="recipeCard" onclick="cookRecipe(this)">
+          <div class="photo"></div>
+          <div class="body">
+            <div class="name">Roasted root bowl</div>
+            <div class="meta">22 min · 480 kcal · 32g protein</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tap pulse -->
+    <div class="card span4">
+      <span class="label">Tactility</span>
+      <h3>Tap ripple</h3>
+      <p class="desc">Every primary CTA gets a soft ripple + scale-down. Feels acknowledged, even on slow networks.</p>
+      <div class="stage">
+        <div class="tap-target" onclick="ripple(this)">＋</div>
+      </div>
+    </div>
+
+    <!-- Sticker flick -->
+    <div class="card span4">
+      <span class="label">Reactions</span>
+      <h3>Flick a sticker</h3>
+      <p class="desc">After logging a meal, react. Stickers fly up the screen with momentum. Light, expressive, optional.</p>
+      <div class="stage" id="stickerStage">
+        <div class="stickers">
+          <div class="sticker" onclick="flyEmoji(this,'💪')">💪</div>
+          <div class="sticker" onclick="flyEmoji(this,'🔥')">🔥</div>
+          <div class="sticker" onclick="flyEmoji(this,'🥗')">🥗</div>
+          <div class="sticker" onclick="flyEmoji(this,'🎉')">🎉</div>
+          <div class="sticker" onclick="flyEmoji(this,'☀️')">☀️</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Coach -->
+    <div class="card span4">
+      <span class="label">Coach</span>
+      <h3>Less robot, more friend</h3>
+      <p class="desc">Sprout-headed avatar, typing pause, soft bubble. Replies feel like a person paused to think.</p>
+      <div class="stage" style="align-items: stretch; justify-content: flex-end; padding-bottom: 8px;">
+        <div class="coach-row">
+          <svg class="coach-avatar-svg" viewBox="0 0 60 60">
+            <circle cx="30" cy="30" r="28" fill="url(#bodyGrad)"/>
+            <ellipse cx="30" cy="20" rx="16" ry="3" fill="rgba(255,255,255,0.2)"/>
+            <ellipse cx="22" cy="28" rx="3" ry="4" fill="#1d2a22"/>
+            <ellipse cx="38" cy="28" rx="3" ry="4" fill="#1d2a22"/>
+            <path d="M22 38 Q30 44 38 38" stroke="#1d2a22" stroke-width="2" stroke-linecap="round" fill="none"/>
+            <path d="M30 4 Q26 -2 20 -2 Q26 2 30 8 Q34 2 40 -2 Q34 -2 30 4" fill="#3f7a4d" transform="translate(0,4)"/>
+          </svg>
+          <div class="coach-bubble" id="coachBubble">
+            <div class="typing-dots"><span></span><span></span><span></span></div>
+          </div>
+        </div>
+      </div>
+      <button class="btn ghost" onclick="coachReply()">Send a question</button>
+    </div>
+
+    <!-- Odometer -->
+    <div class="card span6">
+      <span class="label">Numbers</span>
+      <h3>Numbers that ratchet</h3>
+      <p class="desc">Calorie totals, protein totals, weight changes. They roll into place like an odometer instead of just appearing.</p>
+      <div class="stage" style="flex-direction: column;">
+        <div class="odometer" id="odo"></div>
+        <div class="ko">Calories logged today</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" onclick="rollTo(1240)">Roll to 1,240</button>
+        <button class="btn ghost" onclick="rollTo(1745)">1,745</button>
+        <button class="btn ghost" onclick="rollTo(2080)">2,080</button>
+      </div>
+    </div>
+
+    <!-- Glassmorphic toast -->
+    <div class="card span6">
+      <span class="label">Notifications</span>
+      <h3>Glass toasts</h3>
+      <p class="desc">Frosted, weightless, layer-aware. Replaces the boring rectangle popup with something that feels native to iOS 16+.</p>
+      <div class="stage toast-stage" id="toastStage" style="padding: 0;">
+        <div class="toast" id="toast">
+          <div class="ico">🌱</div>
+          <div>
+            <div class="t">Streak extended to 13 days</div>
+            <div class="s">You're 1 ahead of last week</div>
+          </div>
+        </div>
+      </div>
+      <button class="btn ghost" onclick="popToast()">Show toast</button>
+    </div>
+
+    <!-- Tilt card -->
+    <div class="card span6">
+      <span class="label">Discovery</span>
+      <h3>Cards that tilt to your finger</h3>
+      <p class="desc">Move the cursor over the card. The light follows. 3D depth on recipes, recaps, and weekly summaries.</p>
+      <div class="stage" id="tiltStage">
+        <div class="tilt-card" id="tiltCard">
+          <div class="lvl">Level 4 · Protein</div>
+          <h4>Plate it<br/>like a pro</h4>
+          <span class="dish">🥘</span>
+          <div class="row">
+            <div class="stat">Today</div>
+            <div class="num">128g</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Magic camera -->
+    <div class="card span6">
+      <span class="label">Photo capture</span>
+      <h3>The camera "sees" food</h3>
+      <p class="desc">Scanline + corner brackets pulse over the detected dish. Adds a moment of magic to AI estimation.</p>
+      <div class="stage">
+        <div class="cam-frame">
+          <div class="feed">🍳</div>
+          <div class="cam-scan"></div>
+          <div class="cam-corner tl"></div>
+          <div class="cam-corner tr"></div>
+          <div class="cam-corner bl"></div>
+          <div class="cam-corner br"></div>
+          <div class="cam-tag">Eggs &amp; toast · ~420 kcal</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Meal wiggle -->
+    <div class="card span4">
+      <span class="label">Logging</span>
+      <h3>Log it · wiggle</h3>
+      <p class="desc">Marking a meal eaten gives a tactile shake + check flip. Tiny, but it makes the action feel real.</p>
+      <div class="stage">
+        <div class="meal-card" id="mealCard" onclick="wiggleMeal(this)">
+          <div class="meal-thumb">🍳</div>
+          <div class="meal-info">
+            <div class="n">Eggs &amp; toast</div>
+            <div class="m">420 kcal · 28g protein</div>
+          </div>
+          <div class="check">✓</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Level-up burst -->
+    <div class="card span4">
+      <span class="label">Milestones</span>
+      <h3>Level-up burst</h3>
+      <p class="desc">Big-deal moments: first week, 30-day streak, weight milestone. Rays + badge + Sprout cheer.</p>
+      <div class="stage levelup-stage" onclick="levelUp(this)">
+        <div class="badge" id="badge">7</div>
+        <div class="levelup-label">Tap me</div>
+      </div>
+    </div>
+
+    <!-- Ambient -->
+    <div class="card span4">
+      <span class="label">Ambience</span>
+      <h3>Idle screens drift</h3>
+      <p class="desc">Settings, recap, and empty states get drifting food doodles. Almost subliminal, never static.</p>
+      <div class="stage">
+        <div class="ambient">
+          <span class="dot" style="left:8%;  animation-delay: 0s;">🥕</span>
+          <span class="dot" style="left:24%; animation-delay: 3s;">🥑</span>
+          <span class="dot" style="left:42%; animation-delay: 6s;">🍎</span>
+          <span class="dot" style="left:60%; animation-delay: 9s;">🥦</span>
+          <span class="dot" style="left:78%; animation-delay: 12s;">🍇</span>
+          <span class="dot" style="left:92%; animation-delay: 14s;">🍋</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    Pace · personality &amp; motion mockup
+    <div class="meta">All effects are pure CSS / SVG / vanilla JS · ready to port into the real screens</div>
+  </footer>
+</div>
+
+<script>
+  // ============ Sprout messages ============
+  const sproutMessages = [
+    { name: "Sprout", body: "Morning! Looks like a 5-day streak day. Want to keep it gentle?" },
+    { name: "Sprout", body: "Heads up — protein's tracking a touch low. A palm of chicken later?" },
+    { name: "Sprout", body: "Halfway through your week. I'm proud of you. Quietly." },
+    { name: "Sprout", body: "Water's been napping. Glass of water before lunch?" },
+    { name: "Sprout", body: "That breakfast looked great. Sturdy, not sad." }
+  ];
+  let smi = 0;
+  setInterval(() => {
+    smi = (smi + 1) % sproutMessages.length;
+    const sp = document.getElementById("heroSpeech");
+    sp.style.animation = "none"; sp.offsetHeight; sp.style.animation = "";
+    sp.querySelector(".name").textContent = sproutMessages[smi].name;
+    sp.lastChild.textContent = sproutMessages[smi].body;
+    // also nudge
+    const svg = document.getElementById("sproutHero");
+    svg.animate(
+      [{ transform: "translateY(-8px) rotate(1.5deg)" }, { transform: "translateY(-16px) rotate(-3deg)" }, { transform: "translateY(-8px) rotate(1.5deg)" }],
+      { duration: 600, easing: "cubic-bezier(.34,1.56,.64,1)" }
+    );
+  }, 6000);
+
+  // ============ Day cycle ============
+  const dayParts = {
+    dawn:  { bg: "linear-gradient(180deg, #f6c875 0%, #e29bb5 50%, #c8def0 100%)", cel: { left: "10%", top: "62%", bg: "radial-gradient(circle, #fff5d8, #f3b04a)", shadow: "0 0 30px rgba(243,176,74,0.6)" }, greet: "Dawn light", msg: "Slow start — water first" },
+    noon:  { bg: "linear-gradient(180deg, #9dc5e3 0%, #c8def0 60%, #f7f3ec 100%)", cel: { left: "50%", top: "12%", bg: "radial-gradient(circle, #fff5d8, #f3b04a)", shadow: "0 0 50px rgba(243,176,74,0.8)" }, greet: "Midday", msg: "Real lunch, no skipping" },
+    dusk:  { bg: "linear-gradient(180deg, #4a3868 0%, #c46e5a 60%, #f3b04a 100%)", cel: { left: "82%", top: "62%", bg: "radial-gradient(circle, #ffd24a, #c4527c)", shadow: "0 0 40px rgba(196,82,124,0.6)" }, greet: "Evening", msg: "Wind down — palm of protein" },
+    night: { bg: "linear-gradient(180deg, #0e1429 0%, #1a2540 50%, #2a3b5c 100%)", cel: { left: "82%", top: "20%", bg: "radial-gradient(circle, #f7f3ec, #c8def0)", shadow: "0 0 30px rgba(200,222,240,0.6)" }, greet: "Late night", msg: "Light snack, glass of water" }
+  };
+  function setDayPart(p) {
+    const cfg = dayParts[p];
+    const bg = document.getElementById("daycycleBg");
+    const cel = document.getElementById("celestial");
+    bg.style.background = cfg.bg;
+    cel.style.left = cfg.cel.left;
+    cel.style.top = cfg.cel.top;
+    cel.style.background = cfg.cel.bg;
+    cel.style.boxShadow = cfg.cel.shadow;
+    document.getElementById("dayGreet").textContent = cfg.greet;
+    document.getElementById("dayMsg").textContent = cfg.msg;
+  }
+  setDayPart("dawn");
+
+  // ============ Confetti / goal hit ============
+  const colors = ["#3f7a4d","#f3b04a","#c4527c","#9dc5e3","#5ea36a","#e69b3a"];
+  function fireConfetti(stage) {
+    const wrap = document.getElementById("checkBurstWrap");
+    wrap.innerHTML = '<div class="check-burst">✓</div>';
+    const rect = stage.getBoundingClientRect();
+    // splash ring
+    const ring = document.createElement("div");
+    ring.className = "splash-ring";
+    ring.style.left = (rect.width/2 - 30) + "px";
+    ring.style.top  = (rect.height/2 - 30) + "px";
+    stage.appendChild(ring);
+    setTimeout(() => ring.remove(), 1000);
+    // confetti
+    for (let i = 0; i < 50; i++) {
+      const c = document.createElement("div");
+      c.className = "confetti";
+      c.style.background = colors[i % colors.length];
+      c.style.left = (rect.width/2) + "px";
+      c.style.top = (rect.height/2 - 40) + "px";
+      c.style.setProperty("--x0", "0px");
+      c.style.setProperty("--xd", (Math.random()*340 - 170) + "px");
+      c.style.animation = `confetti-fall ${1 + Math.random()*0.6}s ease-in forwards`;
+      stage.appendChild(c);
+      setTimeout(() => c.remove(), 1800);
+    }
+  }
+
+  // ============ Replay ring ============
+  function replayRing() {
+    const stage = document.getElementById("ringStage");
+    const html = stage.innerHTML;
+    stage.innerHTML = "";
+    stage.offsetHeight;
+    stage.innerHTML = html;
+  }
+
+  // ============ Garden grows ============
+  const vegEmojis = ["🥕","🥦","🍅","🥬","🌽","🍆","🫑","🥒","🍓"];
+  let vegCount = 0;
+  function logDay() {
+    if (vegCount >= 9) return;
+    const slots = document.getElementById("vegSlots");
+    const v = document.createElement("div");
+    v.className = "veg";
+    const x = 12 + (vegCount % 9) * 9;
+    const y = 16 + (vegCount % 2 === 0 ? 4 : -4);
+    v.style.left = x + "%";
+    v.style.bottom = (16 + (vegCount % 2 === 0 ? 6 : 12)) + "%";
+    v.style.fontSize = (28 + Math.random()*10) + "px";
+    v.textContent = vegEmojis[vegCount % vegEmojis.length];
+    slots.appendChild(v);
+    vegCount++;
+  }
+  function resetGarden() {
+    document.getElementById("vegSlots").innerHTML = "";
+    vegCount = 0;
+  }
+  // pre-plant a few
+  logDay(); logDay(); logDay();
+
+  // ============ Recipe steam ============
+  function cookRecipe(card) {
+    const stage = document.getElementById("recipeStage");
+    const rect = card.getBoundingClientRect();
+    const stageRect = stage.getBoundingClientRect();
+    for (let i = 0; i < 6; i++) {
+      const s = document.createElement("div");
+      s.className = "steam";
+      s.style.left = ((rect.left - stageRect.left) + 100 + i*4) + "px";
+      s.style.top  = ((rect.top - stageRect.top) + 30) + "px";
+      s.style.setProperty("--sx", (Math.random()*40 - 20) + "px");
+      s.style.animationDelay = (i * 0.12) + "s";
+      stage.appendChild(s);
+      setTimeout(() => s.remove(), 1800);
+    }
+  }
+
+  // ============ Ripple ============
+  function ripple(el) {
+    el.classList.remove("ripple");
+    el.offsetHeight;
+    el.classList.add("ripple");
+    setTimeout(() => el.classList.remove("ripple"), 800);
+  }
+
+  // ============ Sticker fly ============
+  function flyEmoji(el, emoji) {
+    const stage = document.getElementById("stickerStage");
+    const rect = el.getBoundingClientRect();
+    const stageRect = stage.getBoundingClientRect();
+    const f = document.createElement("div");
+    f.className = "sticker flying";
+    f.textContent = emoji;
+    f.style.left = (rect.left - stageRect.left) + "px";
+    f.style.top  = (rect.top  - stageRect.top ) + "px";
+    f.style.setProperty("--fx", (Math.random()*160 - 80) + "px");
+    stage.appendChild(f);
+    setTimeout(() => f.remove(), 1300);
+  }
+
+  // ============ Coach reply ============
+  const coachReplies = [
+    "Totally doable. Try a palm of chicken and a fist of veg first.",
+    "Yep, snacks count. Just keep them under a thumb of fat.",
+    "If you're hungry between meals, water + protein first.",
+    "Roast a tray. Sturdy lunches make the rest of the day easier."
+  ];
+  let cri = 0;
+  function coachReply() {
+    const b = document.getElementById("coachBubble");
+    b.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+    setTimeout(() => {
+      b.textContent = coachReplies[cri % coachReplies.length];
+      cri++;
+    }, 1300);
+  }
+
+  // ============ Odometer ============
+  const odoEl = document.getElementById("odo");
+  function buildOdo(num) {
+    const s = String(num).padStart(4, "0");
+    odoEl.innerHTML = "";
+    for (const ch of s) {
+      const d = document.createElement("div");
+      d.className = "digit";
+      const reel = document.createElement("div");
+      reel.className = "reel";
+      // 0..9
+      for (let i = 0; i <= 9; i++) {
+        const sp = document.createElement("span");
+        sp.textContent = i;
+        reel.appendChild(sp);
+      }
+      d.appendChild(reel);
+      odoEl.appendChild(d);
+      // animate to digit
+      requestAnimationFrame(() => {
+        const target = +ch;
+        reel.style.transform = `translateY(-${target}em)`;
+      });
+    }
+  }
+  function rollTo(n) { buildOdo(n); }
+  buildOdo(420);
+
+  // ============ Toast ============
+  function popToast() {
+    const t = document.getElementById("toast");
+    t.style.animation = "none"; t.offsetHeight; t.style.animation = "toast-in 0.6s cubic-bezier(.34,1.56,.64,1)";
+  }
+
+  // ============ Tilt ============
+  const tilt = document.getElementById("tiltCard");
+  const tiltStage = document.getElementById("tiltStage");
+  tiltStage.addEventListener("mousemove", e => {
+    const r = tilt.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width;
+    const y = (e.clientY - r.top) / r.height;
+    const rx = (0.5 - y) * 14;
+    const ry = (x - 0.5) * 14;
+    tilt.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+    tilt.style.setProperty("--mx", (x*100) + "%");
+    tilt.style.setProperty("--my", (y*100) + "%");
+  });
+  tiltStage.addEventListener("mouseleave", () => {
+    tilt.style.transform = "";
+  });
+
+  // ============ Meal wiggle ============
+  function wiggleMeal(el) {
+    if (el.classList.contains("logged")) {
+      el.classList.remove("logged");
+      el.offsetHeight;
+    }
+    el.classList.add("logged");
+    setTimeout(() => el.classList.remove("logged"), 700);
+  }
+
+  // ============ Level up ============
+  function levelUp(stage) {
+    const b = document.getElementById("badge");
+    b.classList.remove("burst");
+    b.offsetHeight;
+    b.classList.add("burst");
+    // remove old rays
+    stage.querySelectorAll(".ray").forEach(r => r.remove());
+    // add 12 rays
+    for (let i = 0; i < 12; i++) {
+      const r = document.createElement("div");
+      r.className = "ray show";
+      r.style.setProperty("--rot", (i * 30) + "deg");
+      stage.appendChild(r);
+      setTimeout(() => r.remove(), 1500);
+    }
+  }
+</script>
+</body>
+</html>

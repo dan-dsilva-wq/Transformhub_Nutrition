@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   HealthConnect,
   isHealthConnectPlatform,
@@ -32,12 +32,45 @@ import {
 import { DailyReviewSheet } from "./daily-review-sheet";
 import { trackTesterEvent } from "@/lib/tester/track";
 import { useAppVersion } from "@/lib/app-version";
+import {
+  AmbientDrift,
+  ConfettiBurst,
+  DayCycleHeader,
+  LiquidOrb,
+  LivingFlame,
+  Odometer,
+  useMilestoneToast,
+  useThresholdEffect,
+} from "./personality";
 
 function greet() {
   const h = new Date().getHours();
   if (h < 12) return "morning";
   if (h < 18) return "afternoon";
   return "evening";
+}
+
+function computeStreak(meals: MealLog[]): number {
+  if (meals.length === 0) return 0;
+  const days = new Set(meals.map((m) => m.loggedAt.slice(0, 10)));
+  let streak = 0;
+  const cursor = new Date();
+  // Allow today not yet to be logged: if today has no entries we still want
+  // to count yesterday onwards. Skip today if not present.
+  const today = cursor.toISOString().slice(0, 10);
+  if (!days.has(today)) {
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  while (true) {
+    const key = cursor.toISOString().slice(0, 10);
+    if (days.has(key)) {
+      streak += 1;
+      cursor.setDate(cursor.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+  return streak;
 }
 
 function todayLine() {
@@ -232,6 +265,47 @@ export function TodayScreen() {
   void fatsRatio;
   void fiberRatio;
 
+  const streak = useMemo(() => computeStreak(allMeals), [allMeals]);
+  const [goalBurst, setGoalBurst] = useState<number | null>(null);
+  const [wiggleId, setWiggleId] = useState<string | null>(null);
+  const lastSeenIds = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    for (const m of meals) {
+      if (!lastSeenIds.current.has(m.id)) {
+        lastSeenIds.current.add(m.id);
+        if (lastSeenIds.current.size > 1) {
+          // skip the very first hydration pass
+          setWiggleId(m.id);
+          window.setTimeout(() => setWiggleId(null), 700);
+        }
+      }
+    }
+  }, [meals]);
+  const milestone = useMilestoneToast();
+
+  // Fire confetti the moment calories hit target.
+  useThresholdEffect(totals.calories, targets.calories, () => {
+    setGoalBurst(Date.now());
+    milestone(`calorie-goal:${todayIsoKey()}`, {
+      title: "Calorie target hit",
+      body: "Plate of the week. Nicely paced.",
+      mood: "proud",
+    });
+  });
+
+  // Streak milestones — show a glass toast the first time we cross common ones.
+  useEffect(() => {
+    if (streak === 3) {
+      milestone(`streak-3`, { title: "3 days in a row", body: "The line is forming.", mood: "happy" });
+    } else if (streak === 7) {
+      milestone(`streak-7`, { title: "A full week!", body: "This is the part where it sticks.", mood: "proud" });
+    } else if (streak === 14) {
+      milestone(`streak-14`, { title: "Two weeks logged", body: "Quietly impressive.", mood: "proud" });
+    } else if (streak === 30) {
+      milestone(`streak-30`, { title: "30-day streak", body: "Habit territory now.", mood: "proud" });
+    }
+  }, [streak, milestone]);
+
   return (
     <div className="stagger-up space-y-4">
       {reviewDay ? (
@@ -241,26 +315,37 @@ export function TodayScreen() {
           onSubmitted={() => dismissReview(true)}
         />
       ) : null}
-      {/* Eyebrow + headline */}
-      <header data-tour="today-header">
-        <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-muted">
-          {todayLine()}
-        </p>
-        <h1 className="font-display mt-2 text-[38px] leading-[1.05] text-ink-2">
-          Light, <span className="text-forest">{greet()}.</span>
-        </h1>
-      </header>
 
-      {/* Hero card  -  calorie ring + 4-col macro grid */}
+      <ConfettiBurst trigger={goalBurst} />
+
+      <DayCycleHeader
+        greeting={todayLine()}
+        title={
+          <>
+            Light, <span className="text-forest">{greet()}.</span>
+          </>
+        }
+        subtitle={
+          streak > 0 ? (
+            <span className="inline-flex items-center gap-1.5">
+              <span aria-hidden>🔥</span>
+              <strong className="font-semibold">{streak}-day streak</strong>
+              <span className="opacity-70">· keep it gentle</span>
+            </span>
+          ) : (
+            "One photo, one tap. That's the whole job."
+          )
+        }
+      />
+
+      {/* Hero card  -  calorie ring + odometer + macro orbs */}
       <Card className="!p-6 text-center">
         <div className="inline-flex">
-          <ProgressRing value={calorieRatio} size={196} stroke={12} ariaLabel="Calorie progress">
-            <div>
-              <div className="numerals text-[44px] leading-none text-ink-2">
-                {Math.round(totals.calories)}
-              </div>
-              <div className="mt-1 text-[11px] uppercase tracking-[0.20em] text-muted">
-                / {targets.calories}
+          <ProgressRing value={calorieRatio} size={208} stroke={12} ariaLabel="Calorie progress">
+            <div className="flex flex-col items-center gap-1">
+              <Odometer value={Math.round(totals.calories)} digits={4} size="lg" />
+              <div className="text-[11px] uppercase tracking-[0.20em] text-muted">
+                / {targets.calories} kcal
               </div>
             </div>
           </ProgressRing>
@@ -270,11 +355,45 @@ export function TodayScreen() {
         </div>
 
         <div className="mt-5 grid grid-cols-4 gap-3">
-          <MacroRing label="Protein" value={totals.proteinG} target={targets.proteinG} colorVar="--color-forest" />
-          <MacroRing label="Carbs" value={totals.carbsG} target={targets.carbsG} colorVar="--color-sky" />
-          <MacroRing label="Fat" value={totals.fatG} target={targets.fatG} colorVar="--color-clay" />
-          <MacroRing label="Fiber" value={totals.fiberG} target={targets.fiberG} colorVar="--color-sage" />
+          <LiquidOrb
+            label="Protein"
+            value={totals.proteinG}
+            target={targets.proteinG}
+            gradient={["#34d3c2", "#0d9488"]}
+          />
+          <LiquidOrb
+            label="Carbs"
+            value={totals.carbsG}
+            target={targets.carbsG}
+            gradient={["#7ec3e3", "#0284c7"]}
+          />
+          <LiquidOrb
+            label="Fat"
+            value={totals.fatG}
+            target={targets.fatG}
+            gradient={["#ffc183", "#fb923c"]}
+          />
+          <LiquidOrb
+            label="Fiber"
+            value={totals.fiberG}
+            target={targets.fiberG}
+            gradient={["#b9e08a", "#65a30d"]}
+          />
         </div>
+
+        {streak > 0 ? (
+          <div className="mt-5 inline-flex items-center gap-3 rounded-full border border-white/70 bg-white/55 px-4 py-2 backdrop-blur-xl">
+            <LivingFlame size={42} intensity={Math.min(0.4 + streak / 14, 1)} embers={streak >= 5} />
+            <div className="text-left">
+              <div className="numerals text-base leading-none text-ink-2">
+                {streak}-day streak
+              </div>
+              <div className="mt-0.5 text-[10px] uppercase tracking-[0.18em] text-muted">
+                Don&apos;t break the chain
+              </div>
+            </div>
+          </div>
+        ) : null}
       </Card>
 
       {/* Next action with gradient pill */}
@@ -372,7 +491,7 @@ export function TodayScreen() {
             {meals.map((m) => (
               <li
                 key={m.id}
-                className="card-flat flex items-center gap-3.5 px-4 py-3"
+                className={"card-flat flex items-center gap-3.5 px-4 py-3 " + (m.id === wiggleId ? "wiggle-anim" : "")}
               >
                 {m.imageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -423,7 +542,8 @@ export function TodayScreen() {
         </section>
       ) : null}
 
-      <section className="pt-2">
+      <section className="relative pt-2">
+        <AmbientDrift density={5} className="rounded-3xl opacity-50" />
         <SectionHeader eyebrow="History" title="Past days" />
         {historyDays.length > 0 ? (
           <ul className="space-y-2">
@@ -710,55 +830,6 @@ function MacroField({
         onChange={(e) => onChange(e.target.value)}
       />
     </Field>
-  );
-}
-
-function MacroRing({
-  label,
-  value,
-  target,
-  colorVar,
-}: {
-  label: string;
-  value: number;
-  target: number;
-  colorVar: string;
-}) {
-  const pct = target > 0 ? Math.min(value / target, 1) : 0;
-  const dash = Math.round(pct * 100);
-  return (
-    <div className="flex flex-col items-center">
-      <svg viewBox="0 0 36 36" className="h-14 w-14">
-        <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(0,0,0,0.07)" strokeWidth={3} />
-        <circle
-          cx="18"
-          cy="18"
-          r="15"
-          fill="none"
-          stroke={`var(${colorVar})`}
-          strokeWidth={3}
-          strokeLinecap="round"
-          strokeDasharray={`${dash} 100`}
-          transform="rotate(-90 18 18)"
-          style={{ transition: "stroke-dasharray 500ms ease" }}
-        />
-        <text
-          x="18"
-          y="20.5"
-          textAnchor="middle"
-          fontSize="8.5"
-          fontWeight={700}
-          fill="var(--color-ink-2)"
-          className="numerals"
-        >
-          {dash}%
-        </text>
-      </svg>
-      <div className="mt-1.5 text-[11px] font-medium text-ink-2">{label}</div>
-      <div className="numerals text-[10px] text-muted">
-        {Math.round(value)} / {Math.round(target)}g
-      </div>
-    </div>
   );
 }
 

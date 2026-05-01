@@ -265,15 +265,13 @@ export function isFoodAllowed(item: FoodItem, diet: FoodDietPref): boolean {
 }
 
 export interface RecipeImage {
-  /** Unsplash photo id */
-  id: string;
-  /** Direct image URL (Unsplash CDN) */
+  /** Image URL — relative path under /public, e.g. "/recipes/chicken-rice.jpg" */
   url: string;
-  /** Tiny base64 LQIP for blur-up */
-  blur: string;
-  /** Photographer name (attribution) */
+  /** Source provider for attribution / debugging */
+  source: "themealdb" | "foodish" | "pexels";
+  /** Display name for attribution */
   by: string;
-  /** Photographer profile (attribution link) */
+  /** Attribution link */
   byUrl: string;
 }
 

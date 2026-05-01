@@ -1,19 +1,19 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Send } from "lucide-react";
+import { Send, Sparkles } from "lucide-react";
 import type { CoachDraftMeal, CoachResponse } from "@/lib/ai/schemas";
 import { useAppState, useDayTotals, useTodayMeals } from "@/lib/state/app-state";
 import {
   Button,
   Card,
   Field,
+  IconBadge,
   Textarea,
 } from "./primitives";
 import { useEntitlement } from "@/lib/entitlement";
 import { PaywallSheet } from "./paywall-sheet";
 import { trackTesterEvent } from "@/lib/tester/track";
-import { SproutAvatar, TypingDots } from "./personality";
 
 const COACH_MEMORY_LIMIT = 5;
 
@@ -155,12 +155,7 @@ export function CoachScreen() {
           />
         ))}
         {busy ? (
-          <div className="bubble-anim flex items-start gap-2">
-            <SproutAvatar size={32} mood="calm" />
-            <div className="rounded-2xl rounded-bl-md border border-white/70 bg-white/65 backdrop-blur-xl px-4 py-3">
-              <TypingDots />
-            </div>
-          </div>
+          <div className="text-xs text-muted">Coach is thinking...</div>
         ) : null}
       </div>
 
@@ -232,7 +227,9 @@ function Bubble({
   }
   return (
     <div className="bubble-anim flex items-start gap-2">
-      <SproutAvatar size={32} mood="calm" />
+      <IconBadge tone="sage">
+        <Sparkles size={14} aria-hidden />
+      </IconBadge>
       <div className="max-w-[85%] rounded-2xl rounded-bl-md border border-white/70 bg-white/65 backdrop-blur-xl px-4 py-2.5 text-sm text-ink-2">
         <p className="whitespace-pre-wrap">{content}</p>
         {draftMeal && !draftHidden ? (

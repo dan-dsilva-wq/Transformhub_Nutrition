@@ -28,14 +28,6 @@ import {
 import { useEntitlement } from "@/lib/entitlement";
 import { PaywallSheet } from "./paywall-sheet";
 import { Lock } from "lucide-react";
-import {
-  ConfettiBurst,
-  Garden,
-  LevelUpBurst,
-  LivingFlame,
-  useMilestoneToast,
-  useThresholdEffect,
-} from "./personality";
 
 type RangeFilter = "week" | "month" | "year" | "all";
 
@@ -80,36 +72,6 @@ export function ProgressScreen() {
     rangedWeights,
     profile.goalWeightKg,
   ]);
-
-  // Garden = number of check-ins (a bloom for every weekly note).
-  const gardenCount = Math.min(checkIns.length, 9);
-  // Streak = number of consecutive weeks with at least one check-in. Light approximation.
-  const weekStreak = Math.min(checkIns.length, 12);
-  const flameIntensity = Math.min(0.4 + weekStreak / 8, 1);
-
-  // Confetti + level-up when we hit goal weight. Pick the direction from the
-  // user's intent (lose = we want current <= goal; gain/build-muscle = current >= goal).
-  // Default to "lose" because that's the most common case.
-  const goingDown = profile.goalIntent !== "gain" && profile.goalIntent !== "build-muscle";
-  const proximityKg = profile.currentWeightKg - profile.goalWeightKg;
-  // For "lose" we want proximityKg to drop to 0; for "gain" we want it to reach 0 from below.
-  // useThresholdEffect fires when value crosses threshold from below, so feed it
-  // a single normalized signal.
-  const normalized = goingDown ? -proximityKg : proximityKg;
-
-  const [goalBurst, setGoalBurst] = useState<number | null>(null);
-  const [levelUp, setLevelUp] = useState<number | null>(null);
-  const milestone = useMilestoneToast();
-
-  useThresholdEffect(normalized, 0, () => {
-    setGoalBurst(Date.now());
-    setLevelUp(Date.now());
-    milestone(`weight-goal-hit`, {
-      title: "Goal weight reached",
-      body: "The long line earned this. Hold your form.",
-      mood: "proud",
-    });
-  });
 
   return (
     <div className="stagger-up space-y-5">
@@ -191,28 +153,6 @@ export function ProgressScreen() {
           </div>
         ) : null}
       </Card>
-
-      <ConfettiBurst trigger={goalBurst} />
-      <LevelUpBurst trigger={levelUp} label={String(weekStreak || 1)} />
-
-      {/* Streak flame + garden — tangible proof of the long game */}
-      <div className="grid grid-cols-2 gap-3">
-        <Card className="!p-4 flex flex-col items-center justify-center text-center">
-          <LivingFlame size={84} intensity={flameIntensity} embers={weekStreak >= 3} />
-          <div className="mt-1">
-            <div className="numerals text-2xl text-ink-2">{weekStreak}</div>
-            <div className="text-[10px] uppercase tracking-[0.2em] text-muted">
-              Check-in streak
-            </div>
-          </div>
-        </Card>
-        <div className="min-w-0">
-          <Garden count={gardenCount} height={156} />
-          <div className="mt-1 text-[10px] uppercase tracking-[0.2em] text-muted text-center">
-            Your garden · {gardenCount}/9
-          </div>
-        </div>
-      </div>
 
       {/* Quick weigh-in */}
       <QuickWeighIn onSave={actions.addWeight} />

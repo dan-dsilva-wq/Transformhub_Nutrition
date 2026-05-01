@@ -1,7 +1,7 @@
 "use client";
 
 import { clsx } from "clsx";
-import { useRef, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from "react";
+import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from "react";
 
 /* ───────────────────────── Button ───────────────────────── */
 
@@ -39,40 +39,15 @@ export function Button({
   className,
   children,
   disabled,
-  onPointerDown,
   ...rest
 }: ButtonProps) {
-  const ref = useRef<HTMLButtonElement | null>(null);
-
-  function spawnRipple(e: React.PointerEvent<HTMLButtonElement>) {
-    onPointerDown?.(e);
-    const host = ref.current;
-    if (!host || host.disabled) return;
-    const r = host.getBoundingClientRect();
-    const size = Math.max(r.width, r.height) * 1.4;
-    const span = document.createElement("span");
-    span.className = "ripple-mark";
-    span.style.width = `${size}px`;
-    span.style.height = `${size}px`;
-    span.style.left = `${e.clientX - r.left - size / 2}px`;
-    span.style.top = `${e.clientY - r.top - size / 2}px`;
-    if (variant !== "primary") {
-      // Slightly subtler ripple on light surfaces.
-      span.style.background = "rgba(13,148,136,0.25)";
-    }
-    host.appendChild(span);
-    window.setTimeout(() => span.remove(), 750);
-  }
-
   return (
     <button
-      ref={ref}
       type="button"
       data-tap
       disabled={disabled || loading}
-      onPointerDown={spawnRipple}
       className={clsx(
-        "ripple-host tap-bounce inline-flex items-center justify-center gap-2 rounded-full font-medium tracking-tight transition-colors disabled:cursor-not-allowed",
+        "tap-bounce inline-flex items-center justify-center gap-2 rounded-full font-medium tracking-tight transition-colors disabled:cursor-not-allowed",
         variant === "primary" && "cta-glow",
         variantClass[variant],
         sizeClass[size],

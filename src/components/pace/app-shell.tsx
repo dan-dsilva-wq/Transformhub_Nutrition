@@ -22,7 +22,6 @@ import { useAppState } from "@/lib/state/app-state";
 import { Wordmark } from "./primitives";
 import { AppTour } from "./app-tour";
 import { TrialBanner } from "./trial-banner";
-import { FloatingSprout, GlassToastProvider } from "./personality";
 
 interface NavItem {
   href: string;
@@ -64,7 +63,6 @@ export function AppShell({ children }: { children: ReactNode }) {
   })();
 
   return (
-    <GlassToastProvider>
     <div className="min-h-[100dvh]">
       {/* Header */}
       <header
@@ -224,9 +222,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       ) : null}
 
       <AppTour />
-      <FloatingSprout />
     </div>
-    </GlassToastProvider>
   );
 }
 

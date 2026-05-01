@@ -264,6 +264,19 @@ export function isFoodAllowed(item: FoodItem, diet: FoodDietPref): boolean {
   return true;
 }
 
+export interface RecipeImage {
+  /** Unsplash photo id */
+  id: string;
+  /** Direct image URL (Unsplash CDN) */
+  url: string;
+  /** Tiny base64 LQIP for blur-up */
+  blur: string;
+  /** Photographer name (attribution) */
+  by: string;
+  /** Photographer profile (attribution link) */
+  byUrl: string;
+}
+
 /** Recipe library for the week view. */
 export interface Recipe {
   kcal: number;

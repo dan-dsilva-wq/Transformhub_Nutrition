@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pace — Meal cover explorations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --ink: #0c1714; --ink-2: #0f1714; --muted: #5b6863; --faint: #94a097;
+    --forest: #0d9488; --hairline: #e6ece4; --cream: #f4f0e6;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+    color: var(--ink);
+    background: linear-gradient(180deg,#0d100f 0%,#0a0d0c 100%);
+    min-height: 100vh; padding: 56px 24px 96px;
+  }
+  .stage { max-width: 1080px; margin: 0 auto; }
+  .stage-sub { color: rgba(244,240,230,0.55); font-size: 13px; text-align: center;
+    letter-spacing: 0.04em; text-transform: uppercase; margin: 0; }
+  .stage-title { font-family: "Fraunces", serif; font-weight: 600; letter-spacing: -0.03em;
+    color: #f4f0e6; font-size: 30px; margin: 6px 0 36px; text-align: center; }
+
+  .section-head {
+    display: flex; align-items: baseline; gap: 14px; margin: 28px 0 12px;
+    color: #f4f0e6;
+  }
+  .section-head h2 {
+    font-family: "Fraunces", serif; font-weight: 600; letter-spacing: -0.02em;
+    font-size: 22px; margin: 0;
+  }
+  .section-head p { margin: 0; color: rgba(244,240,230,0.55); font-size: 12.5px; }
+
+  .row {
+    display: flex; gap: 12px; overflow-x: auto;
+    padding: 12px 4px 18px;
+    scrollbar-width: thin;
+  }
+  .row::-webkit-scrollbar { height: 8px; }
+  .row::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.10); border-radius: 4px; }
+
+  /* Card chrome - light, sits on a faux day card */
+  .day-bg {
+    background: linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.86) 100%);
+    border: 1px solid rgba(255,255,255,0.95);
+    border-radius: 26px;
+    padding: 14px;
+    box-shadow: 0 14px 40px -22px rgba(0,0,0,0.55);
+  }
+
+  .puck {
+    width: 156px; flex: none;
+    border-radius: 18px; padding: 8px 8px 10px;
+    background: rgba(255,255,255,0.78);
+    border: 1px solid rgba(15,23,20,0.06);
+    box-shadow: 0 6px 16px -10px rgba(15,23,20,0.18);
+    display: flex; flex-direction: column; gap: 8px;
+    position: relative;
+  }
+  .slot { font-size: 9px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+  .name { font-size: 12.5px; font-weight: 600; line-height: 1.2; color: var(--ink-2); }
+  .micro { font-size: 10.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  .cover {
+    position: relative; height: 84px; border-radius: 12px; overflow: hidden;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.55), 0 6px 14px -8px rgba(0,0,0,0.28);
+  }
+
+  /* Style A — Editorial wash (no emoji, photographic gradients + soft noise) */
+  .a1 { background:
+    radial-gradient(120% 80% at 80% 20%, #fde68a 0%, transparent 60%),
+    radial-gradient(140% 90% at 10% 100%, #f59e0b 0%, transparent 55%),
+    linear-gradient(160deg,#fff7d6 0%,#f59e0b 100%);
+  }
+  .a2 { background:
+    radial-gradient(120% 80% at 80% 20%, #bbf7d0 0%, transparent 60%),
+    radial-gradient(140% 90% at 10% 100%, #65a30d 0%, transparent 55%),
+    linear-gradient(160deg,#e8f8d3 0%,#3f6212 100%);
+  }
+  .a3 { background:
+    radial-gradient(120% 80% at 80% 20%, #bae6fd 0%, transparent 60%),
+    radial-gradient(140% 90% at 10% 100%, #0284c7 0%, transparent 55%),
+    linear-gradient(160deg,#e0f2fe 0%,#0c4a6e 100%);
+  }
+  .a4 { background:
+    radial-gradient(120% 80% at 80% 20%, #fbcfe8 0%, transparent 60%),
+    radial-gradient(140% 90% at 10% 100%, #db2777 0%, transparent 55%),
+    linear-gradient(160deg,#fdf2f8 0%,#9d174d 100%);
+  }
+  .grain::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.4 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/></svg>");
+    mix-blend-mode: overlay; opacity: 0.5;
+  }
+
+  /* Style B — Monogram (single big serif initial, no emoji) */
+  .b-cover { display: grid; place-items: center; }
+  .b-cover .mono {
+    font-family: "Fraunces", serif; font-weight: 600; font-style: italic;
+    color: rgba(255,255,255,0.92); font-size: 56px; letter-spacing: -0.02em;
+    text-shadow: 0 6px 18px rgba(0,0,0,0.18);
+  }
+  .b1 { background: linear-gradient(160deg,#0f766e 0%, #0d9488 60%, #5eead4 100%); }
+  .b2 { background: linear-gradient(160deg,#7c2d12 0%, #c2410c 60%, #fb923c 100%); }
+  .b3 { background: linear-gradient(160deg,#1e3a8a 0%, #2563eb 60%, #93c5fd 100%); }
+  .b4 { background: linear-gradient(160deg,#3f0764 0%, #7e22ce 60%, #d8b4fe 100%); }
+
+  /* Style C — Botanical line-art (svg sprig, no emoji) */
+  .c-cover { position: relative; }
+  .c-cover svg.sprig { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.85; }
+  .c1 { background: linear-gradient(160deg,#fef9c3 0%,#a3e635 100%); }
+  .c2 { background: linear-gradient(160deg,#fee2e2 0%,#f87171 100%); }
+  .c3 { background: linear-gradient(160deg,#dbeafe 0%,#60a5fa 100%); }
+  .c4 { background: linear-gradient(160deg,#f5f3ff 0%,#a78bfa 100%); }
+
+  /* Style D — Photographic (real food photos cropped square-ish) */
+  .d-cover { background-size: cover; background-position: center; }
+  .d-cover::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.32) 100%);
+  }
+  .d-cover .tag {
+    position: absolute; left: 8px; bottom: 8px; z-index: 1;
+    color: #fff; font-size: 10px; font-weight: 600; letter-spacing: 0.14em;
+    text-transform: uppercase; text-shadow: 0 1px 6px rgba(0,0,0,0.5);
+  }
+
+  /* Style E — Geometric: abstract shapes, no emoji */
+  .e-cover { position: relative; overflow: hidden; }
+  .e1 { background: linear-gradient(160deg,#0f172a,#1e293b); }
+  .e2 { background: linear-gradient(160deg,#082f49,#0c4a6e); }
+  .e3 { background: linear-gradient(160deg,#1c1917,#292524); }
+  .e4 { background: linear-gradient(160deg,#052e16,#14532d); }
+  .e-cover .shape {
+    position: absolute; border-radius: 50%; filter: blur(0.5px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  }
+
+  /* Style F — Glass + emoji (current, for reference) */
+  .f1 { background: linear-gradient(135deg,#fde68a,#f59e0b); }
+  .f2 { background: linear-gradient(135deg,#bbf7d0,#65a30d); }
+  .f3 { background: linear-gradient(135deg,#bae6fd,#0284c7); }
+  .f4 { background: linear-gradient(135deg,#fed7aa,#fb923c); }
+  .f-cover { display: grid; place-items: center; font-size: 30px; }
+
+  /* Style G — Iconcraft: tiny crisp lucide-like SVG icon, no emoji */
+  .g-cover { display: grid; place-items: center; position: relative; }
+  .g-cover .ico {
+    width: 36px; height: 36px; color: rgba(255,255,255,0.92);
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25));
+  }
+  .g1 { background: linear-gradient(160deg,#064e46 0%,#0d9488 100%); }
+  .g2 { background: linear-gradient(160deg,#7c2d12 0%,#ea580c 100%); }
+  .g3 { background: linear-gradient(160deg,#0c4a6e 0%,#0284c7 100%); }
+  .g4 { background: linear-gradient(160deg,#3f1d38 0%,#a21caf 100%); }
+
+  /* Notes */
+  .legend {
+    margin-top: 20px;
+    color: rgba(244,240,230,0.7); font-size: 12.5px; line-height: 1.6;
+    border-top: 1px solid rgba(255,255,255,0.08); padding-top: 14px;
+  }
+  .legend b { color: #f4f0e6; font-family: "Fraunces", serif; font-weight: 600; }
+
+  .pickme {
+    display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: 999px;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+    background: rgba(13,148,136,0.18); color: #5eead4;
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+  <p class="stage-sub">Pace · Meal cover explorations</p>
+  <h1 class="stage-title">Six ways to dress a meal — none of them childish.</h1>
+
+  <!-- A: Editorial wash -->
+  <div class="section-head">
+    <h2>A · Editorial wash</h2>
+    <p>Painterly radial gradients with subtle noise grain. No emoji. Magazine feel.</p>
+  </div>
+  <div class="day-bg">
+    <div class="row">
+      <div class="puck"><div class="cover a1 grain"></div><div class="slot">Breakfast</div><div class="name">Halloumi tomato breakfast plate</div><div class="micro">420 kcal · 28g P</div></div>
+      <div class="puck"><div class="cover a2 grain"></div><div class="slot">Lunch</div><div class="name">Smoked mackerel salad</div><div class="micro">520 kcal · 36g P</div></div>
+      <div class="puck"><div class="cover a3 grain"></div><div class="slot">Dinner</div><div class="name">Beef bolognese</div><div class="micro">680 kcal · 42g P</div></div>
+      <div class="puck"><div class="cover a4 grain"></div><div class="slot">Snack</div><div class="name">Greek yogurt &amp; figs</div><div class="micro">220 kcal · 18g P</div></div>
+    </div>
+  </div>
+
+  <!-- B: Monogram -->
+  <div class="section-head">
+    <h2>B · Serif monogram <span class="pickme">my pick</span></h2>
+    <p>One italic Fraunces letter from the dish name. Looks like a private chef's notebook.</p>
+  </div>
+  <div class="day-bg">
+    <div class="row">
+      <div class="puck"><div class="cover b-cover b1"><span class="mono">H</span></div><div class="slot">Breakfast</div><div class="name">Halloumi tomato breakfast plate</div><div class="micro">420 kcal · 28g P</div></div>
+      <div class="puck"><div class="cover b-cover b2"><span class="mono">S</span></div><div class="slot">Lunch</div><div class="name">Smoked mackerel salad</div><div class="micro">520 kcal · 36g P</div></div>
+      <div class="puck"><div class="cover b-cover b3"><span class="mono">B</span></div><div class="slot">Dinner</div><div class="name">Beef bolognese</div><div class="micro">680 kcal · 42g P</div></div>
+      <div class="puck"><div class="cover b-cover b4"><span class="mono">G</span></div><div class="slot">Snack</div><div class="name">Greek yogurt &amp; figs</div><div class="micro">220 kcal · 18g P</div></div>
+    </div>
+  </div>
+
+  <!-- C: Botanical line art -->
+  <div class="section-head">
+    <h2>C · Botanical line-art</h2>
+    <p>Single thin SVG sprig over a soft wash. Tasteful, calm, no emoji.</p>
+  </div>
+  <div class="day-bg">
+    <div class="row">
+      <div class="puck"><div class="cover c-cover c1">
+        <svg class="sprig" viewBox="0 0 100 100" fill="none" stroke="#365314" stroke-width="1.4" stroke-linecap="round"><path d="M50 90 C50 60 50 40 50 14"/><path d="M50 70 C36 64 30 56 28 46"/><path d="M50 64 C66 60 72 52 74 42"/><path d="M50 50 C36 46 30 38 28 30"/><path d="M50 44 C66 40 72 34 74 26"/></svg>
+      </div><div class="slot">Breakfast</div><div class="name">Halloumi tomato breakfast plate</div><div class="micro">420 kcal · 28g P</div></div>
+      <div class="puck"><div class="cover c-cover c2">
+        <svg class="sprig" viewBox="0 0 100 100" fill="none" stroke="#7f1d1d" stroke-width="1.4" stroke-linecap="round"><circle cx="50" cy="48" r="20"/><path d="M50 28 C48 22 50 16 56 12"/><path d="M50 28 C52 24 58 22 62 24"/></svg>
+      </div><div class="slot">Lunch</div><div class="name">Smoked mackerel salad</div><div class="micro">520 kcal · 36g P</div></div>
+      <div class="puck"><div class="cover c-cover c3">
+        <svg class="sprig" viewBox="0 0 100 100" fill="none" stroke="#1e3a8a" stroke-width="1.4" stroke-linecap="round"><path d="M20 60 C32 40 68 40 80 60"/><path d="M28 60 L28 70 M44 58 L44 72 M60 58 L60 72 M76 60 L76 70"/></svg>
+      </div><div class="slot">Dinner</div><div class="name">Beef bolognese</div><div class="micro">680 kcal · 42g P</div></div>
+      <div class="puck"><div class="cover c-cover c4">
+        <svg class="sprig" viewBox="0 0 100 100" fill="none" stroke="#4c1d95" stroke-width="1.4" stroke-linecap="round"><circle cx="50" cy="50" r="22"/><path d="M50 50 L50 30 M50 50 L66 60 M50 50 L36 62"/></svg>
+      </div><div class="slot">Snack</div><div class="name">Greek yogurt &amp; figs</div><div class="micro">220 kcal · 18g P</div></div>
+    </div>
+  </div>
+
+  <!-- D: Photographic -->
+  <div class="section-head">
+    <h2>D · Photographic</h2>
+    <p>Real food photos. The most premium look — but needs a cover image per recipe.</p>
+  </div>
+  <div class="day-bg">
+    <div class="row">
+      <div class="puck"><div class="cover d-cover" style="background-image:url('https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=400&q=70')"><span class="tag">Breakfast</span></div><div class="slot">Breakfast</div><div class="name">Halloumi tomato breakfast plate</div><div class="micro">420 kcal · 28g P</div></div>
+      <div class="puck"><div class="cover d-cover" style="background-image:url('https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=70')"><span class="tag">Lunch</span></div><div class="slot">Lunch</div><div class="name">Smoked mackerel salad</div><div class="micro">520 kcal · 36g P</div></div>
+      <div class="puck"><div class="cover d-cover" style="background-image:url('https://images.unsplash.com/photo-1572441713132-c542fc4fe282?w=400&q=70')"><span class="tag">Dinner</span></div><div class="slot">Dinner</div><div class="name">Beef bolognese</div><div class="micro">680 kcal · 42g P</div></div>
+      <div class="puck"><div class="cover d-cover" style="background-image:url('https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&q=70')"><span class="tag">Snack</span></div><div class="slot">Snack</div><div class="name">Greek yogurt &amp; figs</div><div class="micro">220 kcal · 18g P</div></div>
+    </div>
+  </div>
+
+  <!-- E: Geometric -->
+  <div class="section-head">
+    <h2>E · Dark geometric</h2>
+    <p>Dark cards with floating coloured orbs. Moody, very modern.</p>
+  </div>
+  <div class="day-bg">
+    <div class="row">
+      <div class="puck"><div class="cover e-cover e1">
+        <span class="shape" style="width:50px;height:50px;left:14px;top:18px;background:#fde68a"></span>
+        <span class="shape" style="width:34px;height:34px;left:90px;top:38px;background:#f59e0b;opacity:0.85"></span>
+      </div><div class="slot">Breakfast</div><div class="name">Halloumi tomato breakfast plate</div><div class="micro">420 kcal · 28g P</div></div>
+      <div class="puck"><div class="cover e-cover e2">
+        <span class="shape" style="width:60px;height:60px;left:12px;top:14px;background:#bbf7d0"></span>
+        <span class="shape" style="width:24px;height:24px;left:104px;top:48px;background:#22d3ee"></span>
+      </div><div class="slot">Lunch</div><div class="name">Smoked mackerel salad</div><div class="micro">520 kcal · 36g P</div></div>
+      <div class="puck"><div class="cover e-cover e3">
+        <span class="shape" style="width:46px;height:46px;left:18px;top:22px;background:#fb923c"></span>
+        <span class="shape" style="width:30px;height:30px;left:96px;top:42px;background:#ef4444;opacity:0.85"></span>
+      </div><div class="slot">Dinner</div><div class="name">Beef bolognese</div><div class="micro">680 kcal · 42g P</div></div>
+      <div class="puck"><div class="cover e-cover e4">
+        <span class="shape" style="width:54px;height:54px;left:14px;top:18px;background:#a7f3d0"></span>
+        <span class="shape" style="width:26px;height:26px;left:100px;top:46px;background:#fde68a"></span>
+      </div><div class="slot">Snack</div><div class="name">Greek yogurt &amp; figs</div><div class="micro">220 kcal · 18g P</div></div>
+    </div>
+  </div>
+
+  <!-- F: current for reference -->
+  <div class="section-head">
+    <h2>F · Current (emoji glass) <span class="pickme" style="background:rgba(220,38,38,0.18);color:#fca5a5">today</span></h2>
+    <p>For comparison. The big emoji is what reads as childish.</p>
+  </div>
+  <div class="day-bg">
+    <div class="row">
+      <div class="puck"><div class="cover f1 f-cover">🧀</div><div class="slot">Breakfast</div><div class="name">Halloumi tomato breakfast plate</div><div class="micro">420 kcal · 28g P</div></div>
+      <div class="puck"><div class="cover f2 f-cover">🥗</div><div class="slot">Lunch</div><div class="name">Smoked mackerel salad</div><div class="micro">520 kcal · 36g P</div></div>
+      <div class="puck"><div class="cover f3 f-cover">🍗</div><div class="slot">Dinner</div><div class="name">Beef bolognese</div><div class="micro">680 kcal · 42g P</div></div>
+      <div class="puck"><div class="cover f4 f-cover">🥣</div><div class="slot">Snack</div><div class="name">Greek yogurt &amp; figs</div><div class="micro">220 kcal · 18g P</div></div>
+    </div>
+  </div>
+
+  <!-- G: Iconcraft -->
+  <div class="section-head">
+    <h2>G · Iconcraft</h2>
+    <p>Lucide-style line icon, small and centred. Quiet, app-y, no emoji.</p>
+  </div>
+  <div class="day-bg">
+    <div class="row">
+      <div class="puck"><div class="cover g-cover g1">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h18l-2 9H5L3 11z"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div><div class="slot">Breakfast</div><div class="name">Halloumi tomato breakfast plate</div><div class="micro">420 kcal · 28g P</div></div>
+      <div class="puck"><div class="cover g-cover g2">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v8"/><circle cx="12" cy="14" r="8"/></svg>
+      </div><div class="slot">Lunch</div><div class="name">Smoked mackerel salad</div><div class="micro">520 kcal · 36g P</div></div>
+      <div class="puck"><div class="cover g-cover g3">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h13a4 4 0 0 1 0 8H3z"/><path d="M7 7c0-2 2-3 4-3s4 1 4 3"/></svg>
+      </div><div class="slot">Dinner</div><div class="name">Beef bolognese</div><div class="micro">680 kcal · 42g P</div></div>
+      <div class="puck"><div class="cover g-cover g4">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v18 M3 12h18"/></svg>
+      </div><div class="slot">Snack</div><div class="name">Greek yogurt &amp; figs</div><div class="micro">220 kcal · 18g P</div></div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <p><b>Recommendation:</b> Style B (serif monogram) is the cheapest to ship and reads the most premium — the italic letter pairs with the Fraunces body type already in the app, and it scales gracefully whether the recipe name is short or long. Photography (Style D) is the strongest visually but requires a curated image per recipe; we'd need a fallback for new ones.</p>
+    <p><b>Hybrid worth trying:</b> Editorial wash (A) as the base + a tiny Iconcraft mark (G) in the corner for slot recognition. Best of both — calm, magazine-like, but still scannable.</p>
+  </div>
+</div>
+</body>
+</html>

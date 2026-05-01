@@ -14,6 +14,7 @@ import {
   Shuffle,
   ShoppingBag,
   Sparkles,
+  Timer,
   Utensils,
   X,
 } from "lucide-react";
@@ -28,6 +29,7 @@ import {
   recipes,
   type Recipe,
 } from "./foods/food-data";
+import { recipeImage } from "./foods/recipe-images";
 import {
   dayPlannedNutrition,
   ingredientMatchesSkip,
@@ -74,6 +76,24 @@ const chapterMoods: { title: string; tint: string; sub: string }[] = [
 
 const TODAY_HERO_TITLE = "Today is the one";
 const TODAY_HERO_SUB = "Cook this. The rest of the week can wait.";
+
+const COVER_PALETTES: Array<[string, string]> = [
+  ["#fde68a", "#f59e0b"],
+  ["#bbf7d0", "#65a30d"],
+  ["#bae6fd", "#0284c7"],
+  ["#fed7aa", "#fb923c"],
+  ["#ddd6fe", "#7c3aed"],
+  ["#fbcfe8", "#db2777"],
+  ["#a7f3d0", "#0d9488"],
+  ["#fde68a", "#d97706"],
+];
+function coverFor(key: string): { from: string; to: string } {
+  let h = 0;
+  for (let i = 0; i < key.length; i += 1) h = (h * 31 + key.charCodeAt(i)) >>> 0;
+  const [from, to] = COVER_PALETTES[h % COVER_PALETTES.length];
+  return { from, to };
+}
+
 
 function makeDays(
   weekIdx: number,
@@ -310,39 +330,36 @@ export function FoodsScreen() {
     <LockedState feature="nutrition-guide">
       <div className="stagger-up space-y-4 pb-32">
         <header>
-          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-muted">
-            YOUR FOOD WEEK
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted">
+            Your food week
           </p>
-          <h1 className="font-display mt-1 text-[34px] leading-[1.04] text-ink-2">
+          <h1 className="font-display mt-2 flex flex-wrap items-center gap-2.5 text-[40px] leading-[1.02] text-ink-2">
             {week.name === "This week" ? (
               <>
-                This <span className="text-forest">week.</span>
+                <span>
+                  This <span className="italic text-forest">week.</span>
+                </span>
+                <span
+                  className="float-anim inline-grid h-9 w-9 place-items-center rounded-full text-forest"
+                  style={{
+                    background:
+                      "radial-gradient(circle at 35% 30%, rgba(13,148,136,0.32), transparent 70%)",
+                  }}
+                  aria-hidden
+                >
+                  <Utensils size={20} />
+                </span>
               </>
             ) : (
               week.name
             )}
           </h1>
-          <p className="mt-1 text-xs text-muted">{week.range} · {mealsPerDay} meals/day</p>
+          <p className="mt-1.5 text-[13px] text-muted">
+            {week.range} · {mealsPerDay} meals/day
+          </p>
         </header>
 
-        {week.showShop ? (
-          <Link
-            href="/you/foods/shopping"
-            aria-label="Open shopping list"
-            className="tap-bounce flex items-center gap-3 rounded-2xl border border-forest/20 bg-gradient-to-r from-forest/[0.10] to-forest/[0.04] px-3.5 py-3"
-          >
-            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-forest text-white shadow-sm">
-              <ShoppingBag size={16} aria-hidden />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-sm font-semibold text-ink-2">Shopping list ready</span>
-              <span className="block text-[11px] text-muted">Sorted by aisle · tap to open</span>
-            </span>
-            <ChevronRight size={16} className="shrink-0 text-forest" aria-hidden />
-          </Link>
-        ) : null}
-
-        <div className="flex items-center justify-between gap-2 rounded-3xl border border-white/85 bg-white/55 px-2 py-2 backdrop-blur-xl">
+        <div className="flex items-center gap-1.5 rounded-full border border-white/85 bg-white/55 p-1.5 backdrop-blur-xl">
           <button
             type="button"
             data-tap
@@ -356,7 +373,7 @@ export function FoodsScreen() {
           <div className="flex flex-1 items-center justify-center gap-1.5">
             <span
               className={clsx(
-                "rounded-full px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-[0.14em]",
+                "rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em]",
                 badgeTone[week.badgeClass],
               )}
             >
@@ -367,7 +384,7 @@ export function FoodsScreen() {
               data-tap
               onClick={() => setMealCountOpen(true)}
               aria-haspopup="dialog"
-              className="tap-bounce inline-flex h-7 items-center gap-1 rounded-full bg-white px-2.5 text-[11px] font-medium text-ink-2 shadow-sm"
+              className="tap-bounce inline-flex h-7 items-center gap-1 rounded-full bg-white px-2.5 text-[11px] font-semibold text-ink-2 shadow-sm"
               aria-label="Change meals per day"
             >
               <Utensils size={11} aria-hidden /> {mealsPerDay}/day
@@ -393,7 +410,7 @@ export function FoodsScreen() {
               type="button"
               data-tap
               onClick={generateNextWeek}
-              className="tap-bounce inline-flex h-9 items-center gap-1 rounded-full bg-forest px-3 text-xs font-medium text-white shadow-sm"
+              className="tap-bounce inline-flex h-9 items-center gap-1 rounded-full bg-forest px-3 text-xs font-semibold text-white shadow-sm"
               aria-label="Generate next week"
             >
               <Plus size={14} aria-hidden /> Generate
@@ -411,6 +428,34 @@ export function FoodsScreen() {
             </button>
           )}
         </div>
+
+        {week.showShop ? (
+          <Link
+            href="/you/foods/shopping"
+            aria-label="Open shopping list"
+            className="tap-bounce flex items-center gap-3 rounded-[22px] border border-forest/25 px-3.5 py-3"
+            style={{
+              background:
+                "linear-gradient(135deg, rgba(13,148,136,0.16), rgba(13,148,136,0.04))",
+            }}
+          >
+            <span
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-2xl bg-forest text-white"
+              style={{ boxShadow: "0 8px 20px -10px rgba(13,148,136,0.65)" }}
+            >
+              <ShoppingBag size={16} aria-hidden />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[13.5px] font-semibold text-ink-2">
+                Shopping list ready
+              </span>
+              <span className="block text-[11.5px] text-muted">
+                Sorted by aisle · tap to open
+              </span>
+            </span>
+            <ChevronRight size={16} className="shrink-0 text-forest" aria-hidden />
+          </Link>
+        ) : null}
 
         {week.days.map((d, i) => {
           const isToday = weekIndex === 0 && i === todayIdx;
@@ -436,7 +481,7 @@ export function FoodsScreen() {
           <Link
             href="/you/foods/shopping"
             data-tap
-            className="tap-bounce flex items-center gap-3 rounded-3xl bg-ink-2 p-4 text-white shadow-elevated"
+            className="tap-bounce flex items-center gap-3 rounded-3xl p-4 text-white shadow-elevated"
             style={{ background: "#18241f" }}
           >
             <span className="grid h-12 w-12 place-items-center rounded-2xl bg-white/10 text-2xl">
@@ -462,22 +507,14 @@ export function FoodsScreen() {
         )}
 
         {skipped.length > 0 ? (
-          <div className="rounded-3xl border border-white/85 bg-white/55 p-4 backdrop-blur-xl">
-            <p className="text-[10px] uppercase tracking-[0.18em] text-muted">
-              Foods you skip
-            </p>
-            <p className="mt-1 text-sm text-ink">
-              We&rsquo;re hiding{" "}
-              <span className="font-semibold text-ink-2">{skipped.length}</span>{" "}
-              ingredient{skipped.length === 1 ? "" : "s"} from your plan.
-            </p>
-            <Link
-              href="/you/foods/list"
-              className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-forest"
-            >
-              Open food list <ChevronRight size={12} aria-hidden />
+          <p className="px-2 pt-2 text-center text-[11px] text-muted">
+            Hiding{" "}
+            <span className="font-medium text-ink">{skipped.length}</span>{" "}
+            ingredient{skipped.length === 1 ? "" : "s"} — set in{" "}
+            <Link href="/you/foods/list" className="font-medium text-forest">
+              You → Foods to skip
             </Link>
-          </div>
+          </p>
         ) : null}
       </div>
 
@@ -595,101 +632,76 @@ function ChapterCard({
   const title = isToday ? TODAY_HERO_TITLE : mood.title;
   const subtitle = isToday ? TODAY_HERO_SUB : mood.sub;
 
-  return (
-    <article
-      className={clsx(
-        "rounded-3xl shadow-card overflow-hidden",
-        isToday ? "shadow-elevated" : "",
-      )}
-      style={{
-        background: isToday
-          ? "linear-gradient(160deg,#18241f,#2a4a3c)"
-          : mood.tint,
-        color: isToday ? "white" : undefined,
-      }}
-    >
-      <div className="px-4 pt-4 pb-3">
-        <div className="flex items-start justify-between gap-2">
-          <p
-            className="text-[10px] uppercase tracking-[0.22em] font-semibold"
-            style={{ color: isToday ? "rgba(255,255,255,.6)" : "var(--muted, #6c7a73)" }}
-          >
-            Chapter {chapterIndex + 1} · {day.name} · {dateLabel}
-            {isToday ? " · today" : ""}
-          </p>
-          <span
-            className={clsx(
-              "rounded-full px-2 py-0.5 text-[10px] font-medium",
-              isToday ? "bg-white/15 text-white" : "bg-black/[.06] text-ink-2",
-            )}
-          >
-            {minutes ? `${minutes} min total` : "easy"}
+  if (isToday) {
+    return (
+      <article
+        className="relative overflow-hidden rounded-[28px] px-4 pb-4 pt-4.5 text-cream"
+        style={{
+          background: "linear-gradient(135deg, #064e46 0%, #0d9488 100%)",
+          boxShadow: "0 30px 60px -28px rgba(13,148,136,0.65)",
+        }}
+      >
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -inset-x-6 -top-6 h-[70%] aurora-anim"
+          style={{
+            background:
+              "radial-gradient(50% 50% at 30% 40%, rgba(167,243,208,0.45), transparent 60%), radial-gradient(45% 45% at 75% 30%, rgba(186,230,253,0.45), transparent 60%), radial-gradient(40% 40% at 50% 70%, rgba(251,146,60,0.30), transparent 60%)",
+            filter: "blur(28px)",
+          }}
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 shine-anim"
+          style={{
+            background:
+              "linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.12) 50%, transparent 70%)",
+          }}
+        />
+
+        <div className="relative flex items-center justify-between gap-3 text-[10px] font-bold uppercase tracking-[0.22em] text-cream/72">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="grid h-2 w-2 place-items-center rounded-full bg-mint" style={{ background: "#a7f3d0" }} />
+            {day.name} · {dateLabel} · Today
           </span>
+          {minutes ? <span>~{minutes} min · cook</span> : null}
         </div>
-        <h3
-          className="font-display text-2xl mt-1"
-          style={{ color: isToday ? "white" : "var(--ink-2, #18241f)" }}
-        >
+
+        <h3 className="font-display relative mt-1.5 text-[26px] leading-[1.05] tracking-[-0.025em] text-cream">
           {title}
         </h3>
-        <p
-          className="mt-1 text-xs"
-          style={{
-            color: isToday ? "rgba(255,255,255,.75)" : "rgba(44,58,51,.7)",
-          }}
-        >
-          {subtitle}
-        </p>
-      </div>
+        <p className="relative mt-1 text-[12.5px] text-cream/78">{subtitle}</p>
 
-      <div className="px-4 pb-4">
-        <div className="grid grid-cols-3 gap-2">
+        <div
+          className="relative mt-3 flex items-center justify-between gap-2 rounded-2xl border border-white/15 bg-white/10 px-3 py-2.5"
+        >
+          <TodayStat num={`${nutrition.calories}`} lbl="Kcal" />
+          <span className="h-5 w-px bg-white/22" />
+          <TodayStat num={`${nutrition.proteinG}`} suffix="g" lbl="Protein" />
+          <span className="h-5 w-px bg-white/22" />
+          <TodayStat num={`${nutrition.carbsG}`} suffix="g" lbl="Carbs" />
+          <span className="h-5 w-px bg-white/22" />
+          <TodayStat num={`${day.meals.length}`} lbl="Meals" />
+        </div>
+
+        <div className="relative mt-3.5 grid grid-cols-3 gap-2.5">
           {day.meals.slice(0, 3).map((m, mi) => {
             const slotLabel = slots[mi] ?? "";
-            const isHero = isToday && mi === day.meals.length - 1;
             return (
-              <button
+              <TodayPuck
                 key={`${day.name}-${mi}`}
-                type="button"
-                data-tap
-                onClick={() => onMealTap(day.name, slotLabel, m.key, dayIdx, mi)}
-                className={clsx(
-                  "tap-bounce rounded-2xl p-2 text-center transition",
-                )}
-                style={{
-                  background: isToday
-                    ? isHero
-                      ? "rgba(255,255,255,.18)"
-                      : "rgba(255,255,255,.1)"
-                    : "rgba(255,255,255,.6)",
-                  boxShadow: isHero ? "0 0 0 1px rgba(255,255,255,.3)" : undefined,
-                }}
-                aria-label={`${slotLabel}: ${m.key}`}
-              >
-                <div className="text-[20px] leading-none">{mealIcoFor(m.key)}</div>
-                <div
-                  className="mt-1 text-[10px] truncate"
-                  style={{
-                    color: isToday ? "rgba(255,255,255,.75)" : "var(--muted, #6c7a73)",
-                  }}
-                >
-                  {slotLabel}
-                </div>
-                <div
-                  className="mt-0.5 text-[10.5px] font-medium leading-tight line-clamp-2"
-                  style={{
-                    color: isToday ? "white" : "var(--ink-2, #18241f)",
-                  }}
-                >
-                  {m.key}
-                  {isHero ? " ★" : ""}
-                </div>
-              </button>
+                slotLabel={slotLabel}
+                recipeKey={m.key}
+                slotIdx={mi}
+                mealsPerDay={mealsPerDay}
+                targets={targets}
+                onTap={() => onMealTap(day.name, slotLabel, m.key, dayIdx, mi)}
+              />
             );
           })}
         </div>
         {day.meals.length > 3 ? (
-          <div className="mt-2 grid grid-cols-2 gap-2">
+          <div className="relative mt-2 grid grid-cols-2 gap-2">
             {day.meals.slice(3).map((m, mi) => {
               const realIdx = mi + 3;
               const slotLabel = slots[realIdx] ?? "";
@@ -701,74 +713,249 @@ function ChapterCard({
                   onClick={() =>
                     onMealTap(day.name, slotLabel, m.key, dayIdx, realIdx)
                   }
-                  className="tap-bounce rounded-2xl p-2 text-left"
-                  style={{
-                    background: isToday
-                      ? "rgba(255,255,255,.1)"
-                      : "rgba(255,255,255,.6)",
-                  }}
+                  className="tap-bounce flex items-center gap-2 rounded-2xl border border-white/15 bg-white/10 p-2 text-left"
                 >
-                  <div
-                    className="text-[10px]"
-                    style={{
-                      color: isToday ? "rgba(255,255,255,.7)" : "var(--muted, #6c7a73)",
-                    }}
-                  >
-                    {slotLabel}
-                  </div>
-                  <div
-                    className="text-[11px] font-medium leading-tight"
-                    style={{
-                      color: isToday ? "white" : "var(--ink-2, #18241f)",
-                    }}
-                  >
-                    {mealIcoFor(m.key)} {m.key}
-                  </div>
+                  <MealCover recipeKey={m.key} slotLabel={slotLabel} className="h-9 w-9 shrink-0" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-[9px] font-bold uppercase tracking-[0.16em] text-cream/72">
+                      {slotLabel}
+                    </span>
+                    <span className="block truncate text-[12px] font-semibold leading-tight text-cream">
+                      {m.key}
+                    </span>
+                  </span>
                 </button>
               );
             })}
           </div>
         ) : null}
+      </article>
+    );
+  }
 
-        <div
-          className="mt-3 flex items-center justify-between gap-3 text-[11px]"
-          style={{
-            color: isToday ? "rgba(255,255,255,.85)" : "rgba(44,58,51,.85)",
-          }}
-        >
-          <span className="numerals">
-            ~{nutrition.calories} kcal · {nutrition.proteinG}g P
+  return (
+    <article
+      className="relative overflow-hidden rounded-[26px] border border-white/85 bg-white/55 px-3.5 pb-3 pt-3.5 backdrop-blur-xl"
+      style={{ boxShadow: "0 14px 30px -22px rgba(15,23,20,0.18)" }}
+    >
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-1/2 opacity-55"
+        style={{
+          background: mood.tint,
+          WebkitMask: "linear-gradient(180deg, #000 0%, transparent 100%)",
+          mask: "linear-gradient(180deg, #000 0%, transparent 100%)",
+        }}
+      />
+      <div className="relative flex items-center justify-between gap-2">
+        <div className="flex items-baseline gap-2 min-w-0">
+          <h3 className="font-display truncate text-[20px] tracking-[-0.022em] text-ink-2">
+            {title}
+          </h3>
+          <span className="shrink-0 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
+            {dateLabel}
           </span>
-          {(() => {
-            const heroIdx = day.meals.length - 1;
-            const heroMeal = day.meals[heroIdx];
-            const heroSlot = slots[heroIdx] ?? "";
-            if (!heroMeal) return null;
-            return (
-              <button
-                type="button"
-                data-tap
-                onClick={() =>
-                  onMealTap(day.name, heroSlot, heroMeal.key, dayIdx, heroIdx)
-                }
-                className="tap-bounce inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[11px] font-medium transition"
-                style={{
-                  background: isToday ? "#a7f3d0" : "var(--forest, #1f5f4a)",
-                  color: isToday ? "#18241f" : "white",
-                }}
-                aria-label={
-                  isToday
-                    ? `Cook now — open ${heroMeal.key}`
-                    : `Open ${day.name} — ${heroMeal.key}`
-                }
-              >
-                {isToday ? "Cook now →" : "Open day →"}
-              </button>
-            );
-          })()}
+        </div>
+        <div className="flex shrink-0 items-center gap-1.5">
+          {minutes ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-black/[.06] px-2 py-0.5 text-[10.5px] font-semibold text-ink-2">
+              <Timer size={10} aria-hidden /> {minutes}m
+            </span>
+          ) : null}
+          <span className="numerals rounded-full bg-forest/12 px-2 py-0.5 text-[10.5px] font-semibold text-forest">
+            {nutrition.calories} kcal
+          </span>
         </div>
       </div>
+      <p className="relative mt-1 text-[12px] text-muted">{subtitle}</p>
+
+      <div
+        className="relative mt-2.5 -mx-3.5 flex gap-2 overflow-x-auto px-3.5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        style={{ scrollSnapType: "x mandatory" }}
+      >
+        {day.meals.map((m, mi) => {
+          const slotLabel = slots[mi] ?? "";
+          return (
+            <DayPuck
+              key={`${day.name}-${mi}`}
+              slotLabel={slotLabel}
+              recipeKey={m.key}
+              onTap={() => onMealTap(day.name, slotLabel, m.key, dayIdx, mi)}
+            />
+          );
+        })}
+      </div>
     </article>
+  );
+}
+
+function MealCover({
+  recipeKey,
+  className,
+  rounded = "rounded-xl",
+  showSlotTag,
+  slotLabel,
+}: {
+  recipeKey: string;
+  className?: string;
+  rounded?: string;
+  showSlotTag?: boolean;
+  slotLabel?: string;
+}) {
+  const img = recipeImage(recipeKey);
+  const { from, to } = coverFor(recipeKey);
+
+  if (img) {
+    return (
+      <span
+        className={clsx("relative overflow-hidden", rounded, className)}
+        style={{
+          backgroundColor: from,
+          backgroundImage: `url(${img.url})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          boxShadow:
+            "inset 0 0 0 1px rgba(255,255,255,0.5), 0 6px 14px -8px rgba(0,0,0,0.4)",
+        }}
+        aria-hidden
+      >
+        <span
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.32) 100%)",
+          }}
+        />
+        {showSlotTag && slotLabel ? (
+          <span
+            className="absolute bottom-1.5 left-2 text-[9px] font-bold uppercase tracking-[0.16em] text-white"
+            style={{ textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}
+          >
+            {slotLabel}
+          </span>
+        ) : null}
+      </span>
+    );
+  }
+
+  return (
+    <span
+      className={clsx("relative overflow-hidden", rounded, className)}
+      style={{
+        backgroundImage: `radial-gradient(120% 80% at 78% 18%, ${from} 0%, transparent 58%), radial-gradient(140% 90% at 12% 100%, ${to} 0%, transparent 55%), linear-gradient(160deg, #1f2a26 0%, #0a0d0c 100%)`,
+        boxShadow:
+          "inset 0 0 0 1px rgba(255,255,255,0.08), 0 6px 14px -8px rgba(0,0,0,0.4)",
+      }}
+      aria-hidden
+    >
+      <span
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.45) 100%)",
+        }}
+      />
+      <span
+        className="absolute bottom-1.5 left-2 text-[8.5px] font-bold uppercase tracking-[0.18em] text-white/85"
+        style={{ textShadow: "0 1px 4px rgba(0,0,0,0.55)" }}
+      >
+        {slotLabel ? `${slotLabel} · ` : ""}Coming soon
+      </span>
+    </span>
+  );
+}
+
+function TodayStat({
+  num,
+  suffix,
+  lbl,
+}: {
+  num: string;
+  suffix?: string;
+  lbl: string;
+}) {
+  return (
+    <div className="flex-1 text-center">
+      <div className="font-display numerals text-[18px] leading-none tracking-[-0.02em] text-cream">
+        {num}
+        {suffix ? <span className="text-[11px] font-medium">{suffix}</span> : null}
+      </div>
+      <div className="mt-0.5 text-[9.5px] font-bold uppercase tracking-[0.18em] text-cream/72">
+        {lbl}
+      </div>
+    </div>
+  );
+}
+
+function TodayPuck({
+  slotLabel,
+  recipeKey,
+  slotIdx,
+  mealsPerDay,
+  targets,
+  onTap,
+}: {
+  slotLabel: string;
+  recipeKey: string;
+  slotIdx: number;
+  mealsPerDay: number;
+  targets: DailyTargets;
+  onTap: () => void;
+}) {
+  const recipe = recipes[recipeKey];
+  const macros = recipe
+    ? plannedNutritionForRecipe(recipe, slotIdx, mealsPerDay, targets)
+    : null;
+  return (
+    <button
+      type="button"
+      data-tap
+      onClick={onTap}
+      className="tap-bounce flex flex-col gap-1.5 rounded-2xl border border-white/15 bg-white/10 p-2.5 text-left text-cream backdrop-blur"
+      aria-label={`${slotLabel}: ${recipeKey}`}
+    >
+      <MealCover recipeKey={recipeKey} slotLabel={slotLabel} className="h-14 w-full" />
+      <span className="text-[9.5px] font-bold uppercase tracking-[0.16em] text-cream/72">
+        {slotLabel}
+      </span>
+      <span className="line-clamp-2 text-[12px] font-semibold leading-[1.18] text-cream">
+        {recipeKey}
+      </span>
+      {macros ? (
+        <span className="numerals text-[10.5px] text-cream/72">
+          {macros.calories} kcal · {macros.proteinG}g P
+        </span>
+      ) : null}
+    </button>
+  );
+}
+
+function DayPuck({
+  slotLabel,
+  recipeKey,
+  onTap,
+}: {
+  slotLabel: string;
+  recipeKey: string;
+  onTap: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      data-tap
+      onClick={onTap}
+      className="tap-bounce flex w-[150px] shrink-0 flex-col gap-1.5 rounded-2xl border border-white/95 bg-white/70 p-2 text-left"
+      style={{ scrollSnapAlign: "start" }}
+      aria-label={`${slotLabel}: ${recipeKey}`}
+    >
+      <MealCover recipeKey={recipeKey} slotLabel={slotLabel} className="h-16 w-full" />
+      <span className="block text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
+        {slotLabel}
+      </span>
+      <span className="block text-[12px] font-semibold leading-[1.18] text-ink-2 line-clamp-2">
+        {recipeKey}
+      </span>
+    </button>
   );
 }
 

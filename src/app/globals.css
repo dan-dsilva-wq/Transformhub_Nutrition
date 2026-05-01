@@ -63,7 +63,7 @@
   --color-sky: var(--color-sky);
   --color-cream: var(--color-cream);
 
-  --font-display: var(--font-body), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display-stack: var(--font-display), "Fraunces", ui-serif, Georgia, "Times New Roman", serif;
   --font-body: var(--font-body), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 
   --radius-sm: var(--radius-sm);
@@ -100,7 +100,7 @@ input, select, textarea { font-size: 16px; }
 body { overscroll-behavior-y: contain; }
 
 /* utility primitives — kept tiny so we don't drift from Tailwind */
-.font-display { font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif; letter-spacing: -0.03em; font-weight: 600; }
+.font-display { font-family: var(--font-display), "Fraunces", ui-serif, Georgia, serif; letter-spacing: -0.03em; font-weight: 600; }
 .font-body { font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif; }
 
 /* Card: frosted glass surface (Mint Frost) */
@@ -318,6 +318,26 @@ button { -webkit-tap-highlight-color: transparent; }
   animation: draw-stroke 1100ms cubic-bezier(.2,.8,.2,1) forwards;
 }
 
+/* Living motion for the home hero */
+@keyframes aurora-drift {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50%      { transform: translate3d(-3%, 2%, 0) rotate(2deg); }
+}
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+@keyframes shine-sweep {
+  0%   { transform: translateX(-100%); }
+  60%  { transform: translateX(120%); }
+  100% { transform: translateX(120%); }
+}
+@keyframes water-drift {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.aurora-anim    { animation: aurora-drift 16s ease-in-out infinite; }
+.spin-slow-anim { animation: spin-slow 14s linear infinite; }
+.shine-anim     { animation: shine-sweep 3.6s ease-in-out infinite; }
+.water-drift-anim { animation: water-drift 14s linear infinite; }
+
 /* Reduced-motion guard — disable everything decorative. */
 @media (prefers-reduced-motion: reduce) {
   .ring-anim, .sheet-anim, .fade-anim, .skeleton,
@@ -325,6 +345,7 @@ button { -webkit-tap-highlight-color: transparent; }
   .slide-up-anim, .slide-down-anim, .slide-right-anim, .slide-left-anim,
   .pop-in-anim, .bubble-anim, .blur-in-anim, .float-anim,
   .pulse-soft-anim, .pulse-ring-anim, .draw-anim,
+  .aurora-anim, .spin-slow-anim, .shine-anim, .water-drift-anim,
   .stagger-up > * {
     animation: none !important;
   }

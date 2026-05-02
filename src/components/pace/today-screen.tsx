@@ -3,10 +3,6 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
-  HealthConnect,
-  isHealthConnectPlatform,
-} from "@/lib/health/health-connect";
-import {
   ArrowRight,
   Camera,
   Check,
@@ -291,29 +287,6 @@ export function TodayScreen() {
 
   const historyDays = useMemo(() => groupMealsByDay(allMeals, todayIsoKey()), [allMeals]);
 
-  useEffect(() => {
-    let cancelled = false;
-    async function pullFromHealthConnect() {
-      if (!isHealthConnectPlatform()) return;
-      try {
-        const { available } = await HealthConnect.isAvailable();
-        if (!available) return;
-        const { granted } = await HealthConnect.hasPermissions();
-        if (!granted || cancelled) return;
-        const { steps: stepCount } = await HealthConnect.readStepsToday();
-        if (cancelled) return;
-        if (typeof stepCount === "number" && stepCount >= 0) {
-          actions.setSteps(stepCount);
-        }
-      } catch {
-        /* Health Connect unavailable or denied  -  silent */
-      }
-    }
-    void pullFromHealthConnect();
-    return () => {
-      cancelled = true;
-    };
-  }, [actions]);
   const editingMeal = allMeals.find((meal) => meal.id === editingMealId) ?? null;
 
   function openStepsEditor() {

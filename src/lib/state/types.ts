@@ -169,6 +169,18 @@ export interface OnboardingExtras {
   hasSeenWeekIntro?: boolean;
   /** Number of future weeks the user has manually generated beyond the current week. 0..4. */
   weeksAhead?: number;
+  /** Meal-photo reminder schedule. Master on/off lives on `reminderState`. */
+  photoReminders?: PhotoReminderConfig;
+}
+
+export interface PhotoReminderConfig {
+  mode: "evening" | "all-meals";
+  /** "HH:MM" 24h. Only used when mode === "all-meals". */
+  morning: string;
+  /** "HH:MM" 24h. Only used when mode === "all-meals". */
+  afternoon: string;
+  /** "HH:MM" 24h. Always used. */
+  evening: string;
 }
 
 interface AppState {

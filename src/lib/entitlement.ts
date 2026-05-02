@@ -37,8 +37,8 @@ export const featureCopy: Record<
     body: "Compare any week against your starting photo.",
   },
   "integrations-sync": {
-    title: "Apple Health, Google Fit & Strava",
-    body: "Sync steps, weight, and workouts automatically.",
+    title: "Smart pantry & calendar",
+    body: "Scan groceries to plan meals around what you already own, and tuck reminders into the gaps in your day.",
   },
   workouts: {
     title: "Your workout plan",

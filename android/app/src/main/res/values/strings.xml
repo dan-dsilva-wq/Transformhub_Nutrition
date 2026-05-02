@@ -4,5 +4,4 @@
     <string name="title_activity_main">Pace</string>
     <string name="package_name">com.danieldsilva.pace</string>
     <string name="custom_url_scheme">com.danieldsilva.pace</string>
-    <string name="health_connect_privacy_policy_url">https://pace-nutrition.vercel.app/privacypolicy.html</string>
 </resources>

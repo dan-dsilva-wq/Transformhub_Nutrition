@@ -17,6 +17,23 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const route = (event.notification.data && event.notification.data.route) || "/log";
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+      for (const client of clients) {
+        if ("focus" in client) {
+          client.focus();
+          if ("navigate" in client) client.navigate(route);
+          return;
+        }
+      }
+      if (self.clients.openWindow) return self.clients.openWindow(route);
+    }),
+  );
+});
+
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") {
     return;

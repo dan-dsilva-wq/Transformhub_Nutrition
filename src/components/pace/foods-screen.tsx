@@ -370,7 +370,7 @@ export function FoodsScreen() {
           >
             <ChevronLeft size={16} aria-hidden />
           </button>
-          <div className="flex flex-1 items-center justify-center gap-1.5">
+          <div className="flex min-w-0 flex-1 items-center justify-center gap-1.5">
             <span
               className={clsx(
                 "rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em]",
@@ -410,7 +410,7 @@ export function FoodsScreen() {
               type="button"
               data-tap
               onClick={generateNextWeek}
-              className="tap-bounce inline-flex h-9 items-center gap-1 rounded-full bg-forest px-3 text-xs font-semibold text-white shadow-sm"
+              className="tap-bounce inline-flex h-9 shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-forest px-3 text-xs font-semibold text-white shadow-sm"
               aria-label="Generate next week"
             >
               <Plus size={14} aria-hidden /> Generate
@@ -1079,6 +1079,14 @@ function RecipeSheet({
   const pantrySet = new Set(pantry.map((p) => p.toLowerCase()));
   const planned = plannedNutritionForRecipe(recipe, slotIdx, mealsPerDay, targets);
 
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
+
   function startDrag(event: PointerEvent<HTMLDivElement>) {
     dragStartY.current = event.clientY;
     event.currentTarget.setPointerCapture(event.pointerId);
@@ -1090,7 +1098,7 @@ function RecipeSheet({
   }
 
   function endDrag() {
-    const shouldClose = dragY > 84;
+    const shouldClose = dragY > 64;
     dragStartY.current = null;
     setDragY(0);
     if (shouldClose) onClose();
@@ -1105,23 +1113,31 @@ function RecipeSheet({
         onClick={onClose}
       />
       <div
-        className="sheet-anim relative mx-auto max-h-[92vh] w-full max-w-[480px] overflow-y-auto rounded-t-[28px] bg-white px-5 pt-3 shadow-elevated"
+        className="sheet-anim relative mx-auto max-h-[92vh] w-full max-w-[480px] overflow-y-auto overscroll-contain rounded-t-[28px] bg-white px-5 pt-0 shadow-elevated"
         style={{
           paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 22px)",
           transform: dragY ? `translateY(${dragY}px)` : undefined,
+          touchAction: "pan-y",
         }}
       >
         <div
-          className="mx-auto mb-3 flex h-7 w-24 touch-none cursor-grab items-start justify-center pt-2 active:cursor-grabbing"
+          className="-mx-5 flex h-10 touch-none cursor-grab items-center justify-center active:cursor-grabbing"
           onPointerDown={startDrag}
           onPointerMove={moveDrag}
           onPointerUp={endDrag}
           onPointerCancel={endDrag}
           aria-label="Swipe down to close"
+          role="button"
         >
-          <div className="h-1 w-10 rounded-full bg-stone-2" />
+          <div className="h-1.5 w-14 rounded-full bg-stone-2" />
         </div>
-        <div className="flex items-center gap-3">
+        <div
+          className="flex items-center gap-3 touch-none cursor-grab active:cursor-grabbing"
+          onPointerDown={startDrag}
+          onPointerMove={moveDrag}
+          onPointerUp={endDrag}
+          onPointerCancel={endDrag}
+        >
           <span className="text-[44px] leading-none">{mealIcoFor(name)}</span>
           <div>
             <h3 className="font-display text-2xl text-ink-2">{name}</h3>

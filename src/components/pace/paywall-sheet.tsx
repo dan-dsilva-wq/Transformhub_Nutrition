@@ -17,7 +17,7 @@ const premiumPerks = [
   "Tailored nutrition guide",
   "Coach without limits",
   "Full progress history + photo compare",
-  "Apple Health, Google Fit & Strava sync",
+  "Smart pantry barcode scanning & calendar reminders",
   "Custom reminder schedules",
 ];
 

@@ -585,6 +585,23 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     void refreshSubscription();
   }, [auth.kind, hasHydrated, refreshSubscription]);
 
+  // Re-arm meal-photo reminders after hydration so a fresh app launch
+  // (or the browser fallback's setTimeout being lost on tab close) keeps
+  // the user's chosen schedule alive. Idempotent.
+  useEffect(() => {
+    if (!hasHydrated) return;
+    if (reminderState !== "on") return;
+    void (async () => {
+      const { scheduleReminders, DEFAULT_REMINDER_CONFIG } = await import(
+        "@/lib/notifications"
+      );
+      await scheduleReminders({
+        ...DEFAULT_REMINDER_CONFIG,
+        ...(onboardingExtras.photoReminders ?? {}),
+      });
+    })();
+  }, [hasHydrated, reminderState, onboardingExtras.photoReminders]);
+
   // Reload the WebView when the app returns to foreground after a long
   // background, so testers always see the latest Vercel deploy without
   // having to manually clear cache. Skipped if backgrounded < 60s.

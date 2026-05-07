@@ -201,19 +201,19 @@ export function FoodsShoppingScreen() {
         <div className="flex items-center justify-between">
           <Link
             href="/you/foods"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/70 text-ink-2 shadow-sm backdrop-blur"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/[0.08] text-white backdrop-blur-md hover:bg-white/[0.14]"
             aria-label="Back to your week"
           >
             <ArrowLeft size={16} aria-hidden />
           </Link>
-          <p className="text-[10.5px] uppercase tracking-[0.22em] text-muted">
+          <p className="text-[10.5px] uppercase tracking-[0.22em] text-white/60">
             {opt.range}
           </p>
           <button
             type="button"
             data-tap
             onClick={() => window.print()}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/70 text-ink-2 shadow-sm backdrop-blur"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/[0.08] text-white backdrop-blur-md hover:bg-white/[0.14]"
             aria-label="Export as PDF"
           >
             <Printer size={14} aria-hidden />
@@ -221,16 +221,16 @@ export function FoodsShoppingScreen() {
         </div>
 
         <header>
-          <h1 className="font-display text-[36px] leading-[1.0] text-ink-2">
+          <h1 className="font-display text-[36px] leading-[1.0] text-white">
             The list.
           </h1>
-          <p className="mt-1 text-xs text-muted">
+          <p className="mt-1 text-xs text-white/60">
             Everything you need for the week, sorted by aisle.
           </p>
         </header>
 
         {/* week toggle */}
-        <div className="flex gap-1 rounded-full glass p-1 bg-white/60 border border-white/85 backdrop-blur">
+        <div className="flex gap-1 rounded-full border border-white/15 bg-white/[0.06] p-1 backdrop-blur-xl">
           {weekOptions.map((w, i) => (
             <button
               key={w.label}
@@ -238,8 +238,10 @@ export function FoodsShoppingScreen() {
               data-tap
               onClick={() => setOptionIdx(i)}
               className={clsx(
-                "tap-bounce flex-1 rounded-full px-3 py-2 text-xs font-medium transition",
-                optionIdx === i ? "bg-forest text-white" : "text-ink",
+                "tap-bounce flex-1 rounded-full px-3 py-2 text-xs font-semibold transition",
+                optionIdx === i
+                  ? "text-white border border-[#00c9ff]/40 bg-[linear-gradient(180deg,#1ec0ff_0%,#00aef0_55%,#008fd0_100%)] shadow-[0_6px_18px_-8px_rgba(0,143,208,0.55)]"
+                  : "text-white/70 hover:bg-white/[0.06]",
               )}
             >
               {w.label}
@@ -402,19 +404,21 @@ export function FoodsShoppingScreen() {
         {/* pantry */}
         {pantryHits.length > 0 ? (
           <section
-            className="rounded-3xl shadow-card p-4"
+            className="rounded-3xl border border-[#00aef0]/22 p-4 backdrop-blur-xl"
             style={{
               background:
-                "repeating-linear-gradient(45deg, rgba(31,95,74,.06) 0 6px, transparent 6px 12px), white",
+                "radial-gradient(110% 70% at 50% 0%, rgba(0,143,208,0.10) 0%, transparent 60%), linear-gradient(160deg, rgba(0,60,83,0.55) 0%, rgba(0,26,38,0.72) 100%)",
+              boxShadow:
+                "0 18px 42px -22px rgba(0,8,19,0.65), 0 1px 0 rgba(0,174,240,0.14) inset",
             }}
           >
             <div className="flex items-center gap-2">
-              <Home size={14} aria-hidden className="text-forest" />
-              <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted">
+              <Home size={14} aria-hidden className="text-[#66c8e8]" />
+              <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-white/55">
                 Already at home
               </p>
             </div>
-            <p className="mt-1 text-xs text-muted">
+            <p className="mt-1 text-xs text-white/65">
               These are in recipes this week but we&rsquo;re leaving them off your list.
               Tap to put one back.
             </p>
@@ -425,7 +429,7 @@ export function FoodsShoppingScreen() {
                   type="button"
                   data-tap
                   onClick={() => removePantry(p)}
-                  className="tap-bounce inline-flex items-center gap-1 rounded-full bg-forest/10 px-2.5 py-1 text-[11.5px] font-medium text-forest"
+                  className="tap-bounce inline-flex items-center gap-1 rounded-full border border-[#00aef0]/30 bg-[#00aef0]/15 px-2.5 py-1 text-[11.5px] font-semibold text-[#bfe7f5] hover:bg-[#00aef0]/25"
                 >
                   {p}
                   <X size={10} aria-hidden />
@@ -435,25 +439,25 @@ export function FoodsShoppingScreen() {
           </section>
         ) : null}
 
-        <p className="text-[11px] text-muted text-center">
+        <p className="text-[11px] text-white/50 text-center">
           Tap an item to check it off. Long-press a recipe ingredient on your week
           to skip it permanently.
         </p>
 
         <Link
           href="/you/foods/list"
-          className="block rounded-3xl border border-hairline bg-white/60 px-4 py-3 backdrop-blur"
+          className="block rounded-3xl border border-white/15 bg-white/[0.06] px-4 py-3 backdrop-blur-md hover:bg-white/[0.10] transition-colors"
         >
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-[10px] uppercase tracking-[0.18em] text-muted">
+              <p className="text-[10px] uppercase tracking-[0.18em] text-white/55">
                 Manage food preferences
               </p>
-              <p className="text-sm text-ink-2 mt-0.5 font-medium">
+              <p className="text-sm text-white mt-0.5 font-medium">
                 Foods to skip · pantry staples
               </p>
             </div>
-            <ChevronRight size={16} className="text-muted" aria-hidden />
+            <ChevronRight size={16} className="text-white/55" aria-hidden />
           </div>
         </Link>
       </div>
@@ -476,10 +480,10 @@ function FilterChip({
       data-tap
       onClick={onClick}
       className={clsx(
-        "tap-bounce shrink-0 rounded-full px-3 py-1.5 text-[11.5px] font-medium border transition",
+        "tap-bounce shrink-0 rounded-full px-3 py-1.5 text-[11.5px] font-semibold border transition backdrop-blur-md",
         active
-          ? "bg-forest text-white border-forest shadow-sm"
-          : "bg-white/70 text-ink border-white/85 backdrop-blur",
+          ? "text-white border-[#00c9ff]/40 bg-[linear-gradient(180deg,#1ec0ff_0%,#00aef0_55%,#008fd0_100%)] shadow-[0_6px_16px_-8px_rgba(0,143,208,0.55)]"
+          : "bg-white/[0.06] text-white/75 border-white/15 hover:bg-white/[0.10]",
       )}
     >
       {label}
@@ -512,12 +516,20 @@ function AisleSection({
           >
             {meta.emoji}
           </span>
-          <p className="font-display text-lg text-ink-2">{meta.label}</p>
+          <p className="font-display text-lg text-white">{meta.label}</p>
         </div>
-        <p className="text-[11px] text-muted numerals">{items.length} items</p>
+        <p className="text-[11px] text-white/55 numerals">{items.length} items</p>
       </div>
 
-      <div className="rounded-3xl bg-white/80 shadow-card overflow-hidden">
+      <div
+        className="rounded-3xl overflow-hidden border border-[#00aef0]/22 backdrop-blur-xl"
+        style={{
+          background:
+            "radial-gradient(110% 70% at 50% 0%, rgba(0,143,208,0.12) 0%, transparent 60%), linear-gradient(160deg, rgba(0,60,83,0.62) 0%, rgba(0,26,38,0.78) 100%)",
+          boxShadow:
+            "0 18px 42px -22px rgba(0,8,19,0.65), 0 1px 0 rgba(0,174,240,0.16) inset",
+        }}
+      >
         {items.map((item, idx) => {
           const checked = checkedKeys.has(`${weekIdx}:${item.key}`);
           const days = item.occurrences
@@ -534,10 +546,10 @@ function AisleSection({
               data-tap
               onClick={() => onToggle(item)}
               className={clsx(
-                "tap-bounce w-full flex items-center gap-3 px-3 py-3 text-left transition",
-                idx > 0 ? "border-t border-hairline" : "",
+                "tap-bounce w-full flex items-center gap-3 px-3 py-3 text-left transition hover:bg-white/[0.04]",
+                idx > 0 ? "border-t border-white/8" : "",
                 item.hero && !checked
-                  ? "bg-gradient-to-r from-forest/[0.08] to-transparent"
+                  ? "bg-gradient-to-r from-[#00aef0]/[0.10] to-transparent"
                   : "",
               )}
               aria-pressed={checked}
@@ -546,8 +558,8 @@ function AisleSection({
                 className={clsx(
                   "grid h-5 w-5 shrink-0 place-items-center rounded-md border-[1.5px] transition",
                   checked
-                    ? "border-forest bg-forest text-white"
-                    : "border-hairline bg-white",
+                    ? "border-[#00aef0] bg-[#00aef0] text-white"
+                    : "border-white/30 bg-white/[0.06]",
                 )}
               >
                 {checked ? <Check size={12} aria-hidden /> : null}
@@ -558,24 +570,24 @@ function AisleSection({
                   <p
                     className={clsx(
                       "text-sm font-medium",
-                      checked ? "text-faint line-through" : "text-ink-2",
+                      checked ? "text-white/35 line-through" : "text-white",
                     )}
                   >
                     {item.name}
                     {item.count > 1 ? (
-                      <span className="ml-1 text-xs text-muted numerals">
+                      <span className="ml-1 text-xs text-white/55 numerals">
                         ×{item.count}
                       </span>
                     ) : null}
                   </p>
                   {item.hero ? (
-                    <span className="rounded-full bg-forest/10 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.12em] text-forest font-semibold">
+                    <span className="rounded-full bg-[#00aef0]/15 border border-[#00aef0]/30 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.12em] text-[#66c8e8] font-semibold">
                       ★ hero
                     </span>
                   ) : null}
                 </div>
                 {!checked ? (
-                  <p className="mt-0.5 text-[10.5px] text-muted truncate">
+                  <p className="mt-0.5 text-[10.5px] text-white/55 truncate">
                     {days}
                     {more}
                   </p>
@@ -591,10 +603,16 @@ function AisleSection({
 
 function EmptyList() {
   return (
-    <div className="rounded-3xl border border-white/85 bg-white/55 p-8 text-center backdrop-blur-xl">
+    <div
+      className="rounded-3xl border border-[#00aef0]/22 p-8 text-center backdrop-blur-xl"
+      style={{
+        background:
+          "radial-gradient(110% 70% at 50% 0%, rgba(0,143,208,0.12) 0%, transparent 60%), linear-gradient(160deg, rgba(0,60,83,0.55) 0%, rgba(0,26,38,0.72) 100%)",
+      }}
+    >
       <div className="text-4xl">🛒</div>
-      <p className="mt-2 font-display text-lg text-ink-2">Empty basket</p>
-      <p className="mt-1 text-xs text-muted">
+      <p className="mt-2 font-display text-lg text-white">Empty basket</p>
+      <p className="mt-1 text-xs text-white/65">
         We couldn&rsquo;t find anything to shop for. Generate the week first or
         loosen your skipped ingredients in Settings.
       </p>

@@ -329,10 +329,20 @@ export function FoodsScreen() {
   return (
     <LockedState feature="nutrition-guide">
       <div className="stagger-up space-y-4 pb-32">
-        <header>
+        <header className="relative">
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted">
             Your food week
           </p>
+          <button
+            type="button"
+            data-tap
+            onClick={() => setMealCountOpen(true)}
+            aria-haspopup="dialog"
+            aria-label="Change meals per day"
+            className="tap-bounce absolute right-0 top-0 inline-flex h-8 items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.08] px-3 text-[11.5px] font-semibold text-white hover:bg-white/[0.14] backdrop-blur-md"
+          >
+            <Utensils size={12} aria-hidden /> {mealsPerDay}/day
+          </button>
           <h1 className="font-display mt-2 flex flex-wrap items-center gap-2.5 text-[40px] leading-[1.02] text-ink-2">
             {week.name === "This week" ? (
               <>
@@ -379,16 +389,6 @@ export function FoodsScreen() {
             >
               {week.badge}
             </span>
-            <button
-              type="button"
-              data-tap
-              onClick={() => setMealCountOpen(true)}
-              aria-haspopup="dialog"
-              className="tap-bounce inline-flex h-7 items-center gap-1 rounded-full border border-white/15 bg-white/[0.08] px-2.5 text-[11px] font-semibold text-white hover:bg-white/[0.14]"
-              aria-label="Change meals per day"
-            >
-              <Utensils size={11} aria-hidden /> {mealsPerDay}/day
-            </button>
             <button
               type="button"
               data-tap
@@ -799,7 +799,7 @@ function ChapterCard({
       <p className="relative mt-1 text-[12px] text-white/65">{subtitle}</p>
 
       <div
-        className="relative mt-2.5 -mx-3.5 flex gap-2 overflow-x-auto px-3.5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="relative mt-2.5 -mr-3.5 flex gap-2 overflow-x-auto pl-1 pr-3.5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         style={{ scrollSnapType: "x mandatory" }}
       >
         {day.meals.map((m, mi) => {

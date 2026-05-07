@@ -19,9 +19,9 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClass: Record<ButtonVariant, string> = {
   primary:
-    "bg-forest text-white hover:bg-forest-2 active:bg-forest-2 disabled:bg-stone-2 disabled:text-faint shadow-[0_10px_28px_-8px_rgba(0,143,208,0.55),0_2px_0_rgba(255,255,255,0.25)_inset]",
+    "text-white bg-[linear-gradient(180deg,#00aef0_0%,#008fd0_55%,#0078b8_100%)] border border-[#00c9ff]/35 hover:bg-[linear-gradient(180deg,#1ec0ff_0%,#00aef0_55%,#008fd0_100%)] active:translate-y-[1px] disabled:bg-none disabled:bg-stone-2 disabled:text-faint disabled:border-transparent shadow-[0_14px_32px_-10px_rgba(0,143,208,0.65),0_1px_0_rgba(255,255,255,0.40)_inset,0_-1px_0_rgba(0,40,60,0.40)_inset]",
   secondary:
-    "bg-paper text-ink border border-stone-2 hover:bg-stone hover:border-hairline disabled:text-faint",
+    "text-white bg-white/[0.06] border border-white/20 hover:bg-white/[0.12] hover:border-white/30 disabled:text-faint backdrop-blur-xl",
   ghost: "bg-transparent text-white/80 hover:bg-white/10 hover:text-white disabled:text-faint",
   destructive:
     "bg-clay text-white hover:opacity-90 disabled:bg-stone-2 disabled:text-faint",
@@ -155,11 +155,10 @@ export function Field({
   );
 }
 
-/* Inputs adapt to surface: translucent white over dark canvas, solid white
-   inside cards (where the card overrides --color-ink to dark). The base
-   uses CSS-variable colors throughout so the cascade lands correctly. */
+/* Inputs sit on dark glass everywhere: translucent white field with cyan
+   focus ring. Inside the rare .card-light surface they flip to true paper. */
 const inputBase =
-  "w-full rounded-2xl border border-white/15 bg-white/[0.06] px-4 py-3 text-base text-white outline-none transition placeholder:text-white/35 focus:border-[#00aef0] focus:ring-2 focus:ring-[#00aef0]/30 [.card_&]:border-stone-2 [.card_&]:bg-paper [.card_&]:text-ink [.card_&]:placeholder:text-faint [.card_&]:focus:border-forest [.card-flat_&]:border-stone-2 [.card-flat_&]:bg-paper [.card-flat_&]:text-ink";
+  "w-full rounded-2xl border border-white/15 bg-white/[0.06] px-4 py-3 text-base text-white outline-none transition placeholder:text-white/35 focus:border-[#00aef0] focus:ring-2 focus:ring-[#00aef0]/30 [.card-light_&]:border-stone-2 [.card-light_&]:bg-paper [.card-light_&]:text-ink [.card-light_&]:placeholder:text-faint [.card-light_&]:focus:border-forest";
 
 export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={clsx(inputBase, "h-12", props.className)} />;
@@ -347,14 +346,15 @@ export function IconBadge({
   children: ReactNode;
   tone?: "stone" | "forest" | "sage" | "amber" | "clay";
 }) {
-  // Glass-cyan default works on both dark canvas and inside white cards
+  // Glass-cyan default works on dark canvas and dark-glass cards. Light
+  // surfaces (.card-light) get a solid stone fill for legibility.
   const palette: Record<string, string> = {
     stone:
-      "bg-white/[0.06] text-[#00aef0] border border-white/15 [.card_&]:bg-stone [.card_&]:text-ink-2 [.card_&]:border-transparent",
+      "bg-white/[0.08] text-[#00aef0] border border-white/15 [.card-light_&]:bg-stone [.card-light_&]:text-ink-2 [.card-light_&]:border-transparent",
     forest: "bg-forest text-white",
-    sage: "bg-sage/15 text-sage",
-    amber: "bg-amber/15 text-amber",
-    clay: "bg-clay/15 text-clay",
+    sage: "bg-sage/20 text-sage",
+    amber: "bg-amber/20 text-amber",
+    clay: "bg-clay/20 text-clay",
   };
   return (
     <span

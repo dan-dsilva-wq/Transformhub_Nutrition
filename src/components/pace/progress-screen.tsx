@@ -113,7 +113,7 @@ export function ProgressScreen() {
           </IconBadge>
         </div>
 
-        <div className="mt-5 grid grid-cols-4 gap-1 rounded-full border border-white/60 bg-white/40 p-1 backdrop-blur-xl">
+        <div className="mt-5 grid grid-cols-4 gap-1 rounded-full border border-white/15 bg-white/[0.06] p-1 backdrop-blur-xl">
           {rangeOptions.map((option) => {
             const locked =
               !historyVerdict.allowed && PREMIUM_RANGES.includes(option.id);
@@ -133,8 +133,8 @@ export function ProgressScreen() {
                 className={
                   "inline-flex items-center justify-center gap-1 rounded-full px-2 py-2 text-xs font-medium transition " +
                   (range === option.id
-                    ? "bg-white/85 text-ink-2 shadow-sm border border-white/70"
-                    : "text-muted hover:text-ink")
+                    ? "bg-[#00aef0]/30 text-white border border-[#00aef0]/50"
+                    : "text-white/55 hover:text-white")
                 }
               >
                 {locked ? <Lock size={10} aria-hidden /> : null}

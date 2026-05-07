@@ -230,7 +230,7 @@ function Bubble({
       <IconBadge tone="sage">
         <Sparkles size={14} aria-hidden />
       </IconBadge>
-      <div className="max-w-[85%] rounded-2xl rounded-bl-md border border-white/70 bg-white/65 backdrop-blur-xl px-4 py-2.5 text-sm text-ink-2">
+      <div className="max-w-[85%] rounded-2xl rounded-bl-md border border-white/15 bg-white/[0.06] backdrop-blur-xl px-4 py-2.5 text-sm text-white">
         <p className="whitespace-pre-wrap">{content}</p>
         {draftMeal && !draftHidden ? (
           <DraftMealCard
@@ -291,7 +291,7 @@ function DraftMealCard({
   };
 
   return (
-    <div className="mt-3 rounded-2xl border border-forest/25 bg-white/90 p-3 shadow-sm">
+    <div className="mt-3 rounded-2xl border border-forest/30 bg-[#003c53]/40 backdrop-blur-xl p-3 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           {editing ? (
@@ -369,7 +369,7 @@ function DraftMealCard({
             type="button"
             data-tap
             onClick={() => setEditing((prev) => !prev)}
-            className="rounded-full border border-white/70 bg-white/80 px-3 py-2 text-xs font-medium text-ink-2"
+            className="rounded-full border border-white/20 bg-white/[0.08] px-3 py-2 text-xs font-medium text-white hover:bg-white/[0.14]"
           >
             {editing ? "Done editing" : "Edit first"}
           </button>
@@ -398,14 +398,14 @@ function DraftInput({
 }) {
   const numeric = label !== "Serving";
   return (
-    <label className="rounded-xl border border-white/70 bg-white/70 px-2 py-1.5">
-      <span className="block text-[10px] uppercase tracking-[0.14em] text-faint">{label}</span>
+    <label className="rounded-xl border border-white/15 bg-white/[0.06] px-2 py-1.5">
+      <span className="block text-[10px] uppercase tracking-[0.14em] text-white/55">{label}</span>
       <input
         type={numeric ? "number" : "text"}
         inputMode={numeric ? "decimal" : undefined}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="mt-0.5 w-full bg-transparent text-xs text-ink-2 outline-none"
+        className="mt-0.5 w-full bg-transparent text-xs text-white outline-none"
       />
     </label>
   );

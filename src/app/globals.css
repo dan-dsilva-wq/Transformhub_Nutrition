@@ -118,10 +118,16 @@ body {
   position: relative;
 }
 
-/* Inside any card, the ink tokens flip to dark so type is readable on
-   white paper. Token-based Tailwind utilities (text-ink-2, text-muted, …)
-   inherit through CSS custom-property scoping. */
+/* Inside dark glass cards, ink tokens stay light. The .card-light
+   override (true paper) flips them back to dark for legibility. */
 .card, .card-flat, .card-tint {
+  --color-ink:    #ffffff;
+  --color-ink-2:  #ffffff;
+  --color-muted:  rgba(255, 255, 255, 0.72);
+  --color-faint:  rgba(255, 255, 255, 0.48);
+  color: var(--color-ink);
+}
+.card-light {
   --color-ink:    #020202;
   --color-ink-2:  #001a26;
   --color-muted:  #4a6473;
@@ -169,40 +175,58 @@ body { overscroll-behavior-y: contain; }
   font-size: 11px;
 }
 
-/* ───── Card system — cool stone "paper" on deep navy ─────
-   Cards sit on a deep navy canvas. Pure white reads as glaring and
-   disconnected, so surfaces shift to a cool stone with a soft
-   navy-tinted hairline border that grounds them in the brand. */
+/* ───── Card system — engineered dark glass on deep navy ─────
+   The Transform Hub aesthetic is the plan-reveal hero: deep navy
+   gradients, cyan rim light, big legible white type. Cards adopt
+   that treatment so the whole app feels cohesive. Form-style
+   surfaces use .card-light for genuine paper moments. */
 .card {
   background:
-    linear-gradient(180deg, rgba(241, 246, 249, 0.96) 0%, rgba(225, 235, 242, 0.96) 100%);
-  border: 1px solid rgba(0, 60, 83, 0.14);
-  -webkit-backdrop-filter: blur(20px) saturate(140%);
-  backdrop-filter: blur(20px) saturate(140%);
+    radial-gradient(120% 80% at 50% 0%, rgba(0, 143, 208, 0.16) 0%, transparent 60%),
+    linear-gradient(160deg, rgba(0, 60, 83, 0.78) 0%, rgba(0, 26, 38, 0.86) 60%, rgba(0, 8, 19, 0.90) 100%);
+  border: 1px solid rgba(0, 174, 240, 0.22);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  backdrop-filter: blur(22px) saturate(150%);
   border-radius: var(--radius-lg);
   box-shadow:
-    0 16px 40px rgba(0, 26, 38, 0.42),
-    0 1px 0 rgba(255, 255, 255, 0.65) inset,
-    0 -1px 0 rgba(0, 60, 83, 0.08) inset;
+    0 22px 56px rgba(0, 8, 19, 0.55),
+    0 1px 0 rgba(0, 174, 240, 0.20) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.30) inset;
+  color: #ffffff;
   position: relative;
   isolation: isolate;
 }
 .card-flat {
-  background: rgba(232, 240, 246, 0.94);
-  border: 1px solid rgba(0, 60, 83, 0.12);
-  -webkit-backdrop-filter: blur(18px);
-  backdrop-filter: blur(18px);
+  background:
+    linear-gradient(160deg, rgba(0, 60, 83, 0.62) 0%, rgba(0, 26, 38, 0.78) 100%);
+  border: 1px solid rgba(0, 174, 240, 0.18);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(140%);
   border-radius: var(--radius-lg);
-  box-shadow: 0 8px 22px rgba(0, 26, 38, 0.28);
+  box-shadow: 0 10px 28px rgba(0, 8, 19, 0.45);
+  color: #ffffff;
 }
 .card-tint {
   background:
-    linear-gradient(135deg, rgba(0, 143, 208, 0.14) 0%, rgba(232, 240, 246, 0.94) 100%);
-  border: 1px solid rgba(0, 143, 208, 0.26);
+    linear-gradient(135deg, rgba(0, 143, 208, 0.30) 0%, rgba(0, 26, 38, 0.78) 100%);
+  border: 1px solid rgba(0, 174, 240, 0.32);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 16px 40px rgba(0, 143, 208, 0.30);
+  color: #ffffff;
+}
+/* Genuine white "paper" surface for form-style moments where
+   crisp legible inputs benefit from a light field. Use sparingly. */
+.card-light {
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(0, 60, 83, 0.14);
   -webkit-backdrop-filter: blur(18px);
   backdrop-filter: blur(18px);
   border-radius: var(--radius-lg);
-  box-shadow: 0 14px 36px rgba(0, 26, 38, 0.30);
+  box-shadow:
+    0 12px 32px rgba(0, 26, 38, 0.32),
+    0 1px 0 rgba(255, 255, 255, 0.9) inset;
 }
 
 /* Dark surfaces — the hero treatment for moments that need to breathe */

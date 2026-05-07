@@ -875,7 +875,7 @@ function MacroRing({
   const dash = Math.round(pct * 100);
   const hit = pct >= 1;
   return (
-    <div className="relative flex flex-col items-center rounded-[18px] border border-white/85 bg-white/65 px-1 py-2.5 shadow-[0_6px_16px_-10px_rgba(15,23,20,0.20)]">
+    <div className="relative flex flex-col items-center rounded-[18px] border border-white/15 bg-white/[0.06] px-1 py-2.5 backdrop-blur-xl">
       {hit ? (
         <span
           className="pop-in-anim absolute -right-1.5 -top-1.5 grid h-5 w-5 place-items-center rounded-full text-white shadow"
@@ -886,7 +886,7 @@ function MacroRing({
         </span>
       ) : null}
       <svg viewBox="0 0 36 36" className="h-12 w-12">
-        <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(0,0,0,0.07)" strokeWidth={3} />
+        <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(255,255,255,0.10)" strokeWidth={3} />
         <circle
           cx="18"
           cy="18"
@@ -905,14 +905,14 @@ function MacroRing({
           textAnchor="middle"
           fontSize="8.5"
           fontWeight={700}
-          fill="var(--color-ink-2)"
+          fill="#ffffff"
           className="numerals"
         >
           {dash}%
         </text>
       </svg>
-      <div className="mt-1 text-[10.5px] font-semibold text-ink-2">{label}</div>
-      <div className="numerals text-[9.5px] text-muted">
+      <div className="mt-1 text-[10.5px] font-semibold text-white">{label}</div>
+      <div className="numerals text-[9.5px] text-white/60">
         {Math.round(value)} / {Math.round(target)}g
       </div>
     </div>
@@ -947,7 +947,7 @@ function ConicRing({
         aria-hidden
         className="absolute inset-0 rounded-full"
         style={{
-          background: "conic-gradient(rgba(15,23,20,0.06) 0 360deg)",
+          background: "conic-gradient(rgba(255,255,255,0.10) 0 360deg)",
           WebkitMask:
             "radial-gradient(circle, transparent 86px, #000 87px, #000 105px, transparent 106px)",
           mask: "radial-gradient(circle, transparent 86px, #000 87px, #000 105px, transparent 106px)",

@@ -1559,7 +1559,13 @@ function GenerateWeek({
               setStepIdx(0);
               setPhase("running");
             }}
-            className="cta-glow tap-bounce relative inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-forest text-base font-semibold text-white shadow-elevated"
+            className="cta-glow tap-bounce relative inline-flex h-14 w-full items-center justify-center gap-2 rounded-full text-base font-semibold text-white border border-[#00c9ff]/40"
+            style={{
+              background:
+                "linear-gradient(180deg, #1ec0ff 0%, #00aef0 50%, #008fd0 100%)",
+              boxShadow:
+                "0 18px 40px -10px rgba(0,143,208,0.65), 0 1px 0 rgba(255,255,255,0.40) inset, 0 -1px 0 rgba(0,40,60,0.45) inset",
+            }}
           >
             <Sparkles size={18} aria-hidden />
             Generate my first week
@@ -1571,23 +1577,23 @@ function GenerateWeek({
         </div>
       ) : null}
 
-      <div className="rounded-3xl border border-white/85 bg-white/55 p-5 shadow-card backdrop-blur-xl">
+      <div className="card p-5">
         <div className="flex items-center gap-3">
           <div
             className={clsx(
               "grid h-12 w-12 shrink-0 place-items-center rounded-2xl",
               phase === "running"
                 ? "animate-pulse bg-forest text-white"
-                : "bg-forest/10 text-forest",
+                : "bg-forest/20 text-[#66c8e8] border border-forest/30",
             )}
           >
             <Sparkles size={22} aria-hidden />
           </div>
           <div>
-            <div className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted">
+            <div className="text-[11px] font-medium uppercase tracking-[0.20em] text-white/60">
               Personalised plan
             </div>
-            <div className="font-display text-lg text-ink-2">
+            <div className="font-display text-lg text-white">
               {mealsPerDay} meals/day · {likedCount} recipes
             </div>
           </div>
@@ -1603,17 +1609,17 @@ function GenerateWeek({
                 key={i}
                 className={clsx(
                   "flex items-center gap-2.5 rounded-2xl border px-3 py-2 text-sm transition",
-                  done && "border-forest/20 bg-forest/[0.06] text-ink",
-                  active && "border-forest bg-white text-ink-2",
-                  pending && "border-hairline bg-white/40 text-faint",
+                  done && "border-forest/40 bg-forest/[0.12] text-white",
+                  active && "border-forest bg-forest/15 text-white",
+                  pending && "border-white/10 bg-white/[0.04] text-white/55",
                 )}
               >
                 <span
                   className={clsx(
                     "grid h-6 w-6 place-items-center rounded-full text-[11px] font-semibold",
                     done && "bg-forest text-white",
-                    active && "animate-pulse bg-forest/15 text-forest",
-                    pending && "bg-stone-2 text-muted",
+                    active && "animate-pulse bg-forest/30 text-[#66c8e8]",
+                    pending && "bg-white/10 text-white/60",
                   )}
                 >
                   {done ? <Check size={12} aria-hidden /> : i + 1}

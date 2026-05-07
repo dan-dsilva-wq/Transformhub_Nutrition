@@ -82,8 +82,8 @@ export function LogScreen() {
         </h1>
       </header>
 
-      {/* Segmented tabs  -  glass pill */}
-      <div className="grid grid-cols-3 gap-1 rounded-full border border-white/60 bg-white/40 p-1 backdrop-blur-xl">
+      {/* Segmented tabs — glass pill on the dark canvas */}
+      <div className="grid grid-cols-3 gap-1 rounded-full border border-white/15 bg-white/[0.06] p-1 backdrop-blur-xl">
         {tabs.map((t) => (
           <button
             key={t.id}
@@ -93,8 +93,8 @@ export function LogScreen() {
             className={clsx(
               "flex items-center justify-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium transition",
               tab === t.id
-                ? "bg-white/85 text-ink-2 shadow-sm border border-white/70"
-                : "text-muted hover:text-ink",
+                ? "bg-[#00aef0]/30 text-white border border-[#00aef0]/50 shadow-[0_0_0_1px_rgba(0,174,240,0.15)_inset]"
+                : "text-white/60 hover:text-white",
             )}
             aria-pressed={tab === t.id}
           >
@@ -288,14 +288,16 @@ function PhotoFlow({ onTypeFood }: { onTypeFood: () => void }) {
       <Card className="!p-7">
         <div className="flex flex-col items-center text-center">
           <span
-            className="grid h-14 w-14 place-items-center rounded-2xl"
+            className="grid h-14 w-14 place-items-center rounded-2xl border border-[#00aef0]/40"
             style={{
-              background: "linear-gradient(135deg,#a7f3d0,#bae6fd)",
-              boxShadow: "0 6px 20px -8px rgba(13,148,136,0.45)",
+              background:
+                "radial-gradient(circle at 30% 25%, rgba(0,174,240,0.45) 0%, rgba(0,143,208,0.30) 60%, rgba(0,40,60,0.55) 100%)",
+              boxShadow:
+                "0 8px 24px -8px rgba(0,143,208,0.55), 0 1px 0 rgba(255,255,255,0.18) inset",
             }}
             aria-hidden
           >
-            <Camera size={22} className="text-ink-2" />
+            <Camera size={22} className="text-white" />
           </span>
           <h2 className="font-display mt-4 text-2xl text-ink-2">Snap your plate.</h2>
           <p className="mt-1.5 text-sm text-muted max-w-[28ch]">

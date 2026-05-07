@@ -134,7 +134,15 @@ export function AppShell({ children }: { children: ReactNode }) {
                 isActive("/log") && "ring-4 ring-forest/15",
               )}
             >
-              <span className="tap-bounce cta-glow grid h-14 w-14 place-items-center rounded-full bg-forest text-white shadow-elevated transition">
+              <span
+                className="tap-bounce cta-glow grid h-14 w-14 place-items-center rounded-full text-white transition border border-[#00c9ff]/45"
+                style={{
+                  background:
+                    "radial-gradient(circle at 30% 25%, #1ec0ff 0%, #00aef0 38%, #008fd0 65%, #0078b8 100%)",
+                  boxShadow:
+                    "0 18px 40px -10px rgba(0,143,208,0.70), 0 1px 0 rgba(255,255,255,0.45) inset, 0 -2px 6px rgba(0,40,60,0.45) inset",
+                }}
+              >
                 <Plus size={26} strokeWidth={2.4} aria-hidden />
               </span>
             </Link>

@@ -16,7 +16,7 @@ export function TrialBanner() {
     return (
       <Link
         href="/you/settings"
-        className="pop-in-anim tap-bounce inline-flex items-center gap-1.5 rounded-full border border-[#ff7a45]/40 bg-[#ff7a45]/[0.10] px-3 py-1 text-[11px] font-semibold text-[#ff9f6e] backdrop-blur-xl hover:bg-[#ff7a45]/[0.16] transition"
+        className="pop-in-anim tap-bounce inline-flex items-center gap-1.5 rounded-full border border-[#ec6f5e]/40 bg-[#ec6f5e]/[0.10] px-3 py-1 text-[11px] font-semibold text-[#f29080] backdrop-blur-xl hover:bg-[#ec6f5e]/[0.16] transition"
       >
         <AlertCircle size={12} aria-hidden />
         Trial ended

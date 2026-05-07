@@ -1,20 +1,21 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Fraunces } from "next/font/google";
+import { Lexend } from "next/font/google";
 import { PwaRegister } from "@/components/pwa-register";
 import { AppStateProvider } from "@/lib/state/app-state";
 import "./globals.css";
 
-const inter = Inter({
+const lexend = Lexend({
   variable: "--font-body",
   subsets: ["latin"],
   display: "swap",
+  weight: ["300", "400", "500", "600", "700"],
 });
 
-const fraunces = Fraunces({
+const lexendDisplay = Lexend({
   variable: "--font-display",
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
   display: "swap",
+  weight: ["500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -57,7 +58,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${fraunces.variable} h-full antialiased`}
+      className={`${lexend.variable} ${lexendDisplay.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full text-ink font-body" suppressHydrationWarning>

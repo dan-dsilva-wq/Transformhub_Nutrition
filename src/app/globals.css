@@ -82,8 +82,8 @@
   --color-navy: var(--th-navy);
   --color-cyan: var(--th-cyan);
 
-  --font-display-stack: var(--font-display), "Fraunces", ui-serif, Georgia, "Times New Roman", serif;
-  --font-body: var(--font-body), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display-stack: var(--font-display), "Lexend", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-body: var(--font-body), "Lexend", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);
@@ -112,8 +112,7 @@ body {
   background-attachment: fixed;
   background-repeat: no-repeat;
   color: #ffffff;
-  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
-  font-feature-settings: "ss01", "cv11";
+  font-family: var(--font-body), "Lexend", ui-sans-serif, system-ui, sans-serif;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   position: relative;
@@ -156,14 +155,14 @@ body { overscroll-behavior-y: contain; }
 
 /* ───── Typography utilities ───── */
 .font-display {
-  font-family: var(--font-display), "Fraunces", ui-serif, Georgia, serif;
-  letter-spacing: -0.03em;
+  font-family: var(--font-display), "Lexend", ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.025em;
   font-weight: 600;
 }
-.font-body { font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif; }
+.font-body { font-family: var(--font-body), "Lexend", ui-sans-serif, system-ui, sans-serif; }
 
 .font-eyebrow {
-  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-body), "Lexend", ui-sans-serif, system-ui, sans-serif;
   text-transform: uppercase;
   letter-spacing: 0.22em;
   font-weight: 600;
@@ -258,9 +257,9 @@ button { -webkit-tap-highlight-color: transparent; }
 
 /* Stat readouts — crisp, tabular */
 .numerals {
-  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-body), "Lexend", ui-sans-serif, system-ui, sans-serif;
   font-feature-settings: "tnum", "lnum";
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
   font-weight: 600;
 }
 

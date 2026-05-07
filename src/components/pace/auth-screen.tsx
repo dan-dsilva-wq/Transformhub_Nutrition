@@ -5,6 +5,7 @@ import { Capacitor } from "@capacitor/core";
 import { Mail, ArrowRight, UserPlus } from "lucide-react";
 import { Button, Field, Input, BrandMark } from "./primitives";
 import { getSupabase } from "@/lib/state/app-state";
+import { BUILD_LABEL } from "@/lib/build-version";
 
 const NATIVE_REDIRECT = "com.transformhub.app://auth/callback";
 
@@ -227,8 +228,11 @@ export function AuthScreen() {
           {mode === "sign-in" ? "Need an account? Sign up." : "Have an account? Sign in."}
         </button>
 
-        <p className="fade-anim mt-auto py-8 text-center text-[11px] uppercase tracking-[0.18em] text-white/30">
+        <p className="fade-anim mt-auto pt-8 pb-2 text-center text-[11px] uppercase tracking-[0.18em] text-white/30">
           For adults 18+ · Transform Hub is a tracking tool, not medical advice
+        </p>
+        <p className="fade-anim pb-8 text-center text-[10px] uppercase tracking-[0.22em] text-white/40">
+          {BUILD_LABEL}
         </p>
       </div>
     </div>

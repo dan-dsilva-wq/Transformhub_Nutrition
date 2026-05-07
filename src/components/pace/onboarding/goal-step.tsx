@@ -263,7 +263,7 @@ export function GoalStep({ onNext }: { onNext: () => void }) {
               </Field>
             ) : null}
             {weeklyRateKg > HIGH_WEEKLY_LOSS_KG ? (
-              <p className="mt-3 rounded-2xl border border-[#ff7a45]/40 bg-[#ff7a45]/[0.10] px-3 py-2 text-xs text-[#ff9f6e]">
+              <p className="mt-3 rounded-2xl border border-[#ec6f5e]/40 bg-[#ec6f5e]/[0.10] px-3 py-2 text-xs text-[#f29080]">
                 This is a fast pace. Most healthy guidance suggests 0.5 to 1.0 kg per week. We&apos;ll always keep your calories above a safe minimum.
               </p>
             ) : null}

@@ -973,15 +973,15 @@ function DayPuck({
       type="button"
       data-tap
       onClick={onTap}
-      className="tap-bounce flex w-[150px] shrink-0 flex-col gap-1.5 rounded-2xl border border-white/95 bg-white/70 p-2 text-left"
+      className="tap-bounce flex w-[150px] shrink-0 flex-col gap-1.5 rounded-2xl border border-white/12 bg-white/[0.06] p-2 text-left backdrop-blur-md hover:bg-white/[0.09] transition-colors"
       style={{ scrollSnapAlign: "start" }}
       aria-label={`${slotLabel}: ${recipeKey}`}
     >
       <MealCover recipeKey={recipeKey} slotLabel={slotLabel} className="h-16 w-full" />
-      <span className="block text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
+      <span className="block text-[9px] font-bold uppercase tracking-[0.16em] text-white/55">
         {slotLabel}
       </span>
-      <span className="block text-[12px] font-semibold leading-[1.18] text-ink-2 line-clamp-2">
+      <span className="block text-[12px] font-semibold leading-[1.18] text-white line-clamp-2">
         {recipeKey}
       </span>
     </button>

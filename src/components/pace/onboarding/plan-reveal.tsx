@@ -206,7 +206,7 @@ function MacroBar({
       : tone === "sky"
         ? "linear-gradient(90deg, #66c8e8, #008fd0)"
         : tone === "clay"
-          ? "linear-gradient(90deg, #ffb547, #ff7a45)"
+          ? "linear-gradient(90deg, #f0b96b, #ec6f5e)"
           : "linear-gradient(90deg, #00d2a8, #00b894)";
   return (
     <div className="rounded-2xl border border-white/15 bg-white/[0.04] p-3 backdrop-blur-xl">

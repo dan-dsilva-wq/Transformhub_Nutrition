@@ -340,18 +340,18 @@ function WeightChart({
           x2={w - padX}
           y1={ys(goalKg)}
           y2={ys(goalKg)}
-          stroke="var(--color-amber)"
+          stroke="var(--color-forest)"
           strokeDasharray="3 4"
           strokeWidth="1"
-          opacity="0.7"
+          opacity="0.45"
         />
         <text
           x={w - padX}
           y={ys(goalKg) - 4}
           textAnchor="end"
           fontSize="9"
-          fill="var(--color-amber)"
-          opacity="0.85"
+          fill="var(--color-forest)"
+          opacity="0.7"
         >
           Goal {goalKg.toFixed(1)}
         </text>

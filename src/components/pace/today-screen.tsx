@@ -339,7 +339,7 @@ export function TodayScreen() {
             {todayLine()}
           </p>
           {streak > 0 ? (
-            <span className="inline-flex items-center gap-1 rounded-full border border-amber/30 bg-amber/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.10em] text-amber">
+            <span className="inline-flex items-center gap-1 rounded-full border border-sky/40 bg-sky/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.10em] text-sky">
               <Flame size={11} aria-hidden />
               {streak}-day streak
             </span>
@@ -390,7 +390,7 @@ export function TodayScreen() {
         <div className="relative mt-3 inline-flex items-center justify-center gap-2 text-sm text-muted">
           {calorieRatio >= 1 && !overshoot ? (
             <>
-              <Sparkles size={14} className="text-amber" aria-hidden />
+              <Sparkles size={14} className="text-sage" aria-hidden />
               Target hit. Nice.
             </>
           ) : overshoot ? (

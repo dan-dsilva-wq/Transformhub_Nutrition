@@ -359,13 +359,13 @@ export function FoodsScreen() {
           </p>
         </header>
 
-        <div className="flex items-center gap-1.5 rounded-full border border-white/85 bg-white/55 p-1.5 backdrop-blur-xl">
+        <div className="flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.06] p-1.5 backdrop-blur-xl">
           <button
             type="button"
             data-tap
             onClick={() => step(-1)}
             disabled={weekIndex === 0}
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-hairline bg-white text-ink disabled:opacity-30"
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-white/15 bg-white/[0.08] text-white hover:bg-white/[0.14] disabled:opacity-30"
             aria-label="Previous week"
           >
             <ChevronLeft size={16} aria-hidden />
@@ -384,7 +384,7 @@ export function FoodsScreen() {
               data-tap
               onClick={() => setMealCountOpen(true)}
               aria-haspopup="dialog"
-              className="tap-bounce inline-flex h-7 items-center gap-1 rounded-full bg-white px-2.5 text-[11px] font-semibold text-ink-2 shadow-sm"
+              className="tap-bounce inline-flex h-7 items-center gap-1 rounded-full border border-white/15 bg-white/[0.08] px-2.5 text-[11px] font-semibold text-white hover:bg-white/[0.14]"
               aria-label="Change meals per day"
             >
               <Utensils size={11} aria-hidden /> {mealsPerDay}/day
@@ -398,7 +398,7 @@ export function FoodsScreen() {
                   shoppingChecked: [],
                 })
               }
-              className="tap-bounce grid h-7 w-7 place-items-center rounded-full bg-white text-ink-2 shadow-sm"
+              className="tap-bounce grid h-7 w-7 place-items-center rounded-full border border-white/15 bg-white/[0.08] text-white hover:bg-white/[0.14]"
               aria-label="Re-roll the week"
               title="Re-roll the week"
             >
@@ -410,7 +410,13 @@ export function FoodsScreen() {
               type="button"
               data-tap
               onClick={generateNextWeek}
-              className="tap-bounce inline-flex h-9 shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-forest px-3 text-xs font-semibold text-white shadow-sm"
+              className="tap-bounce inline-flex h-9 shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-3 text-xs font-semibold text-white border border-[#00c9ff]/40"
+              style={{
+                background:
+                  "linear-gradient(180deg, #1ec0ff 0%, #00aef0 55%, #008fd0 100%)",
+                boxShadow:
+                  "0 8px 22px -8px rgba(0,143,208,0.55), 0 1px 0 rgba(255,255,255,0.30) inset",
+              }}
               aria-label="Generate next week"
             >
               <Plus size={14} aria-hidden /> Generate
@@ -421,7 +427,7 @@ export function FoodsScreen() {
               data-tap
               onClick={() => step(1)}
               disabled={isLastWeek}
-              className="grid h-9 w-9 place-items-center rounded-full border border-hairline bg-white text-ink disabled:opacity-30"
+              className="grid h-9 w-9 place-items-center rounded-full border border-white/15 bg-white/[0.08] text-white hover:bg-white/[0.14] disabled:opacity-30"
               aria-label="Next week"
             >
               <ChevronRight size={16} aria-hidden />
@@ -433,27 +439,33 @@ export function FoodsScreen() {
           <Link
             href="/you/foods/shopping"
             aria-label="Open shopping list"
-            className="tap-bounce flex items-center gap-3 rounded-[22px] border border-forest/25 px-3.5 py-3"
+            className="tap-bounce flex items-center gap-3 rounded-[22px] border border-[#00aef0]/40 px-3.5 py-3 backdrop-blur-xl"
             style={{
               background:
-                "linear-gradient(135deg, rgba(13,148,136,0.16), rgba(13,148,136,0.04))",
+                "linear-gradient(135deg, rgba(0,174,240,0.22) 0%, rgba(0,143,208,0.10) 60%, rgba(0,40,60,0.30) 100%)",
+              boxShadow:
+                "0 12px 32px -12px rgba(0,143,208,0.55), 0 1px 0 rgba(0,174,240,0.25) inset",
             }}
           >
             <span
-              className="grid h-9 w-9 shrink-0 place-items-center rounded-2xl bg-forest text-white"
-              style={{ boxShadow: "0 8px 20px -10px rgba(13,148,136,0.65)" }}
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-2xl text-white border border-[#00c9ff]/40"
+              style={{
+                background:
+                  "linear-gradient(180deg,#1ec0ff 0%,#00aef0 55%,#008fd0 100%)",
+                boxShadow: "0 8px 20px -10px rgba(0,143,208,0.65)",
+              }}
             >
               <ShoppingBag size={16} aria-hidden />
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block text-[13.5px] font-semibold text-ink-2">
+              <span className="block text-[13.5px] font-semibold text-white">
                 Shopping list ready
               </span>
-              <span className="block text-[11.5px] text-muted">
+              <span className="block text-[11.5px] text-white/65">
                 Sorted by aisle · tap to open
               </span>
             </span>
-            <ChevronRight size={16} className="shrink-0 text-forest" aria-hidden />
+            <ChevronRight size={16} className="shrink-0 text-[#66c8e8]" aria-hidden />
           </Link>
         ) : null}
 
@@ -481,26 +493,38 @@ export function FoodsScreen() {
           <Link
             href="/you/foods/shopping"
             data-tap
-            className="tap-bounce flex items-center gap-3 rounded-3xl p-4 text-white shadow-elevated"
-            style={{ background: "#18241f" }}
+            className="tap-bounce flex items-center gap-3 rounded-3xl p-4 text-white border border-[#00aef0]/30 backdrop-blur-xl"
+            style={{
+              background:
+                "radial-gradient(120% 80% at 0% 0%, rgba(0,143,208,0.30) 0%, transparent 60%), linear-gradient(160deg, #003c53 0%, #001a26 60%, #000813 100%)",
+              boxShadow:
+                "0 18px 44px -16px rgba(0,143,208,0.55), 0 1px 0 rgba(0,174,240,0.25) inset",
+            }}
           >
-            <span className="grid h-12 w-12 place-items-center rounded-2xl bg-white/10 text-2xl">
-              🛍️
+            <span
+              className="grid h-12 w-12 place-items-center rounded-2xl border border-[#00c9ff]/40 text-white"
+              style={{
+                background:
+                  "linear-gradient(180deg,#1ec0ff 0%,#00aef0 55%,#008fd0 100%)",
+                boxShadow: "0 8px 20px -10px rgba(0,143,208,0.55)",
+              }}
+            >
+              <ShoppingBag size={20} aria-hidden />
             </span>
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-white/60">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-[#66c8e8]">
                 Shopping list
               </p>
               <p className="font-display text-lg leading-tight">
                 Built from this week&rsquo;s meals
               </p>
             </div>
-            <ChevronRight size={18} aria-hidden className="text-white/70" />
+            <ChevronRight size={18} aria-hidden className="text-[#66c8e8]" />
           </Link>
         ) : (
-          <div className="rounded-3xl border border-white/85 bg-white/55 p-4 backdrop-blur-xl">
-            <div className="text-sm font-semibold">Plan ahead</div>
-            <p className="mt-1 text-xs text-muted">
+          <div className="card !p-4">
+            <div className="text-sm font-semibold text-white">Plan ahead</div>
+            <p className="mt-1 text-xs text-white/65">
               Last week is read-only. Use the arrows to plan ahead or look back.
             </p>
           </div>
@@ -735,12 +759,17 @@ function ChapterCard({
 
   return (
     <article
-      className="relative overflow-hidden rounded-[26px] border border-white/85 bg-white/55 px-3.5 pb-3 pt-3.5 backdrop-blur-xl"
-      style={{ boxShadow: "0 14px 30px -22px rgba(15,23,20,0.18)" }}
+      className="relative overflow-hidden rounded-[26px] border border-[#00aef0]/22 px-3.5 pb-3 pt-3.5 backdrop-blur-xl"
+      style={{
+        background:
+          "radial-gradient(110% 70% at 50% 0%, rgba(0,143,208,0.14) 0%, transparent 60%), linear-gradient(160deg, rgba(0,60,83,0.62) 0%, rgba(0,26,38,0.78) 100%)",
+        boxShadow:
+          "0 18px 42px -22px rgba(0,8,19,0.65), 0 1px 0 rgba(0,174,240,0.18) inset",
+      }}
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-1/2 opacity-55"
+        className="pointer-events-none absolute inset-x-0 top-0 h-1/2 opacity-30"
         style={{
           background: mood.tint,
           WebkitMask: "linear-gradient(180deg, #000 0%, transparent 100%)",
@@ -749,25 +778,25 @@ function ChapterCard({
       />
       <div className="relative flex items-center justify-between gap-2">
         <div className="flex items-baseline gap-2 min-w-0">
-          <h3 className="font-display truncate text-[20px] tracking-[-0.022em] text-ink-2">
+          <h3 className="font-display truncate text-[20px] tracking-[-0.022em] text-white">
             {title}
           </h3>
-          <span className="shrink-0 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
+          <span className="shrink-0 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/60">
             {dateLabel}
           </span>
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
           {minutes ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-black/[.06] px-2 py-0.5 text-[10.5px] font-semibold text-ink-2">
+            <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-[10.5px] font-semibold text-white">
               <Timer size={10} aria-hidden /> {minutes}m
             </span>
           ) : null}
-          <span className="numerals rounded-full bg-forest/12 px-2 py-0.5 text-[10.5px] font-semibold text-forest">
+          <span className="numerals rounded-full bg-[#00aef0]/20 border border-[#00aef0]/30 px-2 py-0.5 text-[10.5px] font-semibold text-[#66c8e8]">
             {nutrition.calories} kcal
           </span>
         </div>
       </div>
-      <p className="relative mt-1 text-[12px] text-muted">{subtitle}</p>
+      <p className="relative mt-1 text-[12px] text-white/65">{subtitle}</p>
 
       <div
         className="relative mt-2.5 -mx-3.5 flex gap-2 overflow-x-auto px-3.5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
@@ -1113,11 +1142,15 @@ function RecipeSheet({
         onClick={onClose}
       />
       <div
-        className="sheet-anim relative mx-auto max-h-[92vh] w-full max-w-[480px] overflow-y-auto overscroll-contain rounded-t-[28px] bg-white px-5 pt-0 shadow-elevated"
+        className="sheet-anim relative mx-auto max-h-[92vh] w-full max-w-[480px] overflow-y-auto overscroll-contain rounded-t-[28px] px-5 pt-0 text-white border-t border-x border-[#00aef0]/22 backdrop-blur-2xl"
         style={{
           paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 22px)",
           transform: dragY ? `translateY(${dragY}px)` : undefined,
           touchAction: "pan-y",
+          background:
+            "radial-gradient(120% 60% at 50% 0%, rgba(0,143,208,0.20) 0%, transparent 60%), linear-gradient(180deg, #003c53 0%, #001a26 55%, #000813 100%)",
+          boxShadow:
+            "0 -24px 64px rgba(0,8,19,0.65), 0 1px 0 rgba(0,174,240,0.28) inset",
         }}
       >
         <div
@@ -1129,7 +1162,7 @@ function RecipeSheet({
           aria-label="Swipe down to close"
           role="button"
         >
-          <div className="h-1.5 w-14 rounded-full bg-stone-2" />
+          <div className="h-1.5 w-14 rounded-full bg-white/25" />
         </div>
         <div
           className="flex items-center gap-3 touch-none cursor-grab active:cursor-grabbing"
@@ -1140,8 +1173,8 @@ function RecipeSheet({
         >
           <span className="text-[44px] leading-none">{mealIcoFor(name)}</span>
           <div>
-            <h3 className="font-display text-2xl text-ink-2">{name}</h3>
-            <p className="text-xs text-muted">
+            <h3 className="font-display text-2xl text-white">{name}</h3>
+            <p className="text-xs text-white/65">
               {day} · {slot} · {recipe.time}
             </p>
           </div>
@@ -1153,16 +1186,16 @@ function RecipeSheet({
           <Stat label="Carbs" value={`${planned.carbsG}g`} />
           <Stat label="Fats" value={`${planned.fatG}g`} />
         </div>
-        <p className="mt-2 rounded-2xl bg-forest/[0.06] px-3 py-2 text-[11px] text-muted">
+        <p className="mt-2 rounded-2xl bg-[#00aef0]/[0.10] border border-[#00aef0]/25 px-3 py-2 text-[11px] text-white/75">
           Portion target for your {targets.calories} kcal day. Use about{" "}
-          <span className="font-semibold text-ink-2">
+          <span className="font-semibold text-white">
             {Math.round(planned.portionFactor * 100)}%
           </span>{" "}
           of the listed recipe if you want it to fit tightly.
         </p>
 
         <SectionTitle>Ingredients</SectionTitle>
-        <p className="-mt-1 mb-2 text-[11px] text-muted">
+        <p className="-mt-1 mb-2 text-[11px] text-white/60">
           Tap any ingredient to skip it or mark as pantry.
         </p>
         <div className="space-y-1.5">
@@ -1179,10 +1212,10 @@ function RecipeSheet({
                 className={clsx(
                   "tap-bounce w-full flex items-center gap-2.5 rounded-2xl border px-3 py-2 text-left text-sm transition",
                   isSkipped
-                    ? "border-clay/30 bg-clay/5 line-through opacity-70"
+                    ? "border-clay/40 bg-clay/[0.10] line-through text-white/55"
                     : isPantry
-                      ? "border-forest/20 bg-forest/[0.05]"
-                      : "border-hairline bg-white/70",
+                      ? "border-forest/30 bg-forest/[0.10] text-white"
+                      : "border-white/12 bg-white/[0.05] text-white hover:bg-white/[0.10]",
                 )}
               >
                 <span className="text-lg">{i.e}</span>
@@ -1192,11 +1225,11 @@ function RecipeSheet({
                     Skipped
                   </span>
                 ) : isPantry ? (
-                  <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-forest">
+                  <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-[#66c8e8]">
                     Pantry
                   </span>
                 ) : null}
-                <span className="text-xs font-semibold text-forest numerals">
+                <span className="text-xs font-semibold text-[#66c8e8] numerals">
                   {i.q}
                 </span>
               </button>
@@ -1209,9 +1242,9 @@ function RecipeSheet({
           {recipe.steps.map((s, i) => (
             <li
               key={i}
-              className="flex gap-3 border-b border-hairline py-2.5 text-sm last:border-b-0"
+              className="flex gap-3 border-b border-white/10 py-2.5 text-sm text-white/85 last:border-b-0"
             >
-              <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-cream text-xs font-bold text-forest numerals">
+              <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#00aef0]/20 border border-[#00aef0]/30 text-xs font-bold text-[#66c8e8] numerals">
                 {i + 1}
               </span>
               <span className="leading-relaxed">{s}</span>
@@ -1224,7 +1257,7 @@ function RecipeSheet({
             type="button"
             data-tap
             onClick={onSwap}
-            className="tap-bounce inline-flex h-11 items-center justify-center gap-1.5 rounded-full border border-stone-2 bg-paper text-xs"
+            className="tap-bounce inline-flex h-11 items-center justify-center gap-1.5 rounded-full border border-white/20 bg-white/[0.06] text-xs text-white hover:bg-white/[0.12]"
           >
             <Shuffle size={14} aria-hidden /> Swap
           </button>
@@ -1232,7 +1265,7 @@ function RecipeSheet({
             type="button"
             data-tap
             onClick={onBan}
-            className="tap-bounce inline-flex h-11 items-center justify-center gap-1.5 rounded-full border border-stone-2 bg-paper text-xs"
+            className="tap-bounce inline-flex h-11 items-center justify-center gap-1.5 rounded-full border border-white/20 bg-white/[0.06] text-xs text-white hover:bg-white/[0.12]"
           >
             <Ban size={14} aria-hidden /> Don&rsquo;t suggest
           </button>
@@ -1240,7 +1273,13 @@ function RecipeSheet({
             type="button"
             data-tap
             onClick={onClose}
-            className="tap-bounce inline-flex h-11 items-center justify-center rounded-full bg-forest text-xs font-medium text-white"
+            className="tap-bounce inline-flex h-11 items-center justify-center rounded-full text-xs font-medium text-white border border-[#00c9ff]/40"
+            style={{
+              background:
+                "linear-gradient(180deg, #1ec0ff 0%, #00aef0 55%, #008fd0 100%)",
+              boxShadow:
+                "0 8px 22px -8px rgba(0,143,208,0.55), 0 1px 0 rgba(255,255,255,0.30) inset",
+            }}
           >
             Done
           </button>
@@ -1277,15 +1316,21 @@ function IngredientSkipSheet({
         role="dialog"
         aria-modal="true"
         aria-label={`Manage ${name}`}
-        className="sheet-anim relative mx-auto w-full max-w-[480px] rounded-t-[28px] bg-white px-5 pt-3 shadow-elevated"
-        style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 22px)" }}
+        className="sheet-anim relative mx-auto w-full max-w-[480px] rounded-t-[28px] px-5 pt-3 text-white border-t border-x border-[#00aef0]/22 backdrop-blur-2xl"
+        style={{
+          paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 22px)",
+          background:
+            "radial-gradient(120% 60% at 50% 0%, rgba(0,143,208,0.20) 0%, transparent 60%), linear-gradient(180deg, #003c53 0%, #001a26 55%, #000813 100%)",
+          boxShadow:
+            "0 -24px 64px rgba(0,8,19,0.65), 0 1px 0 rgba(0,174,240,0.28) inset",
+        }}
       >
-        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-stone-2" />
+        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-white/25" />
         <div className="flex items-center gap-3">
           <span className="text-3xl leading-none">{emoji}</span>
           <div>
-            <h3 className="font-display text-xl text-ink-2">{name}</h3>
-            <p className="text-xs text-muted">What should we do with this?</p>
+            <h3 className="font-display text-xl text-white">{name}</h3>
+            <p className="text-xs text-white/65">What should we do with this?</p>
           </div>
         </div>
 
@@ -1298,8 +1343,8 @@ function IngredientSkipSheet({
             className={clsx(
               "tap-bounce w-full rounded-2xl border px-4 py-3 text-left",
               alreadySkipped
-                ? "border-stone-2 bg-stone-2/30 text-muted cursor-not-allowed"
-                : "border-clay/30 bg-clay/5 text-clay",
+                ? "border-white/15 bg-white/[0.04] text-white/45 cursor-not-allowed"
+                : "border-clay/40 bg-clay/[0.12] text-clay",
             )}
           >
             <div className="flex items-center gap-2 text-sm font-semibold">
@@ -1316,12 +1361,12 @@ function IngredientSkipSheet({
             type="button"
             data-tap
             onClick={onPantry}
-            className="tap-bounce w-full rounded-2xl border border-forest/30 bg-forest/[0.06] px-4 py-3 text-left text-forest"
+            className="tap-bounce w-full rounded-2xl border border-forest/40 bg-forest/[0.12] px-4 py-3 text-left text-[#66c8e8]"
           >
             <div className="flex items-center gap-2 text-sm font-semibold">
               <Home size={14} aria-hidden /> I always have this
             </div>
-            <p className="mt-0.5 text-[11.5px] text-forest/80">
+            <p className="mt-0.5 text-[11.5px] text-[#66c8e8]/80">
               Pantry items are hidden from the shopping list — recipes still use them.
             </p>
           </button>
@@ -1330,7 +1375,7 @@ function IngredientSkipSheet({
             type="button"
             data-tap
             onClick={onClose}
-            className="tap-bounce mt-2 inline-flex h-11 w-full items-center justify-center rounded-full border border-stone-2 bg-paper text-sm"
+            className="tap-bounce mt-2 inline-flex h-11 w-full items-center justify-center rounded-full border border-white/20 bg-white/[0.06] text-sm text-white hover:bg-white/[0.12]"
           >
             Cancel
           </button>
@@ -1378,19 +1423,25 @@ function SwapSheet({
         onClick={onClose}
       />
       <div
-        className="sheet-anim relative mx-auto max-h-[85vh] w-full max-w-[480px] overflow-y-auto rounded-t-[28px] bg-white px-5 pt-3 shadow-elevated"
-        style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 22px)" }}
+        className="sheet-anim relative mx-auto max-h-[85vh] w-full max-w-[480px] overflow-y-auto rounded-t-[28px] px-5 pt-3 text-white border-t border-x border-[#00aef0]/22 backdrop-blur-2xl"
+        style={{
+          paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 22px)",
+          background:
+            "radial-gradient(120% 60% at 50% 0%, rgba(0,143,208,0.20) 0%, transparent 60%), linear-gradient(180deg, #003c53 0%, #001a26 55%, #000813 100%)",
+          boxShadow:
+            "0 -24px 64px rgba(0,8,19,0.65), 0 1px 0 rgba(0,174,240,0.28) inset",
+        }}
       >
-        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-stone-2" />
+        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-white/25" />
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h3 className="font-display text-2xl text-ink-2">Swap meal</h3>
-            <p className="text-xs text-muted">
+            <h3 className="font-display text-2xl text-white">Swap meal</h3>
+            <p className="text-xs text-white/65">
               {day} · {slot} · replacing{" "}
-              <span className="font-medium text-ink">{currentKey}</span>
+              <span className="font-medium text-white">{currentKey}</span>
             </p>
           </div>
-          <Shuffle size={20} className="text-forest" aria-hidden />
+          <Shuffle size={20} className="text-[#66c8e8]" aria-hidden />
         </div>
 
         <button
@@ -1400,7 +1451,7 @@ function SwapSheet({
             onBan(currentKey);
             onClose();
           }}
-          className="tap-bounce mt-4 inline-flex w-full items-center gap-2 rounded-2xl border border-clay/30 bg-clay/5 px-3 py-2.5 text-left text-sm text-clay"
+          className="tap-bounce mt-4 inline-flex w-full items-center gap-2 rounded-2xl border border-clay/40 bg-clay/[0.12] px-3 py-2.5 text-left text-sm text-clay"
         >
           <Ban size={14} aria-hidden />
           <span className="flex-1">
@@ -1408,12 +1459,12 @@ function SwapSheet({
           </span>
         </button>
 
-        <div className="mt-4 mb-2 text-[11px] font-medium uppercase tracking-[0.18em] text-muted">
+        <div className="mt-4 mb-2 text-[11px] font-medium uppercase tracking-[0.18em] text-white/60">
           Pick an alternative
         </div>
 
         {alternatives.length === 0 ? (
-          <p className="rounded-2xl border border-hairline bg-paper px-4 py-6 text-center text-sm text-muted">
+          <p className="rounded-2xl border border-white/15 bg-white/[0.04] px-4 py-6 text-center text-sm text-white/65">
             No more alternatives. Unban a meal in You · Settings or skip fewer ingredients.
           </p>
         ) : (
@@ -1423,7 +1474,7 @@ function SwapSheet({
               return (
                 <li
                   key={key}
-                  className="flex items-center gap-2 rounded-2xl border border-hairline bg-white px-3 py-2"
+                  className="flex items-center gap-2 rounded-2xl border border-white/12 bg-white/[0.05] px-3 py-2"
                 >
                   <button
                     type="button"
@@ -1433,19 +1484,19 @@ function SwapSheet({
                   >
                     <span className="text-2xl leading-none">{mealIcoFor(key)}</span>
                     <div className="min-w-0 flex-1">
-                      <div className="truncate text-sm font-medium">{key}</div>
-                      <div className="text-[11px] text-muted">
+                      <div className="truncate text-sm font-medium text-white">{key}</div>
+                      <div className="text-[11px] text-white/55">
                         {r ? `${r.kcal} kcal · ${r.p}g protein · ${r.time}` : "-"}
                       </div>
                     </div>
-                    <Check size={14} className="text-forest opacity-0" aria-hidden />
+                    <Check size={14} className="text-[#66c8e8] opacity-0" aria-hidden />
                   </button>
                   <button
                     type="button"
                     data-tap
                     onClick={() => onBan(key)}
                     aria-label={`Don't suggest ${key}`}
-                    className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-hairline bg-paper text-muted hover:text-clay"
+                    className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-white/15 bg-white/[0.06] text-white/60 hover:text-clay"
                   >
                     <Ban size={13} aria-hidden />
                   </button>
@@ -1470,16 +1521,16 @@ function SwapSheet({
 
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-2xl border border-forest/15 bg-forest/[0.06] px-2 py-2 text-center">
-      <div className="text-base font-semibold numerals">{value}</div>
-      <div className="text-[9.5px] uppercase tracking-[0.1em] text-muted">{label}</div>
+    <div className="rounded-2xl border border-[#00aef0]/22 bg-[#00aef0]/[0.10] px-2 py-2 text-center">
+      <div className="text-base font-semibold numerals text-white">{value}</div>
+      <div className="text-[9.5px] uppercase tracking-[0.1em] text-white/55">{label}</div>
     </div>
   );
 }
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mt-5 mb-2 text-[11px] font-medium uppercase tracking-[0.18em] text-muted">
+    <div className="mt-5 mb-2 text-[11px] font-medium uppercase tracking-[0.18em] text-white/60">
       {children}
     </div>
   );

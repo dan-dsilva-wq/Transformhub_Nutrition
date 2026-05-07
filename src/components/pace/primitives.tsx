@@ -19,12 +19,12 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClass: Record<ButtonVariant, string> = {
   primary:
-    "text-white bg-[linear-gradient(180deg,#00aef0_0%,#008fd0_55%,#0078b8_100%)] border border-[#00c9ff]/35 hover:bg-[linear-gradient(180deg,#1ec0ff_0%,#00aef0_55%,#008fd0_100%)] active:translate-y-[1px] disabled:bg-none disabled:bg-stone-2 disabled:text-faint disabled:border-transparent shadow-[0_14px_32px_-10px_rgba(0,143,208,0.65),0_1px_0_rgba(255,255,255,0.40)_inset,0_-1px_0_rgba(0,40,60,0.40)_inset]",
+    "text-white bg-[linear-gradient(180deg,#00aef0_0%,#008fd0_55%,#0078b8_100%)] border border-[#00c9ff]/35 hover:bg-[linear-gradient(180deg,#1ec0ff_0%,#00aef0_55%,#008fd0_100%)] active:translate-y-[1px] disabled:bg-none disabled:bg-white/[0.06] disabled:text-white/40 disabled:border-white/15 shadow-[0_14px_32px_-10px_rgba(0,143,208,0.65),0_1px_0_rgba(255,255,255,0.40)_inset,0_-1px_0_rgba(0,40,60,0.40)_inset]",
   secondary:
-    "text-white bg-white/[0.06] border border-white/20 hover:bg-white/[0.12] hover:border-white/30 disabled:text-faint backdrop-blur-xl",
-  ghost: "bg-transparent text-white/80 hover:bg-white/10 hover:text-white disabled:text-faint",
+    "text-white bg-white/[0.06] border border-white/20 hover:bg-white/[0.12] hover:border-white/30 disabled:bg-white/[0.04] disabled:text-white/35 disabled:border-white/10 backdrop-blur-xl",
+  ghost: "bg-transparent text-white/80 hover:bg-white/10 hover:text-white disabled:text-white/35",
   destructive:
-    "bg-clay text-white hover:opacity-90 disabled:bg-stone-2 disabled:text-faint",
+    "bg-clay text-white hover:opacity-90 disabled:bg-white/[0.06] disabled:text-white/40",
 };
 
 const sizeClass: Record<ButtonSize, string> = {

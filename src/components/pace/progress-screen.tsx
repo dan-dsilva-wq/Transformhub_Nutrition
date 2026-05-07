@@ -522,12 +522,12 @@ function WeeklyPhoto() {
             type="button"
             data-tap
             onClick={() => fileRef.current?.click()}
-            className="grid h-40 w-full place-items-center rounded-2xl border border-dashed border-white/80 bg-white/45 text-muted backdrop-blur-xl hover:bg-white/65 transition"
+            className="grid h-40 w-full place-items-center rounded-2xl border border-dashed border-white/25 bg-white/[0.04] text-white/70 backdrop-blur-xl hover:bg-white/[0.08] transition"
           >
             <span className="flex flex-col items-center gap-2">
               <ImagePlus size={20} aria-hidden />
               <span className="text-sm">Add this week&apos;s photo</span>
-              <span className="text-xs text-faint">
+              <span className="text-xs text-white/45">
                 Same spot, same light, same time
               </span>
             </span>
@@ -580,7 +580,7 @@ function ScalePicker({
 }) {
   return (
     <div>
-      <span className="block text-[11px] font-medium uppercase tracking-[0.16em] text-muted">
+      <span className="block text-[11px] font-medium uppercase tracking-[0.16em] text-white/60">
         {label}
       </span>
       <div className="mt-1.5 grid grid-cols-5 gap-1">
@@ -596,8 +596,8 @@ function ScalePicker({
               className={
                 "numerals grid h-9 min-w-0 place-items-center rounded-full border px-0 text-sm transition " +
                 (active
-                  ? "border-forest bg-forest text-white"
-                  : "border-white/70 bg-white/60 text-ink backdrop-blur hover:bg-white/80")
+                  ? "border-[#00aef0] bg-[#00aef0]/30 text-white"
+                  : "border-white/15 bg-white/[0.06] text-white/70 backdrop-blur hover:bg-white/[0.12]")
               }
             >
               {n}

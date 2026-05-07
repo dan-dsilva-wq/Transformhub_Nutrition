@@ -20,7 +20,7 @@ export function NameStep({ onNext }: { onNext: () => void }) {
     <div className="flex h-full flex-col">
       <div>
         <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted">
-          Step 1
+          Step 1 · Your name
         </span>
         <h2 className="mt-2 font-display text-3xl leading-tight text-ink-2">
           What should we call you?

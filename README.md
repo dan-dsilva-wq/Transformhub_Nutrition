@@ -1,6 +1,12 @@
-# Pace
+# Transform Hub — Performance Nutrition
 
-Mobile-first PWA for adult weight-loss nutrition tracking. It supports photo-based meal estimates, target calculation, water and step accountability, progress tracking, a food guide, a busy home workout plan, and an AI coach.
+Engineered nutrition tracking for high performers. A mobile-first PWA that pairs photo-based meal estimates with daily targets, water and step accountability, progress tracking, a tailored food guide, a home-workout plan, and an AI coach.
+
+This is the Transform Hub white-labelled build — the original Pace codebase rebranded around the Transform Hub palette (`#003c53` navy, `#008fd0` cyan, `#020202` ink, `#ffffff` paper) and brand mark. Brand assets live in `public/brand/`.
+
+## Setup
+
+If you copied this folder, run `npm install` here — the project uses an isolated `node_modules` per copy.
 
 ## Stack
 

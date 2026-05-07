@@ -18,31 +18,31 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://pace-nutrition.vercel.app"),
-  title: "Pace - your weight-loss partner",
+  metadataBase: new URL("https://transformhub.app"),
+  title: "Transform Hub — Performance Nutrition",
   description:
-    "Pace is a calm, photo-first nutrition app for busy adults. Snap a meal, see the next good move, lose weight at your own pace.",
-  applicationName: "Pace",
+    "Engineered nutrition tracking for high performers. Log meals in seconds, see your numbers, and let the system pace your transformation.",
+  applicationName: "Transform Hub",
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    title: "Pace - your weight-loss partner",
+    title: "Transform Hub — Performance Nutrition",
     description:
-      "Calm, photo-first nutrition tracking for busy adults losing weight at their own pace.",
+      "Engineered nutrition tracking for high performers. Built for the few who measure what matters.",
     url: "/",
-    siteName: "Pace",
+    siteName: "Transform Hub",
     type: "website",
   },
   appleWebApp: {
     capable: true,
-    title: "Pace",
-    statusBarStyle: "default",
+    title: "Transform Hub",
+    statusBarStyle: "black-translucent",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#fbfaf6",
+  themeColor: "#001a26",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -58,8 +58,9 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${inter.variable} ${fraunces.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full text-ink font-body">
+      <body className="min-h-full text-ink font-body" suppressHydrationWarning>
         <PwaRegister />
         <AppStateProvider>{children}</AppStateProvider>
       </body>

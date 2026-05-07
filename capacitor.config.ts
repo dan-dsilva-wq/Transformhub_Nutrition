@@ -85,10 +85,10 @@ console.log(`[capacitor.config] WebView will load: ${serverUrl}`);
 const allowNavigation = [serverHost];
 
 const config: CapacitorConfig = {
-  appId: "com.danieldsilva.pace",
-  appName: "Pace",
+  appId: "com.transformhub.app",
+  appName: "Transform Hub",
   webDir: "capacitor-web",
-  backgroundColor: "#fbfaf6",
+  backgroundColor: "#001a26",
   server: {
     url: serverUrl,
     androidScheme: "https",
@@ -96,7 +96,7 @@ const config: CapacitorConfig = {
     allowNavigation,
   },
   android: {
-    backgroundColor: "#fbfaf6",
+    backgroundColor: "#001a26",
   },
 };
 

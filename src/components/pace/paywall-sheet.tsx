@@ -13,12 +13,12 @@ import {
 import { Button, Sheet } from "./primitives";
 
 const premiumPerks = [
-  "Unlimited AI photo logging",
-  "Tailored nutrition guide",
-  "Coach without limits",
-  "Full progress history + photo compare",
-  "Smart pantry barcode scanning & calendar reminders",
-  "Custom reminder schedules",
+  "Unlimited photo food logging",
+  "Your tailored 7-day food guide",
+  "Ask the coach anytime",
+  "Full progress history & side-by-side photos",
+  "Custom meal & water reminders",
+  "Cancel any time, no contract",
 ];
 
 export function PaywallSheet({
@@ -145,18 +145,21 @@ function LockedCard({
 
   return (
     <div className="stagger-up space-y-5">
-      <div className="pop-in-anim rounded-3xl border border-white/70 bg-white/55 p-7 text-center shadow-card backdrop-blur-xl">
-        <div className="float-anim mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-cream text-forest">
+      <div className="pop-in-anim surface-deep p-7 text-center" style={{ borderRadius: 28 }}>
+        <div
+          className="float-anim mx-auto grid h-14 w-14 place-items-center rounded-2xl text-white"
+          style={{ background: "linear-gradient(135deg,#00aef0,#003c53)" }}
+        >
           <Lock size={22} aria-hidden />
         </div>
-        <p className="mt-4 text-[11px] font-medium uppercase tracking-[0.18em] text-muted">
-          {expired ? "Trial ended" : "Premium feature"}
+        <p className="font-eyebrow mt-5 text-[#66c8e8]">
+          {expired ? "Trial ended" : "Performance Tier"}
         </p>
-        <h2 className="mt-1 font-display text-2xl text-ink-2">{title}</h2>
-        <p className="mx-auto mt-2 max-w-[34ch] text-sm text-muted">{body}</p>
+        <h2 className="mt-1.5 font-display text-2xl text-white">{title}</h2>
+        <p className="mx-auto mt-2 max-w-[34ch] text-sm text-white/70">{body}</p>
         <Button
           size="lg"
-          className="mt-5"
+          className="mt-5 cyan-halo"
           onClick={startTrial}
           loading={busy}
         >
@@ -174,10 +177,13 @@ function LockedCard({
         {premiumPerks.map((p) => (
           <li
             key={p}
-            className="flex items-center gap-3 rounded-2xl border border-white/70 bg-white/45 px-4 py-2.5 text-sm text-ink-2 backdrop-blur-xl"
+            className="flex items-center gap-3 rounded-2xl border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm text-white/85 backdrop-blur-xl"
           >
-            <span className="grid h-7 w-7 place-items-center rounded-full bg-cream text-forest">
-              <Check size={14} aria-hidden />
+            <span
+              className="grid h-7 w-7 place-items-center rounded-full text-white"
+              style={{ background: "linear-gradient(135deg,#00aef0,#008fd0)" }}
+            >
+              <Check size={14} aria-hidden strokeWidth={3} />
             </span>
             {p}
           </li>

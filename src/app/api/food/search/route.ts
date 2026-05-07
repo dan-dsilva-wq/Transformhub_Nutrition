@@ -101,6 +101,9 @@ export async function GET(request: Request) {
     });
 
     if (!response.ok) {
+      if (cachedWithCommon.length) {
+        return NextResponse.json({ foods: cachedWithCommon.slice(0, 8), source: "cache" });
+      }
       return NextResponse.json({ error: "Food search is unavailable right now." }, { status: 502 });
     }
 

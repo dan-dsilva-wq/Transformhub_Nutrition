@@ -33,10 +33,10 @@ export function MotivationStep({ onNext }: { onNext: () => void }) {
           Step 7 · Why now
         </span>
         <h2 className="mt-2 font-display text-3xl leading-tight text-ink-2">
-          What&apos;s pulling you here?
+          Why now?
         </h2>
         <p className="mt-2 text-sm text-muted">
-          A sentence is plenty. We&apos;ll surface this in your Coach when motivation dips.
+          One sentence is plenty. Your coach will gently bring this back when you need a lift.
         </p>
         <div className="mt-8">
           <Textarea

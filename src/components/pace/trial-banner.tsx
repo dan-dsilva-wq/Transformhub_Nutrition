@@ -16,7 +16,7 @@ export function TrialBanner() {
     return (
       <Link
         href="/you/settings"
-        className="pop-in-anim tap-bounce inline-flex items-center gap-1.5 rounded-full border border-clay/40 bg-white/65 px-3 py-1 text-[11px] font-medium text-clay backdrop-blur-xl hover:bg-white/85 transition"
+        className="pop-in-anim tap-bounce inline-flex items-center gap-1.5 rounded-full border border-[#ff7a45]/40 bg-[#ff7a45]/[0.10] px-3 py-1 text-[11px] font-semibold text-[#ff9f6e] backdrop-blur-xl hover:bg-[#ff7a45]/[0.16] transition"
       >
         <AlertCircle size={12} aria-hidden />
         Trial ended
@@ -30,7 +30,7 @@ export function TrialBanner() {
   return (
     <Link
       href="/you/settings"
-      className="pop-in-anim tap-bounce pulse-soft-anim inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-white/65 px-3 py-1 text-[11px] font-medium text-forest backdrop-blur-xl hover:bg-white/85 transition"
+      className="pop-in-anim tap-bounce pulse-soft-anim inline-flex items-center gap-1.5 rounded-full border border-[#00aef0]/40 bg-[#00aef0]/[0.12] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.10em] text-[#66c8e8] backdrop-blur-xl hover:bg-[#00aef0]/[0.18] transition"
     >
       <Sparkles size={12} aria-hidden />
       {days === 1 ? "1 day left" : `${days} days left`}

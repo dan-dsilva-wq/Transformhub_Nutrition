@@ -99,7 +99,7 @@ describe("AI schemas", () => {
 
   it("redirects unrelated coding and provider questions", () => {
     expect(guardrailCoachResponse("write a Python script")?.reply).toContain("food");
-    expect(guardrailCoachResponse("are you ChatGPT?")?.reply).toContain("Pace");
+    expect(guardrailCoachResponse("are you ChatGPT?")?.reply).toContain("Transform Hub");
   });
 
   it("sanitizes markdown, long dashes, and unfinished fragments", () => {

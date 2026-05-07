@@ -100,15 +100,15 @@ export function PlanScreen() {
           You &amp; your <span className="text-forest">targets.</span>
         </h1>
         <p className="mt-2 text-sm text-muted">
-          Update height, weight, goal, and pace. We will recalculate the maths behind your day.
+          Update your height, weight, goal, or pace. We&apos;ll redo the numbers behind your day.
         </p>
       </header>
 
       <Card>
         <SectionHeader eyebrow="Daily targets" title="What we're aiming at" />
         <div className="grid grid-cols-2 gap-4">
-          <Stat label="Calories" value={previewTargets.calories} hint="kcal" />
-          <Stat label="Protein" value={`${previewTargets.proteinG}g`} hint="for muscle" />
+          <Stat label="Calories" value={previewTargets.calories} hint="kcal/day" />
+          <Stat label="Protein" value={`${previewTargets.proteinG}g`} hint="keeps muscle strong" />
           <Stat label="Carbs" value={`${previewTargets.carbsG}g`} />
           <Stat label="Fats" value={`${previewTargets.fatG}g`} />
           <Stat label="Fiber" value={`${previewTargets.fiberG}g`} />

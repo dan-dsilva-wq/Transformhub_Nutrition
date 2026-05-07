@@ -69,13 +69,13 @@ function scopedKey(scope: string) {
 }
 
 const greetMessage =
-  "I keep this practical. Show me the messy bits of the day and I'll help you make the next good move.";
+  "Hello. I'm here when you need a hand — about your meals, your day, or anything that's getting in the way. Tell me what's on your plate and we'll work it out together.";
 
 const defaultChat: ChatMessage[] = [
   {
     role: "assistant",
     content: greetMessage,
-    actions: ["Log the next meal", "Hit water target", "Take a 10 min walk"],
+    actions: ["Log my next meal", "Reach my water target", "Take a 10 min walk"],
   },
 ];
 

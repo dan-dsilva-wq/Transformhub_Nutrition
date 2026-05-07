@@ -74,8 +74,8 @@ const chapterMoods: { title: string; tint: string; sub: string }[] = [
   { title: "Sunday roast", tint: "linear-gradient(160deg,#dff5e8,#cfe9ff)", sub: "Cook once, eat twice." },
 ];
 
-const TODAY_HERO_TITLE = "Today is the one";
-const TODAY_HERO_SUB = "Cook this. The rest of the week can wait.";
+const TODAY_HERO_TITLE = "Today's meals";
+const TODAY_HERO_SUB = "Tap any meal below to see the recipe and steps.";
 
 const COVER_PALETTES: Array<[string, string]> = [
   ["#fde68a", "#f59e0b"],
@@ -1540,8 +1540,8 @@ function GenerateWeek({
         </h1>
         <p className="mt-2 text-sm text-muted">
           {phase === "running"
-            ? "Hang tight. We're tailoring this to you."
-            : `Hi ${name ?? "there"}. Nothing here yet — hit the green button to generate your 7-day plan.`}
+            ? "One moment — we're tailoring this to you."
+            : `Hi ${name ?? "there"}. Tap the green button below to build your first 7-day plan.`}
         </p>
       </header>
 
@@ -1655,11 +1655,11 @@ const walkthroughSteps: WalkthroughStep[] = [
   {
     eyebrow: "Step 1",
     emoji: "🗓️",
-    title: "Your week, written like a story",
-    body: "Each day is its own chapter — a mood, a key meal, a feel.",
+    title: "Your week, day by day",
+    body: "Seven days, each with its own meals to cook and a feel of its own.",
     bullets: [
-      "Today is the dark hero card.",
-      "Open any day to see the full recipe and prep steps.",
+      "Today is the green card at the top.",
+      "Tap any day to see the full recipe and how to make it.",
     ],
     tint: "linear-gradient(160deg,#a7f3d0,#dff5e8)",
   },
@@ -1667,21 +1667,21 @@ const walkthroughSteps: WalkthroughStep[] = [
     eyebrow: "Step 2",
     emoji: "🚫",
     title: "Tap any ingredient to skip it",
-    body: "Don't like mushrooms? Tap the chip in any recipe.",
+    body: "Don't like mushrooms? Tap the mushroom in any recipe.",
     bullets: [
-      "Choose <em>Don't suggest again</em> — gone forever.",
-      "Or <em>I always have this</em> — kept in recipes, hidden from shopping.",
+      "Choose <em>Don't suggest again</em> and we'll never use it.",
+      "Or <em>I always have this</em> to keep it in recipes but off your shopping list.",
     ],
     tint: "linear-gradient(160deg,#f6c8c0,#fde7e3)",
   },
   {
     eyebrow: "Step 3",
     emoji: "🛍️",
-    title: "Shopping list, ready",
-    body: "Tap the bag in the corner — every ingredient, sorted by aisle.",
+    title: "Shopping list, sorted for you",
+    body: "Tap the bag at the top — every ingredient, sorted by where it lives in the shop.",
     bullets: [
-      "Check items off as you shop.",
-      "Pantry staples stay quiet at the bottom.",
+      "Tick items off as you put them in the trolley.",
+      "Things you always have at home stay tucked at the bottom.",
     ],
     tint: "linear-gradient(160deg,#bae6fd,#e6f4fc)",
   },

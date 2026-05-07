@@ -31,11 +31,11 @@ export function BodyStep({ onNext }: { onNext: () => void }) {
         </span>
         <h2 className="mt-2 font-display text-3xl leading-tight text-ink-2">
           {name
-            ? `${name}, tell us about your body.`
-            : "Tell us about your body."}
+            ? `${name}, a few details about you.`
+            : "A few details about you."}
         </h2>
         <p className="mt-2 text-sm text-muted">
-          We use this to build your calorie and protein targets.
+          We use these to work out your calorie and protein targets.
         </p>
         <div className="mt-8 grid grid-cols-2 gap-3">
           <Field label="Age">

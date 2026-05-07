@@ -147,44 +147,52 @@ export function GoalStep({ onNext }: { onNext: () => void }) {
     <div className="flex h-full flex-col">
       <div>
         <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted">
-          Step 3 - Goal
+          Step 3 · Goal
         </span>
         <h2 className="mt-2 font-display text-3xl leading-tight text-ink-2">
           What are you aiming for?
         </h2>
         <p className="mt-2 text-sm text-muted">
-          Choose the outcome first, then set the pace. We still keep calorie targets inside adult safety floors.
+          Pick the outcome you want, then choose your pace. We won&apos;t let your calories drop too low for your safety.
         </p>
 
-        <div className="mt-6 grid grid-cols-2 gap-2">
-          {goalOptions.map((option) => (
-            <button
-              key={option.id}
-              type="button"
-              data-tap
-              onClick={() => setGoalIntent(option.id)}
-              className={`rounded-2xl border px-3 py-3 text-left transition ${
-                goalIntent === option.id
-                  ? "border-forest bg-white/85 text-ink-2 shadow-sm"
-                  : "border-white/70 bg-white/55 text-muted"
-              }`}
-              aria-pressed={goalIntent === option.id}
-            >
-              <span className="block text-sm font-semibold">{option.title}</span>
-              <span className="mt-1 block text-xs">{option.body}</span>
-            </button>
-          ))}
+        <div className="mt-6 grid grid-cols-2 gap-2.5">
+          {goalOptions.map((option) => {
+            const active = goalIntent === option.id;
+            return (
+              <button
+                key={option.id}
+                type="button"
+                data-tap
+                onClick={() => setGoalIntent(option.id)}
+                className={`relative rounded-2xl border px-3.5 py-3.5 text-left transition ${
+                  active
+                    ? "border-[#00aef0] text-white shadow-[0_8px_24px_-8px_rgba(0,143,208,0.55)]"
+                    : "border-white/12 text-white/65 hover:border-white/25 hover:text-white"
+                }`}
+                style={{
+                  background: active
+                    ? "linear-gradient(135deg, rgba(0,143,208,0.22) 0%, rgba(0,60,83,0.30) 100%)"
+                    : "rgba(255,255,255,0.04)",
+                }}
+                aria-pressed={active}
+              >
+                <span className="block text-[13.5px] font-semibold">{option.title}</span>
+                <span className="mt-1 block text-[11.5px] leading-relaxed">{option.body}</span>
+              </button>
+            );
+          })}
         </div>
 
         <div className="mt-6">
           <Field
-            label={isWeightChangeGoal ? "Goal weight (kg)" : "Reference weight (kg)"}
+            label={isWeightChangeGoal ? "Goal weight (kg)" : "Target weight (kg)"}
             hint={
               goalIntent === "lose"
-                ? "Must be below your current weight."
+                ? "A number a little below where you are now."
                 : goalIntent === "gain"
-                  ? "Must be above your current weight."
-                  : "Used for charts and progress context."
+                  ? "A number a little above where you are now."
+                  : "Used to show your charts and progress."
             }
           >
             <Input
@@ -201,7 +209,7 @@ export function GoalStep({ onNext }: { onNext: () => void }) {
             <div className="mb-2 text-[11px] font-medium uppercase tracking-[0.16em] text-muted">
               Weekly pace
             </div>
-            <div className="grid grid-cols-4 gap-1 rounded-full border border-white/60 bg-white/40 p-1 backdrop-blur-xl">
+            <div className="grid grid-cols-4 gap-1 rounded-full border border-white/12 bg-white/[0.04] p-1 backdrop-blur-xl">
               {paceOptions.map((option) => {
                 const active = !customOpen && weeklyRateKg === option.value;
                 return (
@@ -213,8 +221,10 @@ export function GoalStep({ onNext }: { onNext: () => void }) {
                       setCustomOpen(false);
                       setLocal({ ...local, weeklyRateKg: String(option.value) });
                     }}
-                    className={`rounded-full px-2 py-2 text-xs font-medium ${
-                      active ? "border border-white/70 bg-white/90 text-ink-2 shadow-sm" : "text-muted"
+                    className={`rounded-full px-2 py-2 text-xs font-semibold transition ${
+                      active
+                        ? "bg-[#00aef0] text-white shadow-[0_4px_14px_-2px_rgba(0,143,208,0.55)]"
+                        : "text-white/55 hover:text-white"
                     }`}
                     aria-pressed={active}
                   >
@@ -226,8 +236,10 @@ export function GoalStep({ onNext }: { onNext: () => void }) {
                 type="button"
                 data-tap
                 onClick={() => setCustomOpen(true)}
-                className={`rounded-full px-2 py-2 text-xs font-medium ${
-                  customOpen ? "border border-white/70 bg-white/90 text-ink-2 shadow-sm" : "text-muted"
+                className={`rounded-full px-2 py-2 text-xs font-semibold transition ${
+                  customOpen
+                    ? "bg-[#00aef0] text-white shadow-[0_4px_14px_-2px_rgba(0,143,208,0.55)]"
+                    : "text-white/55 hover:text-white"
                 }`}
                 aria-pressed={customOpen}
               >
@@ -251,8 +263,8 @@ export function GoalStep({ onNext }: { onNext: () => void }) {
               </Field>
             ) : null}
             {weeklyRateKg > HIGH_WEEKLY_LOSS_KG ? (
-              <p className="mt-3 rounded-2xl border border-clay/30 bg-white/65 px-3 py-2 text-xs text-clay">
-                This is aggressive. Public guidance usually points to about 0.5 to 1.0 kg/week, and the app will still apply calorie floors.
+              <p className="mt-3 rounded-2xl border border-[#ff7a45]/40 bg-[#ff7a45]/[0.10] px-3 py-2 text-xs text-[#ff9f6e]">
+                This is a fast pace. Most healthy guidance suggests 0.5 to 1.0 kg per week. We&apos;ll always keep your calories above a safe minimum.
               </p>
             ) : null}
           </div>

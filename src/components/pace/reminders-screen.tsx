@@ -1,7 +1,7 @@
 "use client";
 
 import { BellRing, Camera, Smartphone, Sun, Sunrise, Sunset } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAppState } from "@/lib/state/app-state";
 import {
   DEFAULT_REMINDER_CONFIG,
@@ -23,22 +23,14 @@ export function RemindersScreen() {
   const on = reminderState === "on";
   const config = readConfig(onboardingExtras);
   const [permission, setPermission] = useState<"granted" | "denied" | "default" | "unknown">(
-    "unknown",
+    () => {
+      if (typeof window === "undefined") return "unknown";
+      if (isNative()) return "default";
+      if ("Notification" in window) return Notification.permission;
+      return "denied";
+    },
   );
   const [busy, setBusy] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (isNative()) {
-      setPermission("default");
-      return;
-    }
-    if ("Notification" in window) {
-      setPermission(Notification.permission);
-    } else {
-      setPermission("denied");
-    }
-  }, []);
 
   async function applyConfig(next: PhotoReminderConfig, enable: boolean) {
     actions.setOnboardingExtras({ photoReminders: next });
@@ -226,7 +218,7 @@ export function RemindersScreen() {
             <Smartphone size={16} aria-hidden />
           </IconBadge>
           <p className="text-xs leading-relaxed text-muted">
-            Reminders work best in the installed Pace app. In a browser they only fire while the
+            Reminders work best in the installed Transform Hub app. In a browser they only fire while the
             tab is open. {permission === "denied" && "Notifications are blocked for this site — enable them in your browser settings."}
           </p>
         </div>
@@ -258,17 +250,25 @@ function ModeOption({
       data-tap
       onClick={onClick}
       className={
-        "rounded-2xl border p-3 text-left transition " +
+        "rounded-2xl border p-3 text-left transition backdrop-blur-xl " +
         (active
-          ? "border-forest bg-forest/5"
-          : "border-stone-2 bg-paper hover:bg-stone")
+          ? "border-[#00aef0] text-white shadow-[0_8px_24px_-8px_rgba(0,143,208,0.55)]"
+          : "border-white/12 bg-white/[0.04] text-white hover:bg-white/[0.08]")
+      }
+      style={
+        active
+          ? {
+              background:
+                "linear-gradient(135deg, rgba(0,143,208,0.20) 0%, rgba(0,60,83,0.30) 100%)",
+            }
+          : undefined
       }
     >
-      <div className="flex items-center gap-2 text-ink-2">
-        <span className={active ? "text-forest" : "text-muted"}>{icon}</span>
-        <span className="text-sm font-medium">{title}</span>
+      <div className="flex items-center gap-2">
+        <span className={active ? "text-[#00aef0]" : "text-white/55"}>{icon}</span>
+        <span className="text-sm font-semibold">{title}</span>
       </div>
-      <p className="mt-1 text-xs text-muted">{sub}</p>
+      <p className="mt-1 text-xs text-white/55">{sub}</p>
     </button>
   );
 }

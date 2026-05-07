@@ -1,56 +1,74 @@
 "use client";
 
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Activity, Target, Sparkles } from "lucide-react";
 import type { ReactNode } from "react";
-import { Button } from "../primitives";
+import { Button, BrandMark } from "../primitives";
 
 export function WelcomeStep({ onNext }: { onNext: () => void }) {
   return (
-    <div className="flex h-full flex-col">
-      <div className="mt-8">
-        <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted">
-          Your plan starts here
+    <div className="relative flex h-full flex-col">
+      {/* Ambient mark behind the headline */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-20 -top-8 z-0 opacity-[0.07] brand-spin-slow"
+      >
+        <BrandMark size={420} color="cyan" strokeWidth={5} />
+      </div>
+
+      <div className="relative z-10 mt-6 flex items-center gap-3">
+        <BrandMark size={56} color="cyan" strokeWidth={8} className="float-anim" />
+        <span className="font-eyebrow text-white/55">
+          Performance Nutrition
         </span>
-        <h1 className="mt-3 font-display text-[44px] leading-[1.02] text-ink-2">
-          Lose weight at <span className="text-forest">your own pace</span>.
+      </div>
+
+      <div className="relative z-10 mt-8">
+        <h1 className="font-display text-[44px] leading-[1.02] text-white">
+          Build a body that{" "}
+          <span className="italic" style={{ color: "#00aef0" }}>
+            holds the work
+          </span>
+          .
         </h1>
-        <p className="mt-4 text-base text-muted">
-          A calm, premium plan tailored to your body, your routine, and the life
-          you actually live.
+        <p className="mt-4 text-[15.5px] leading-relaxed text-white/65">
+          Engineered tracking for high performers. Two minutes from now,
+          you&apos;ll have numbers that fit the body you&apos;re building and the
+          life you actually live.
         </p>
       </div>
 
-      <ul className="mt-10 space-y-3 text-sm text-ink-2">
-        <Bullet color="forest">A daily target built from your numbers.</Bullet>
-        <Bullet color="sky">Three habits that move the needle, gently.</Bullet>
-        <Bullet color="clay">A coach that holds the line without nagging.</Bullet>
+      <ul className="relative z-10 mt-10 space-y-3.5">
+        <Bullet icon={<Target size={18} />}>A daily target built from your numbers.</Bullet>
+        <Bullet icon={<Activity size={18} />}>Three habits that move the needle.</Bullet>
+        <Bullet icon={<Sparkles size={18} />}>A coach that supports without nagging.</Bullet>
       </ul>
 
-      <div className="mt-auto pt-10">
-        <Button onClick={onNext} size="lg" fullWidth>
+      <div className="relative z-10 mt-auto pt-10">
+        <Button onClick={onNext} size="lg" fullWidth className="cyan-halo">
           Begin <ArrowRight size={18} />
         </Button>
-        <p className="mt-3 text-center text-xs text-muted">
-          Takes about 90 seconds.
+        <p className="mt-3 text-center text-[11px] uppercase tracking-[0.22em] text-white/35">
+          Takes about 2 minutes
         </p>
       </div>
     </div>
   );
 }
 
-function Bullet({
-  children,
-  color,
-}: {
-  children: ReactNode;
-  color: "forest" | "sky" | "clay";
-}) {
-  const dot =
-    color === "forest" ? "bg-forest" : color === "sky" ? "bg-sky" : "bg-clay";
+function Bullet({ children, icon }: { children: ReactNode; icon: ReactNode }) {
   return (
-    <li className="flex items-start gap-3">
-      <span className={`mt-1.5 h-1.5 w-1.5 rounded-full ${dot}`} />
-      <span>{children}</span>
+    <li className="flex items-start gap-3 text-[14.5px] text-white/85">
+      <span
+        className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-[#00aef0]"
+        style={{
+          background:
+            "linear-gradient(135deg, rgba(0,143,208,0.20) 0%, rgba(0,60,83,0.40) 100%)",
+          border: "1px solid rgba(0,174,240,0.28)",
+        }}
+      >
+        {icon}
+      </span>
+      <span className="pt-1">{children}</span>
     </li>
   );
 }

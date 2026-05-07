@@ -136,7 +136,7 @@ export function SettingsScreen() {
           YOU · SETTINGS
         </p>
         <h1 className="font-display mt-2 text-[38px] leading-[1.05] text-ink-2">
-          Tidy <span className="text-forest">up.</span>
+          Your <span className="text-forest">settings.</span>
         </h1>
       </header>
 
@@ -452,13 +452,13 @@ function subscriptionBody(
   switch (status) {
     case "trial":
       return daysLeft != null && daysLeft > 0
-        ? `${daysLeft === 1 ? "1 day" : `${daysLeft} days`} left of your free trial. Cancel anytime.`
+        ? `${daysLeft === 1 ? "1 day" : `${daysLeft} days`} left of your free trial. Cancel any time.`
         : "Your trial ends today.";
     case "active":
-      return "You're on Premium. Thanks for backing the build.";
+      return "You're on Premium. Thanks for backing Transform Hub.";
     case "expired":
       return "Your trial has ended. Resubscribe to unlock everything again.";
     default:
-      return "Free includes the basics. Try Premium for 7 days, no payment today.";
+      return "Free covers the basics. Try Premium for 7 days — no payment today.";
   }
 }

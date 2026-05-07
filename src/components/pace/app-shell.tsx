@@ -47,7 +47,7 @@ const drawerItems: NavItem[] = [
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { auth, profile, actions } = useAppState();
+  const { auth, profile, onboardingExtras, actions } = useAppState();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const isActive = (href: string) =>
@@ -55,22 +55,29 @@ export function AppShell({ children }: { children: ReactNode }) {
   const isCoachRoute = isActive("/you/coach");
 
   const initials = (() => {
+    const name = onboardingExtras.name?.trim();
+    if (name) {
+      const parts = name.split(/\s+/);
+      const first = parts[0]?.[0] ?? "";
+      const second = parts[1]?.[0] ?? "";
+      const combined = `${first}${second}`.toUpperCase();
+      if (combined) return combined;
+    }
     if (auth.kind === "signed-in" && auth.email) {
       return auth.email.slice(0, 2).toUpperCase();
     }
-    if (profile.sexForCalories === "male") return "P";
     return "P";
   })();
 
   return (
     <div className="min-h-[100dvh]">
-      {/* Header */}
+      {/* Header — frosted dark glass over the navy canvas */}
       <header
-        className="sticky top-0 z-30 border-b border-white/60 bg-white/40 backdrop-blur-xl"
+        className="sticky top-0 z-30 border-b border-white/10 bg-[#001a26]/65 backdrop-blur-xl"
         style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
       >
         <div className="mx-auto flex h-14 max-w-md items-center justify-between gap-3 px-5">
-          <Link href="/today" aria-label="Pace home">
+          <Link href="/today" aria-label="Transform Hub home">
             <Wordmark size="md" />
           </Link>
           <div className="flex items-center gap-2">
@@ -81,7 +88,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               data-tour="drawer-trigger"
               onClick={() => setDrawerOpen(true)}
               aria-label="Open menu"
-              className="grid h-10 w-10 place-items-center rounded-full bg-white/60 text-ink-2 hover:bg-white/80 border border-white/70 backdrop-blur"
+              className="grid h-10 w-10 place-items-center rounded-full border border-white/15 bg-white/[0.06] text-white hover:bg-white/[0.12] backdrop-blur"
             >
               <span className="font-display text-sm tracking-tight">{initials}</span>
             </button>
@@ -107,9 +114,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         {children}
       </main>
 
-      {/* Bottom nav */}
+      {/* Bottom nav — frosted dark over the navy canvas */}
       <nav
-        className="fixed inset-x-0 bottom-0 z-30 border-t border-white/60 bg-white/55 backdrop-blur-xl"
+        className="fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-[#001a26]/75 backdrop-blur-xl"
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
         aria-label="Primary"
       >
@@ -147,10 +154,12 @@ export function AppShell({ children }: { children: ReactNode }) {
             onClick={() => setDrawerOpen(false)}
           />
           <aside
-            className="sheet-anim absolute inset-y-0 right-0 w-[88%] max-w-sm overflow-y-auto bg-white/80 shadow-elevated backdrop-blur-2xl border-l border-white/70"
+            className="sheet-anim absolute inset-y-0 right-0 w-[88%] max-w-sm overflow-y-auto border-l border-white/10 backdrop-blur-2xl shadow-[0_24px_64px_rgba(0,8,19,0.55)]"
             style={{
               paddingTop: "calc(env(safe-area-inset-top, 0px) + 8px)",
               paddingBottom: "env(safe-area-inset-bottom, 0px)",
+              background:
+                "linear-gradient(180deg, rgba(0,38,53,0.95) 0%, rgba(0,8,19,0.95) 100%)",
             }}
           >
             <div className="flex items-center justify-between px-5 pt-3 pb-2">
@@ -160,26 +169,27 @@ export function AppShell({ children }: { children: ReactNode }) {
                 data-tap
                 onClick={() => setDrawerOpen(false)}
                 aria-label="Close menu"
-                className="grid h-10 w-10 place-items-center rounded-full text-muted hover:bg-white/60 hover:text-ink"
+                className="grid h-10 w-10 place-items-center rounded-full text-white/55 hover:bg-white/[0.08] hover:text-white"
               >
                 <X size={20} aria-hidden />
               </button>
             </div>
 
             <div className="px-5 pt-2">
-              <div className="rounded-2xl border border-white/70 bg-white/55 backdrop-blur-xl p-4">
-                <div className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted">
-                  Signed in
+              <div className="relative overflow-hidden rounded-2xl border border-white/12 p-4 backdrop-blur-xl"
+                   style={{ background: "linear-gradient(135deg, rgba(0,143,208,0.16) 0%, rgba(0,60,83,0.30) 100%)" }}>
+                <div className="text-[10.5px] font-semibold uppercase tracking-[0.20em] text-[#66c8e8]">
+                  {onboardingExtras.name ? `Hi, ${onboardingExtras.name}` : "Signed in"}
                 </div>
-                <div className="mt-1 truncate font-display text-lg text-ink-2">
+                <div className="mt-1 truncate font-display text-lg text-white">
                   {auth.kind === "signed-in"
                     ? auth.email ?? "Member"
                     : auth.kind === "demo"
                       ? "Demo mode"
                       : "Not signed in"}
                 </div>
-                <p className="mt-0.5 text-xs text-muted">
-                  Goal {profile.goalWeightKg} kg · current {profile.currentWeightKg} kg
+                <p className="mt-1 text-xs text-white/55">
+                  Goal {profile.goalWeightKg} kg · now {profile.currentWeightKg} kg
                 </p>
               </div>
             </div>
@@ -191,11 +201,11 @@ export function AppShell({ children }: { children: ReactNode }) {
                     href={item.href}
                     onClick={() => setDrawerOpen(false)}
                     className={clsx(
-                      "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm text-ink-2 hover:bg-white/60 transition",
-                      isActive(item.href) && "bg-white/70 border border-white/70",
+                      "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm text-white/85 hover:bg-white/[0.06] transition",
+                      isActive(item.href) && "bg-white/[0.08] border border-white/12 text-white",
                     )}
                   >
-                    <span className="text-muted">{item.icon}</span>
+                    <span className="text-[#66c8e8]">{item.icon}</span>
                     <span className="flex-1">{item.label}</span>
                   </Link>
                 </li>
@@ -211,7 +221,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   await actions.signOut();
                   router.push("/");
                 }}
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-full border border-white/70 bg-white/55 backdrop-blur-xl px-4 py-3 text-sm font-medium text-muted hover:bg-white/75 hover:text-ink transition"
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-4 py-3 text-sm font-medium text-white/65 hover:bg-white/[0.08] hover:text-white transition"
               >
                 <LogOut size={16} aria-hidden />
                 {auth.kind === "demo" ? "Reset demo data" : "Sign out"}

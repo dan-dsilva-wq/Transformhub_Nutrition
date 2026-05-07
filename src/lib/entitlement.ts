@@ -17,36 +17,36 @@ export const featureCopy: Record<
   { title: string; body: string }
 > = {
   "ai-photo-unlimited": {
-    title: "Photo logging, unlimited",
-    body: "You used today's three free AI photo estimates. Premium unlocks unlimited.",
+    title: "Unlimited photo logging",
+    body: "You've used today's 3 free photo estimates. Premium gives you as many as you like.",
   },
   "coach-unlimited": {
-    title: "Talk to your Coach anytime",
-    body: "Free includes 5 messages a week. Premium removes the limit.",
+    title: "Talk to your coach anytime",
+    body: "Free gives you 5 coach messages a week. Premium removes the limit.",
   },
   "nutrition-guide": {
-    title: "Tailored nutrition guide",
-    body: "Approved-foods curation, swap suggestions, and weekly meal building.",
+    title: "Your tailored food guide",
+    body: "A 7-day plan built around your goals, with shopping lists and easy swaps.",
   },
   "progress-history-full": {
     title: "Full progress history",
-    body: "See months and years, not just the last 30 days.",
+    body: "See months and years of your progress, not just the last 30 days.",
   },
   "compare-photos": {
-    title: "Side-by-side photo compare",
-    body: "Compare any week against your starting photo.",
+    title: "Side-by-side photo comparison",
+    body: "Compare any check-in photo against your starting photo to see how far you've come.",
   },
   "integrations-sync": {
     title: "Smart pantry & calendar",
-    body: "Scan groceries to plan meals around what you already own, and tuck reminders into the gaps in your day.",
+    body: "Scan groceries to plan meals around what you already have, with reminders that fit around your day.",
   },
   workouts: {
     title: "Your workout plan",
-    body: "Five short sessions for a busy week, calibrated to your equipment.",
+    body: "Five short sessions for a busy week, matched to your equipment at home.",
   },
   "custom-reminders": {
-    title: "Custom reminder schedules",
-    body: "Time meals, water, and walks to your routine, not the app's.",
+    title: "Custom reminder times",
+    body: "Set meal, water, and walk reminders to fit your routine — not the app's.",
   },
 };
 

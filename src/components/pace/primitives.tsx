@@ -3,6 +3,8 @@
 import { clsx } from "clsx";
 import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from "react";
 
+export { Wordmark, BrandMark, BrandHero, BrandLogo } from "./brand";
+
 /* ───────────────────────── Button ───────────────────────── */
 
 type ButtonVariant = "primary" | "secondary" | "ghost" | "destructive";
@@ -17,10 +19,10 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClass: Record<ButtonVariant, string> = {
   primary:
-    "bg-forest text-white hover:bg-forest-2 active:bg-forest-2 disabled:bg-stone-2 disabled:text-faint",
+    "bg-forest text-white hover:bg-forest-2 active:bg-forest-2 disabled:bg-stone-2 disabled:text-faint shadow-[0_10px_28px_-8px_rgba(0,143,208,0.55),0_2px_0_rgba(255,255,255,0.25)_inset]",
   secondary:
     "bg-paper text-ink border border-stone-2 hover:bg-stone hover:border-hairline disabled:text-faint",
-  ghost: "bg-transparent text-ink hover:bg-stone disabled:text-faint",
+  ghost: "bg-transparent text-white/80 hover:bg-white/10 hover:text-white disabled:text-faint",
   destructive:
     "bg-clay text-white hover:opacity-90 disabled:bg-stone-2 disabled:text-faint",
 };
@@ -153,8 +155,11 @@ export function Field({
   );
 }
 
+/* Inputs adapt to surface: translucent white over dark canvas, solid white
+   inside cards (where the card overrides --color-ink to dark). The base
+   uses CSS-variable colors throughout so the cascade lands correctly. */
 const inputBase =
-  "w-full rounded-2xl border border-stone-2 bg-paper px-4 py-3 text-base text-ink outline-none transition placeholder:text-faint focus:border-forest focus:ring-2 focus:ring-forest/15";
+  "w-full rounded-2xl border border-white/15 bg-white/[0.06] px-4 py-3 text-base text-white outline-none transition placeholder:text-white/35 focus:border-[#00aef0] focus:ring-2 focus:ring-[#00aef0]/30 [.card_&]:border-stone-2 [.card_&]:bg-paper [.card_&]:text-ink [.card_&]:placeholder:text-faint [.card_&]:focus:border-forest [.card-flat_&]:border-stone-2 [.card-flat_&]:bg-paper [.card-flat_&]:text-ink";
 
 export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={clsx(inputBase, "h-12", props.className)} />;
@@ -215,9 +220,9 @@ export function ProgressRing({
         {usingDefaultFill ? (
           <defs>
             <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#0d9488" />
-              <stop offset="50%" stopColor="#0284c7" />
-              <stop offset="100%" stopColor="#fb923c" />
+              <stop offset="0%" stopColor="#00aef0" />
+              <stop offset="55%" stopColor="#008fd0" />
+              <stop offset="100%" stopColor="#003c53" />
             </linearGradient>
           </defs>
         ) : null}
@@ -301,10 +306,10 @@ export function Sheet({
         onClick={onClose}
       />
       <div
-        className="sheet-anim absolute inset-x-0 bottom-0 max-h-[88vh] overflow-y-auto rounded-t-[28px] border-t border-white/70 bg-white/80 shadow-elevated backdrop-blur-xl"
+        className="card sheet-anim absolute inset-x-0 bottom-0 max-h-[88vh] overflow-y-auto !rounded-t-[28px] !rounded-b-none !border-x-0 !border-b-0"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 16px)" }}
       >
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-4 bg-white/70 px-5 pt-3 pb-2 backdrop-blur-xl">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-4 bg-white/85 px-5 pt-3 pb-2 backdrop-blur-xl">
           <div className="mx-auto h-1 w-10 rounded-full bg-stone-2 absolute left-1/2 -translate-x-1/2 top-2" />
           <h3 className="font-display text-xl text-ink-2 mt-3">{title}</h3>
           <button
@@ -331,22 +336,7 @@ export function Skeleton({ className }: { className?: string }) {
   return <div className={clsx("skeleton", className)} />;
 }
 
-/* ───────────────────────── Wordmark ───────────────────────── */
-
-export function Wordmark({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
-  const cls =
-    size === "lg"
-      ? "text-3xl"
-      : size === "sm"
-        ? "text-lg"
-        : "text-2xl";
-  return (
-    <span className={clsx("font-display tracking-tight text-ink-2", cls)}>
-      <span>Pace</span>
-      <span className="ml-1 inline-block h-1.5 w-1.5 rounded-full bg-forest align-baseline" />
-    </span>
-  );
-}
+/* Wordmark, BrandMark, BrandHero, BrandLogo are re-exported from ./brand */
 
 /* ───────────────────────── Iconography helpers ───────────────────────── */
 
@@ -357,8 +347,10 @@ export function IconBadge({
   children: ReactNode;
   tone?: "stone" | "forest" | "sage" | "amber" | "clay";
 }) {
+  // Glass-cyan default works on both dark canvas and inside white cards
   const palette: Record<string, string> = {
-    stone: "bg-stone text-ink-2",
+    stone:
+      "bg-white/[0.06] text-[#00aef0] border border-white/15 [.card_&]:bg-stone [.card_&]:text-ink-2 [.card_&]:border-transparent",
     forest: "bg-forest text-white",
     sage: "bg-sage/15 text-sage",
     amber: "bg-amber/15 text-amber",
@@ -388,9 +380,9 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-dashed border-stone-2 bg-paper/60 px-5 py-10 text-center">
-      <p className="font-display text-lg text-ink-2">{title}</p>
-      {body ? <p className="mt-1 text-sm text-muted">{body}</p> : null}
+    <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.04] px-5 py-10 text-center backdrop-blur-xl">
+      <p className="font-display text-lg text-white">{title}</p>
+      {body ? <p className="mt-1 text-sm text-white/60">{body}</p> : null}
       {action ? <div className="mt-4 flex justify-center">{action}</div> : null}
     </div>
   );

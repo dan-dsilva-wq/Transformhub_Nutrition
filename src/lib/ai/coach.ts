@@ -37,7 +37,7 @@ export function guardrailCoachResponse(message: string): CoachResponse | null {
 
   return {
     reply: asksAboutProvider
-      ? "I'm Pace's nutrition coach. I can help with food logging, targets, habits, and progress."
+      ? "I'm Transform Hub's nutrition coach. I can help with food logging, targets, habits, and progress."
       : nutritionRedirect,
     tone: "gentle_supportive",
     suggestedActions: ["Log a meal", "Review today's target"],

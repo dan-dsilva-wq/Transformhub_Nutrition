@@ -38,9 +38,9 @@ import { useAppVersion } from "@/lib/app-version";
 
 function greet() {
   const h = new Date().getHours();
-  if (h < 12) return "morning";
-  if (h < 18) return "afternoon";
-  return "evening";
+  if (h < 12) return "Good morning";
+  if (h < 18) return "Good afternoon";
+  return "Good evening";
 }
 
 function timeOfDayMark() {
@@ -59,13 +59,13 @@ function vibeLine(args: {
   hour: number;
 }) {
   const { mealsCount, calorieRatio, overshoot, hour } = args;
-  if (overshoot > 0) return "A walk closes the gap.";
-  if (mealsCount === 0 && hour < 11) return "Fresh page. Make it count.";
-  if (mealsCount === 0 && hour >= 11) return "Nothing logged yet — easy fix.";
-  if (calorieRatio >= 0.95) return "Right on target. Nice.";
-  if (calorieRatio >= 0.7) return "Almost home.";
-  if (calorieRatio >= 0.4) return "Halfway there. Strong start to the day.";
-  if (calorieRatio > 0) return "Strong start.";
+  if (overshoot > 0) return "A short walk will close the gap.";
+  if (mealsCount === 0 && hour < 11) return "A fresh page. Let's go.";
+  if (mealsCount === 0 && hour >= 11) return "Nothing logged yet — easy to fix.";
+  if (calorieRatio >= 0.95) return "Right on target. Lovely.";
+  if (calorieRatio >= 0.7) return "Almost there.";
+  if (calorieRatio >= 0.4) return "Halfway there.";
+  if (calorieRatio > 0) return "Nice start.";
   return "Let's get the day going.";
 }
 
@@ -199,7 +199,7 @@ function formatHistoryDay(dayKey: string) {
 }
 
 export function TodayScreen() {
-  const { profile, targets, meals: allMeals, weights, waterMl, steps, auth, actions } = useAppState();
+  const { profile, targets, meals: allMeals, weights, waterMl, steps, auth, onboardingExtras, actions } = useAppState();
   const totals = useDayTotals();
   const meals = useTodayMeals();
   const [isEditingSteps, setIsEditingSteps] = useState(false);
@@ -219,7 +219,13 @@ export function TodayScreen() {
     const ymd = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
     const lastKey = `pace.lastUsedDay.${userId}`;
     const lastUsed = window.localStorage.getItem(lastKey);
-    if (lastUsed && lastUsed !== ymd) {
+    // Daily tester review sheet is opt-in: it only fires for builds that
+    // explicitly enable it (or for users that flipped the localStorage flag),
+    // so production users don't get a "How was yesterday's version?" prompt.
+    const testerMode =
+      process.env.NEXT_PUBLIC_TESTER_MODE === "true" ||
+      window.localStorage.getItem("pace.testerMode") === "true";
+    if (testerMode && lastUsed && lastUsed !== ymd) {
       const seenKey = `pace.reviewSeen.${userId}.${lastUsed}`;
       if (!window.localStorage.getItem(seenKey)) {
         window.setTimeout(() => setReviewDay(lastUsed), 0);
@@ -267,20 +273,20 @@ export function TodayScreen() {
       return { label: "Log breakfast", body: "Snap a photo or type it in.", icon: "camera" };
     }
     if (meals.length < 2 && h >= 11 && h < 15) {
-      return { label: "Time for lunch", body: "Photo or typed food both work.", icon: "camera" };
+      return { label: "Time for lunch", body: "Photo or typed food, whichever's easiest.", icon: "camera" };
     }
     if (meals.length < 3 && h >= 17) {
-      return { label: "Log dinner", body: "Keep it boring, keep it on plan.", icon: "camera" };
+      return { label: "Log dinner", body: "A few seconds now keeps the day on track.", icon: "camera" };
     }
     if (waterMl < targets.waterMl * 0.5) {
       return {
         label: "Drink some water",
-        body: `${(Math.max(targets.waterMl - waterMl, 0) / 1000).toFixed(1)} L to target.`,
+        body: `${(Math.max(targets.waterMl - waterMl, 0) / 1000).toFixed(1)} L to your target.`,
         icon: "water",
       };
     }
     if (overshoot > 0) {
-      return { label: "Walk it off", body: `Roughly ${Math.round(overshoot / 60)} min walk closes the gap.`, icon: "steps" };
+      return { label: "A short walk", body: `About ${Math.round(overshoot / 60)} minutes will close the gap.`, icon: "steps" };
     }
     return { label: "Log a snack", body: "Even a small one keeps the day honest.", icon: "camera" };
   }, [meals.length, waterMl, targets.waterMl, overshoot]);
@@ -341,7 +347,8 @@ export function TodayScreen() {
         </div>
         <h1 className="font-display mt-2 flex flex-wrap items-center gap-2.5 text-[40px] leading-[1.02] text-ink-2">
           <span>
-            Light, <span className="italic text-forest">{greet()}.</span>
+            <span className="italic text-forest">{greet()}</span>
+            {onboardingExtras.name ? `, ${onboardingExtras.name}.` : "."}
           </span>
           {(() => {
             const { Icon, tint } = timeOfDayMark();
@@ -375,7 +382,7 @@ export function TodayScreen() {
           className="pointer-events-none absolute -inset-x-6 -top-12 h-[55%] aurora-anim opacity-70"
           style={{
             background:
-              "radial-gradient(50% 50% at 30% 50%, rgba(13,148,136,0.40), transparent 60%), radial-gradient(45% 45% at 75% 40%, rgba(2,132,199,0.34), transparent 60%), radial-gradient(40% 40% at 50% 80%, rgba(251,146,60,0.30), transparent 60%)",
+              "radial-gradient(50% 50% at 30% 50%, rgba(0,143,208,0.45), transparent 60%), radial-gradient(45% 45% at 75% 40%, rgba(0,174,240,0.36), transparent 60%), radial-gradient(40% 40% at 50% 80%, rgba(0,60,83,0.32), transparent 60%)",
             filter: "blur(28px)",
           }}
         />
@@ -389,18 +396,18 @@ export function TodayScreen() {
           ) : overshoot ? (
             <>
               <span className="rounded-full bg-clay/15 px-2.5 py-0.5 text-[12px] font-semibold text-clay">
-                {overshoot} over
+                {overshoot} kcal over
               </span>
               <span className="text-faint">·</span>
-              <span>a walk closes the gap</span>
+              <span>a short walk closes the gap</span>
             </>
           ) : (
             <>
               <span className="rounded-full bg-forest/10 px-2.5 py-0.5 text-[12px] font-semibold text-forest">
-                {remaining} left
+                {remaining} kcal left
               </span>
               <span className="text-faint">·</span>
-              <span>{calorieRatio >= 0.4 ? "on pace for a clean day" : "plenty of runway"}</span>
+              <span>{calorieRatio >= 0.4 ? "on track for a steady day" : "plenty of room"}</span>
             </>
           )}
         </div>
@@ -421,15 +428,15 @@ export function TodayScreen() {
             className="pointer-events-none absolute inset-0 shine-anim"
             style={{
               background:
-                "linear-gradient(120deg, transparent 30%, rgba(13,148,136,0.16) 50%, transparent 70%)",
+                "linear-gradient(120deg, transparent 30%, rgba(0,143,208,0.18) 50%, transparent 70%)",
             }}
           />
           <div className="relative flex items-center gap-3.5">
             <span
-              className="float-anim grid h-12 w-12 place-items-center rounded-2xl text-ink-2 shrink-0"
+              className="float-anim grid h-12 w-12 place-items-center rounded-2xl text-white shrink-0"
               style={{
-                background: "linear-gradient(135deg,#a7f3d0,#bae6fd)",
-                boxShadow: "0 10px 24px -10px rgba(13,148,136,0.55)",
+                background: "linear-gradient(135deg,#008fd0,#003c53)",
+                boxShadow: "0 10px 24px -10px rgba(0,143,208,0.65)",
               }}
               aria-hidden
             >
@@ -469,18 +476,15 @@ export function TodayScreen() {
       {/* Streak / weight / adherence ribbon */}
       {streak > 0 || weightDelta !== null || adherence !== null ? (
         <div
-          className="relative overflow-hidden rounded-[22px] px-4 py-3.5 text-cream"
-          style={{
-            background: "linear-gradient(135deg, #064e46 0%, #0d9488 100%)",
-            boxShadow: "0 22px 40px -22px rgba(13,148,136,0.65)",
-          }}
+          className="surface-deep relative overflow-hidden px-4 py-3.5"
+          style={{ borderRadius: 22 }}
         >
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0"
             style={{
               background:
-                "radial-gradient(circle at 90% 0%, rgba(167,243,208,0.45), transparent 55%), radial-gradient(circle at 0% 100%, rgba(186,230,253,0.30), transparent 55%)",
+                "radial-gradient(circle at 90% 0%, rgba(0,174,240,0.40), transparent 55%), radial-gradient(circle at 0% 100%, rgba(0,143,208,0.30), transparent 55%)",
             }}
           />
           <div className="relative flex items-center justify-between gap-3">
@@ -489,7 +493,7 @@ export function TodayScreen() {
               value={streak > 0 ? `${streak}` : "—"}
               suffix={streak > 0 ? (streak === 1 ? " day" : " days") : ""}
             />
-            <span className="h-7 w-px bg-cream/25" />
+            <span className="h-7 w-px bg-white/20" />
             <RibbonStat
               label="Last 30 days"
               value={
@@ -499,7 +503,7 @@ export function TodayScreen() {
               }
               suffix={weightDelta === null ? "" : " kg"}
             />
-            <span className="h-7 w-px bg-cream/25" />
+            <span className="h-7 w-px bg-white/20" />
             <RibbonStat
               label="Adherence"
               value={adherence === null ? "—" : `${adherence}`}
@@ -538,7 +542,7 @@ export function TodayScreen() {
                       hour: "2-digit",
                       minute: "2-digit",
                     }).format(new Date(m.loggedAt))}{" "}
-                    · {m.proteinG}g protein
+                    · {Math.round(m.proteinG)}g protein
                   </div>
                 </div>
                 <div className="numerals text-base text-ink-2">{m.calories}</div>
@@ -615,8 +619,8 @@ export function TodayScreen() {
         )}
       </section>
 
-      <div className="pt-2 pb-1 text-center text-[10px] tracking-[0.16em] uppercase text-faint">
-        Pace · v{appVersion}
+      <div className="pt-2 pb-1 text-center text-[10px] tracking-[0.22em] uppercase text-faint">
+        Transform Hub · v{appVersion}
       </div>
 
       <Sheet
@@ -934,7 +938,7 @@ function ConicRing({
         className="spin-slow-anim pointer-events-none absolute -inset-6 rounded-full opacity-55"
         style={{
           background:
-            "conic-gradient(from 200deg, rgba(13,148,136,0.55), rgba(2,132,199,0.45), rgba(251,146,60,0.40), rgba(13,148,136,0.55))",
+            "conic-gradient(from 200deg, rgba(0,143,208,0.65), rgba(0,174,240,0.50), rgba(0,60,83,0.40), rgba(0,143,208,0.65))",
           filter: "blur(22px)",
         }}
       />
@@ -954,7 +958,7 @@ function ConicRing({
         aria-hidden
         className="absolute inset-0 rounded-full transition-[background] duration-500"
         style={{
-          background: `conic-gradient(var(--color-forest) 0deg, #2dd4bf ${sweep}deg, rgba(0,0,0,0) ${sweep}deg 360deg)`,
+          background: `conic-gradient(#003c53 0deg, #008fd0 ${Math.max(sweep * 0.5, 1)}deg, #00aef0 ${sweep}deg, rgba(0,0,0,0) ${sweep}deg 360deg)`,
           WebkitMask:
             "radial-gradient(circle, transparent 86px, #000 87px, #000 105px, transparent 106px)",
           mask: "radial-gradient(circle, transparent 86px, #000 87px, #000 105px, transparent 106px)",
@@ -970,9 +974,9 @@ function ConicRing({
           className="absolute left-1/2 top-1/2 block h-[14px] w-[14px] rounded-full"
           style={{
             transform: "translate(-50%, -50%) translateY(-96px)",
-            background: "linear-gradient(135deg,#2dd4bf,#14b8a6)",
+            background: "linear-gradient(135deg,#00aef0,#008fd0)",
             boxShadow:
-              "0 0 0 3px rgba(255,255,255,0.95), 0 6px 16px rgba(13,148,136,0.45)",
+              "0 0 0 3px rgba(255,255,255,0.95), 0 6px 16px rgba(0,143,208,0.55)",
           }}
         />
       </div>
@@ -1007,12 +1011,12 @@ function WaterTile({
       className="relative overflow-hidden rounded-[22px] border border-white/85 px-4 pb-3 pt-3"
       style={{
         background:
-          "linear-gradient(180deg, rgba(186,230,253,0.55), rgba(186,230,253,0.18))",
+          "linear-gradient(180deg, rgba(102, 200, 232, 0.55), rgba(0, 143, 208, 0.10))",
         minHeight: 122,
       }}
     >
       <div className="flex items-center justify-between">
-        <span className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-muted">
+        <span className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-muted">
           Water
         </span>
       </div>
@@ -1033,8 +1037,8 @@ function WaterTile({
         >
           <defs>
             <linearGradient id="water-grad" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor="#0284c7" stopOpacity="0.55" />
-              <stop offset="100%" stopColor="#0284c7" stopOpacity="0.18" />
+              <stop offset="0%" stopColor="#008fd0" stopOpacity="0.65" />
+              <stop offset="100%" stopColor="#003c53" stopOpacity="0.20" />
             </linearGradient>
           </defs>
           <path
@@ -1090,11 +1094,11 @@ function StepsTile({
       className="relative overflow-hidden rounded-[22px] border border-white/85 px-4 pb-3 pt-3"
       style={{
         background:
-          "linear-gradient(180deg, rgba(167,243,208,0.55), rgba(167,243,208,0.18))",
+          "linear-gradient(180deg, rgba(0, 60, 83, 0.18), rgba(0, 143, 208, 0.10))",
         minHeight: 122,
       }}
     >
-      <span className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-muted">
+      <span className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-muted">
         Steps
       </span>
       <div className="font-display numerals mt-0.5 text-[26px] leading-none text-ink-2">

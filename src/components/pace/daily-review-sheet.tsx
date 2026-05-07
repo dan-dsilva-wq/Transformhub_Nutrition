@@ -98,10 +98,10 @@ export function DailyReviewSheet({
               Tester check-in
             </span>
             <h3 className="font-display mt-2 text-[26px] leading-tight text-ink-2">
-              How was yesterday&rsquo;s version?
+              How did Pace feel yesterday?
             </h3>
             <p className="mt-1 text-xs text-muted">
-              {fmtFriendly(day)} · takes about 20 seconds
+              {fmtFriendly(day)} · about 20 seconds
             </p>
           </div>
           <button

@@ -132,7 +132,7 @@ export function LogScreen() {
                       hour: "2-digit",
                       minute: "2-digit",
                     }).format(new Date(m.loggedAt))}{" "}
-                    · {m.proteinG}g protein
+                    · {Math.round(m.proteinG)}g protein
                   </div>
                 </div>
                 <div className="numerals text-base text-ink-2">{m.calories}</div>
@@ -232,7 +232,6 @@ function PhotoFlow({ onTypeFood }: { onTypeFood: () => void }) {
     setBusy(true);
     setError(null);
     try {
-      actions.bumpUsage("ai-photo");
       const res = await fetch("/api/ai/meal-estimate", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -242,6 +241,9 @@ function PhotoFlow({ onTypeFood }: { onTypeFood: () => void }) {
       if (res.ok) {
         const json = await res.json();
         if (runId !== estimateRunRef.current) return;
+        // Only count this against the daily free quota once the estimate
+        // actually came back. Failed attempts shouldn't burn a free credit.
+        actions.bumpUsage("ai-photo");
         setEstimate(json.estimate as MealEstimate);
         setSource("ai");
       } else if (res.status === 503) {
@@ -250,13 +252,13 @@ function PhotoFlow({ onTypeFood }: { onTypeFood: () => void }) {
         setSource("demo");
       } else {
         const json = await res.json().catch(() => ({}));
-        setError(json.error ?? "Estimate failed.");
+        setError(json.error ?? "We couldn't read that photo. Try a clearer shot or type the food.");
         setEstimate(demoEstimate());
         setSource("demo");
       }
     } catch {
       if (runId !== estimateRunRef.current) return;
-      setError("Network unavailable. Showing a demo estimate.");
+      setError("No connection. Showing an example you can edit.");
       setEstimate(demoEstimate());
       setSource("demo");
     } finally {
@@ -297,7 +299,7 @@ function PhotoFlow({ onTypeFood }: { onTypeFood: () => void }) {
           </span>
           <h2 className="font-display mt-4 text-2xl text-ink-2">Snap your plate.</h2>
           <p className="mt-1.5 text-sm text-muted max-w-[28ch]">
-            One photo. We&apos;ll do the maths and you confirm.
+            Take one photo. We&apos;ll work out the calories — you check it&apos;s right.
           </p>
           <input
             ref={fileRef}
@@ -782,13 +784,13 @@ function SearchFlow() {
 
       if (!res.ok) {
         setResults([]);
-        setError(`Food search failed (${res.status}). Check the app server/API route.`);
+        setError("Food search isn't responding right now. Please try again in a moment.");
         return;
       }
 
       if (!contentType.includes("application/json")) {
         setResults([]);
-        setError("Food search returned a page instead of data. The app is probably using an old deployment.");
+        setError("Food search isn't responding right now. Please try again in a moment.");
         return;
       }
 
@@ -797,12 +799,12 @@ function SearchFlow() {
         setResults(json.foods);
       } else {
         setResults([]);
-        setError(json.error ?? "Couldn't search foods.");
+        setError(json.error ?? "We couldn't find that. Try a simpler word.");
       }
     } catch {
       if (searchId !== searchIdRef.current) return;
       setResults([]);
-      setError("Network unavailable.");
+      setError("No connection. Check your internet and try again.");
     } finally {
       if (searchId === searchIdRef.current) {
         setBusy(false);
@@ -1085,7 +1087,7 @@ function SearchFlow() {
         </div>
       ) : (
         <p className="mt-4 text-xs text-muted">
-          Powered by USDA FoodData Central. Branded items also available.
+          Type a food, drink, or brand name to find it.
         </p>
       )}
     </Card>
@@ -1115,10 +1117,10 @@ function BarcodeFlow() {
         setProduct(json.product);
         setScanning(false);
       } else {
-        setError(json.error ?? "Barcode not found.");
+        setError(json.error ?? "We couldn't find that barcode. You can type the food instead.");
       }
     } catch {
-      setError("Network unavailable.");
+      setError("No connection. Check your internet and try again.");
     } finally {
       setBusy(false);
     }
@@ -1226,7 +1228,7 @@ function BarcodeFlow() {
       ) : null}
 
       <p className="mt-4 text-sm text-muted">
-        Powered by Open Food Facts. Manual entry is here as backup.
+        Or type the number from the back of the pack:
       </p>
       <div className="mt-3 flex items-center gap-2">
         <Input

@@ -1,37 +1,53 @@
 @import "tailwindcss";
 
-/* ───────────────────────── Pace design tokens ─────────────────────────
-   Mint Frost.
-   Bone canvas with a fixed mint/sky/peach mesh, frosted-glass cards,
-   teal primary, lime + sky + peach supports.
+/* ───────────────────────── Transform Hub design tokens ─────────────────────
+   Premium executive theme. Deep navy canvas with bright cyan accents and
+   crisp white "paper" surfaces. Built around the Transform Hub palette:
+   #003c53 (navy), #008fd0 (cyan), #020202 (ink), #ffffff (paper).
+   Token names are preserved from the Pace system so existing components
+   pick up the new palette without per-file rewrites.
    ──────────────────────────────────────────────────────────────────── */
 
 :root {
-  /* Surface */
-  --color-canvas: #fbfaf6;          /* page background base (the mesh sits on body) */
-  --color-paper: #ffffff;           /* solid sheets / drawers */
-  --color-stone: #eef3ec;           /* secondary tile */
-  --color-stone-2: #e2eae0;         /* subtle border */
-  --color-hairline: #e6ece4;        /* divider line */
+  /* Brand atoms */
+  --th-navy:     #003c53;
+  --th-cyan:     #008fd0;
+  --th-ink:      #020202;
+  --th-paper:    #ffffff;
+  --th-navy-2:   #002738;     /* deeper navy — used in shadows/gradients */
+  --th-navy-3:   #001a26;     /* near-black navy */
+  --th-cyan-2:   #00aef0;     /* lifted cyan — hover */
+  --th-cyan-3:   #66c8e8;     /* soft cyan — supports/tints */
+  --th-cyan-glow: rgba(0, 143, 208, 0.35);
 
-  /* Ink */
-  --color-ink: #0f1714;             /* primary text */
-  --color-ink-2: #0f1714;           /* heading */
-  --color-muted: #5b6863;           /* secondary text */
-  --color-faint: #94a097;           /* placeholder, hint */
+  /* Surface — white paper floating on deep navy canvas */
+  --color-canvas:   #001a26;     /* page background base */
+  --color-paper:    #ffffff;     /* solid sheets / cards */
+  --color-stone:    #f1f6f9;     /* secondary tile (cool off-white) */
+  --color-stone-2:  #d6e3ec;     /* subtle border */
+  --color-hairline: #e3ecf2;     /* divider line */
 
-  /* Brand + intent (Mint Frost palette) */
-  --color-forest: #0d9488;          /* teal — primary accent */
-  --color-forest-2: #0b7c70;        /* darker teal — hover */
-  --color-sage: #65a30d;            /* lime — positive */
-  --color-clay: #fb923c;            /* peach — warm warning */
-  --color-amber: #f59e0b;           /* amber — highlight */
-  --color-sky: #0284c7;             /* sky — secondary */
-  --color-cream: #e8f3ec;           /* mint tint surface */
+  /* Ink — defaults are LIGHT (for dark canvas). Inside .card the tokens are
+     overridden to DARK so cards keep crisp readable typography. Components
+     using `text-ink`/`text-ink-2`/`text-muted` automatically adapt. */
+  --color-ink:    #ffffff;       /* primary text */
+  --color-ink-2:  #ffffff;       /* heading */
+  --color-muted:  rgba(255, 255, 255, 0.65);
+  --color-faint:  rgba(255, 255, 255, 0.40);
+
+  /* Brand + intent (Transform Hub palette) */
+  --color-forest:   #008fd0;     /* primary cyan — replaces teal */
+  --color-forest-2: #007ab2;     /* hover/pressed cyan */
+  --color-sage:     #00b894;     /* positive — cyan-leaning green */
+  --color-clay:     #ff7a45;     /* warm warning */
+  --color-amber:    #ffb547;     /* amber highlight */
+  --color-sky:      #00aef0;     /* secondary lifted cyan */
+  --color-cream:    #e6f3fb;     /* cyan-tinted surface (replaces mint) */
 
   /* Effects */
-  --shadow-card: 0 12px 40px rgba(15, 23, 20, 0.06);
-  --shadow-elevated: 0 24px 60px rgba(15, 23, 20, 0.10);
+  --shadow-card:     0 8px 28px rgba(0, 26, 38, 0.18), 0 1px 0 rgba(255,255,255,0.7) inset;
+  --shadow-elevated: 0 24px 64px rgba(0, 26, 38, 0.32), 0 2px 0 rgba(255,255,255,0.8) inset;
+  --shadow-cyan:     0 12px 40px rgba(0, 143, 208, 0.32);
   --radius-sm: 8px;
   --radius-md: 14px;
   --radius-lg: 22px;
@@ -39,7 +55,7 @@
   --radius-full: 9999px;
 
   /* Safe-area aware viewport */
-  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-top:    env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
@@ -63,6 +79,9 @@
   --color-sky: var(--color-sky);
   --color-cream: var(--color-cream);
 
+  --color-navy: var(--th-navy);
+  --color-cyan: var(--th-cyan);
+
   --font-display-stack: var(--font-display), "Fraunces", ui-serif, Georgia, "Times New Roman", serif;
   --font-body: var(--font-body), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 
@@ -75,56 +94,156 @@
   --shadow-elevated: var(--shadow-elevated);
 }
 
-/* base */
-html { background: var(--color-canvas); color: var(--color-ink); }
+/* ───── Base — deep navy canvas with engineered light field ───── */
+html {
+  background: var(--color-canvas);
+  color: #ffffff;
+}
+
 body {
+  /* Dark canvas stack: deep navy with cyan corner glows + a fine grid
+     suggestive of the Transform Hub wheel mark. Engineered, premium. */
   background:
-    radial-gradient(circle at 18% 8%, rgba(167, 243, 208, 0.55) 0%, transparent 50%),
-    radial-gradient(circle at 90% 28%, rgba(186, 230, 253, 0.55) 0%, transparent 50%),
-    radial-gradient(circle at 40% 95%, rgba(254, 215, 170, 0.50) 0%, transparent 55%),
-    linear-gradient(180deg, #fbfaf6 0%, #f4f7f3 100%);
+    radial-gradient(1200px 700px at 12% -10%, rgba(0, 143, 208, 0.30) 0%, transparent 60%),
+    radial-gradient(900px 600px at 92% 8%,   rgba(0, 174, 240, 0.18) 0%, transparent 55%),
+    radial-gradient(700px 500px at 85% 95%,  rgba(0, 60, 83, 0.55)  0%, transparent 60%),
+    radial-gradient(900px 600px at 8% 100%,  rgba(0, 143, 208, 0.10) 0%, transparent 55%),
+    linear-gradient(180deg, #003c53 0%, #001a26 55%, #000813 100%);
   background-attachment: fixed;
   background-repeat: no-repeat;
-  color: var(--color-ink);
+  color: #ffffff;
   font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
   font-feature-settings: "ss01", "cv11";
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  position: relative;
 }
+
+/* Inside any card, the ink tokens flip to dark so type is readable on
+   white paper. Token-based Tailwind utilities (text-ink-2, text-muted, …)
+   inherit through CSS custom-property scoping. */
+.card, .card-flat, .card-tint {
+  --color-ink:    #020202;
+  --color-ink-2:  #001a26;
+  --color-muted:  #4a6473;
+  --color-faint:  #8aa1ad;
+  color: var(--color-ink);
+}
+
+/* Engineered grid overlay — extremely subtle, references the brand wheel */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(0, 174, 240, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 174, 240, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: -1px -1px;
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 30%, #000 0%, transparent 78%);
+  -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 30%, #000 0%, transparent 78%);
+  z-index: 0;
+}
+
 button, input, select, textarea { font: inherit; color: inherit; }
 img { max-width: 100%; }
-::selection { background: var(--color-forest); color: #fff; }
+::selection { background: var(--th-cyan); color: #fff; }
 
 /* prevent the silly iOS zoom on focus and the rubber-band scroll on body */
 input, select, textarea { font-size: 16px; }
 body { overscroll-behavior-y: contain; }
 
-/* utility primitives — kept tiny so we don't drift from Tailwind */
-.font-display { font-family: var(--font-display), "Fraunces", ui-serif, Georgia, serif; letter-spacing: -0.03em; font-weight: 600; }
+/* ───── Typography utilities ───── */
+.font-display {
+  font-family: var(--font-display), "Fraunces", ui-serif, Georgia, serif;
+  letter-spacing: -0.03em;
+  font-weight: 600;
+}
 .font-body { font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif; }
 
-/* Card: frosted glass surface (Mint Frost) */
+.font-eyebrow {
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+/* ───── Card system — crisp white paper on deep navy ───── */
 .card {
-  background: rgba(255, 255, 255, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.85);
-  -webkit-backdrop-filter: blur(22px);
-  backdrop-filter: blur(22px);
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(255, 255, 255, 1);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  backdrop-filter: blur(20px) saturate(140%);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-card);
+  box-shadow:
+    0 12px 32px rgba(0, 26, 38, 0.28),
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 -1px 0 rgba(0, 60, 83, 0.04) inset;
+  position: relative;
+  isolation: isolate;
 }
 .card-flat {
-  background: rgba(255, 255, 255, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.70);
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.95);
   -webkit-backdrop-filter: blur(18px);
   backdrop-filter: blur(18px);
   border-radius: var(--radius-lg);
+  box-shadow: 0 6px 18px rgba(0, 26, 38, 0.18);
 }
 .card-tint {
-  background: rgba(167, 243, 208, 0.30);
-  border: 1px solid rgba(167, 243, 208, 0.50);
+  background:
+    linear-gradient(135deg, rgba(0, 143, 208, 0.10) 0%, rgba(255, 255, 255, 0.95) 100%);
+  border: 1px solid rgba(0, 143, 208, 0.25);
   -webkit-backdrop-filter: blur(18px);
   backdrop-filter: blur(18px);
   border-radius: var(--radius-lg);
+  box-shadow: 0 12px 32px rgba(0, 26, 38, 0.20);
+}
+
+/* Dark surfaces — the hero treatment for moments that need to breathe */
+.surface-deep {
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba(0, 143, 208, 0.22) 0%, transparent 60%),
+    linear-gradient(160deg, #003c53 0%, #001a26 60%, #000813 100%);
+  color: #ffffff;
+  border: 1px solid rgba(0, 143, 208, 0.25);
+  border-radius: var(--radius-xl);
+  box-shadow:
+    0 24px 64px rgba(0, 26, 38, 0.55),
+    0 1px 0 rgba(0, 143, 208, 0.30) inset;
+  position: relative;
+  overflow: hidden;
+}
+.surface-deep::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse 80% 100% at 50% 0%, #000 0%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 100% at 50% 0%, #000 0%, transparent 75%);
+  pointer-events: none;
+  z-index: 0;
+}
+.surface-deep > * { position: relative; z-index: 1; }
+
+.surface-cyan {
+  background: linear-gradient(135deg, #008fd0 0%, #0078b8 60%, #003c53 100%);
+  color: #ffffff;
+  border-radius: var(--radius-xl);
+  box-shadow: 0 18px 50px rgba(0, 143, 208, 0.45);
+  position: relative;
+  overflow: hidden;
+}
+.surface-cyan::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 100% 0%, rgba(255,255,255,0.30) 0%, transparent 50%);
+  pointer-events: none;
 }
 
 /* Hairline divider */
@@ -133,7 +252,7 @@ body { overscroll-behavior-y: contain; }
 /* Quiet button reset */
 button { -webkit-tap-highlight-color: transparent; }
 
-/* Stat readouts — Mint Frost favours sans, tabular figures, tight tracking */
+/* Stat readouts — crisp, tabular */
 .numerals {
   font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
   font-feature-settings: "tnum", "lnum";
@@ -141,10 +260,15 @@ button { -webkit-tap-highlight-color: transparent; }
   font-weight: 600;
 }
 
+/* ───── Brand-mark wheel motion ───── */
+@keyframes spin-soft  { to { transform: rotate(360deg); } }
+.brand-spin-slow { animation: spin-soft 18s linear infinite; }
+.brand-spin-med  { animation: spin-soft 8s linear infinite; }
+
 /* Smooth ring animation */
 @keyframes ring-fill {
   from { stroke-dashoffset: var(--ring-from, 100); }
-  to { stroke-dashoffset: var(--ring-to, 0); }
+  to   { stroke-dashoffset: var(--ring-to, 0); }
 }
 .ring-anim { animation: ring-fill 700ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
 
@@ -163,7 +287,7 @@ button { -webkit-tap-highlight-color: transparent; }
 /* Shimmer skeleton */
 @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 .skeleton {
-  background: linear-gradient(90deg, rgba(255,255,255,0.45) 25%, rgba(255,255,255,0.75) 50%, rgba(255,255,255,0.45) 75%);
+  background: linear-gradient(90deg, rgba(255,255,255,0.10) 25%, rgba(255,255,255,0.30) 50%, rgba(255,255,255,0.10) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.4s linear infinite;
   border-radius: var(--radius-md);
@@ -193,11 +317,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .scale-in-anim   { animation: scale-in 420ms cubic-bezier(.2,.8,.2,1) both; }
 .pillar-fade-anim { animation: pillar-fade 380ms cubic-bezier(.2,.8,.2,1) both; }
 
-/* ───────────────────────── Motion library (extended) ─────────────────────────
-   A small, opinionated animation toolkit. Easings standardise on
-   "out-quint" cubic-bezier(.2,.8,.2,1) so every motion feels the same.
-   Every utility respects prefers-reduced-motion below.
-   ──────────────────────────────────────────────────────────────────────── */
+/* ───── Motion library (kept identical timing to original Pace) ───── */
 
 @keyframes slide-up-in {
   from { opacity: 0; transform: translate3d(0, 14px, 0); }
@@ -225,13 +345,13 @@ button { -webkit-tap-highlight-color: transparent; }
   100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
 }
 @keyframes pulse-soft {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.0); }
-  50%      { box-shadow: 0 0 0 6px rgba(13, 148, 136, 0.10); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0, 143, 208, 0.0); }
+  50%      { box-shadow: 0 0 0 8px rgba(0, 143, 208, 0.18); }
 }
 @keyframes pulse-ring {
-  0%   { box-shadow: 0 0 0 0 rgba(255,255,255,0.55), 0 0 0 9999px rgba(15,23,20,0.55); }
-  70%  { box-shadow: 0 0 0 14px rgba(255,255,255,0.0),  0 0 0 9999px rgba(15,23,20,0.55); }
-  100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.0),     0 0 0 9999px rgba(15,23,20,0.55); }
+  0%   { box-shadow: 0 0 0 0 rgba(0, 174, 240, 0.55), 0 0 0 9999px rgba(0, 26, 38, 0.55); }
+  70%  { box-shadow: 0 0 0 14px rgba(0, 174, 240, 0.0),  0 0 0 9999px rgba(0, 26, 38, 0.55); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 174, 240, 0.0),     0 0 0 9999px rgba(0, 26, 38, 0.55); }
 }
 @keyframes float-soft {
   0%, 100% { transform: translateY(0); }
@@ -243,9 +363,6 @@ button { -webkit-tap-highlight-color: transparent; }
 @keyframes blur-in {
   from { opacity: 0; filter: blur(8px); transform: translateY(6px); }
   to   { opacity: 1; filter: blur(0);   transform: translateY(0); }
-}
-@keyframes spin-soft {
-  to { transform: rotate(360deg); }
 }
 
 .slide-up-anim     { animation: slide-up-in     420ms cubic-bezier(.2,.8,.2,1) both; }
@@ -259,8 +376,6 @@ button { -webkit-tap-highlight-color: transparent; }
 .pulse-soft-anim   { animation: pulse-soft 2.4s cubic-bezier(.4,0,.6,1) infinite; }
 .pulse-ring-anim   { animation: pulse-ring 2.0s cubic-bezier(.4,0,.6,1) infinite; }
 
-/* Stagger helper: apply to a parent; direct children animate sequentially.
-   Pair with .slide-up-anim / .pop-in-anim / etc. on each child. */
 .stagger > * { animation-delay: 0ms; }
 .stagger > *:nth-child(1)  { animation-delay:  40ms; }
 .stagger > *:nth-child(2)  { animation-delay:  90ms; }
@@ -273,8 +388,6 @@ button { -webkit-tap-highlight-color: transparent; }
 .stagger > *:nth-child(9)  { animation-delay: 440ms; }
 .stagger > *:nth-child(10) { animation-delay: 490ms; }
 
-/* Convenience: parent that auto-applies slide-up-in to its direct children
-   and staggers them. Saves needing to mark every child individually. */
 .stagger-up > * { animation: slide-up-in 420ms cubic-bezier(.2,.8,.2,1) both; }
 .stagger-up > *:nth-child(1)  { animation-delay:  40ms; }
 .stagger-up > *:nth-child(2)  { animation-delay:  90ms; }
@@ -287,18 +400,18 @@ button { -webkit-tap-highlight-color: transparent; }
 .stagger-up > *:nth-child(9)  { animation-delay: 440ms; }
 .stagger-up > *:nth-child(10) { animation-delay: 490ms; }
 
-/* Tactile press response — pair with [data-tap] or any interactive element. */
+/* Tactile press response */
 .tap-bounce { transition: transform 140ms cubic-bezier(.2,.8,.2,1); }
 .tap-bounce:active { transform: scale(0.96); }
 
-/* Soft glow that draws the eye to a primary CTA without being noisy. */
+/* Cyan CTA glow — replaces the original teal glow */
 .cta-glow { position: relative; }
 .cta-glow::after {
   content: "";
   position: absolute;
-  inset: -6px;
+  inset: -8px;
   border-radius: inherit;
-  background: radial-gradient(circle at 50% 50%, rgba(13,148,136,0.20), transparent 70%);
+  background: radial-gradient(circle at 50% 50%, rgba(0, 143, 208, 0.45), transparent 70%);
   z-index: -1;
   opacity: 0;
   transition: opacity 280ms ease-out;
@@ -307,11 +420,25 @@ button { -webkit-tap-highlight-color: transparent; }
 .cta-glow:hover::after,
 .cta-glow:focus-visible::after { opacity: 1; }
 
-/* Underline reveal for nav tabs and inline buttons. */
-.link-reveal { background-image: linear-gradient(currentColor, currentColor); background-size: 0% 1px; background-position: 0 100%; background-repeat: no-repeat; transition: background-size 240ms cubic-bezier(.2,.8,.2,1); }
+/* Always-on cyan halo for hero CTAs */
+.cyan-halo {
+  box-shadow:
+    0 0 0 1px rgba(0, 174, 240, 0.40),
+    0 12px 36px rgba(0, 143, 208, 0.40),
+    0 0 0 6px rgba(0, 143, 208, 0.12);
+}
+
+/* Underline reveal */
+.link-reveal {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 240ms cubic-bezier(.2,.8,.2,1);
+}
 .link-reveal:hover, .link-reveal:focus-visible { background-size: 100% 1px; }
 
-/* SVG line draw — set --draw-len on the path; pair with .draw-anim */
+/* SVG line draw */
 .draw-anim {
   stroke-dasharray: var(--draw-len, 600);
   stroke-dashoffset: var(--draw-len, 600);
@@ -333,12 +460,30 @@ button { -webkit-tap-highlight-color: transparent; }
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
 }
-.aurora-anim    { animation: aurora-drift 16s ease-in-out infinite; }
-.spin-slow-anim { animation: spin-slow 14s linear infinite; }
-.shine-anim     { animation: shine-sweep 3.6s ease-in-out infinite; }
+.aurora-anim     { animation: aurora-drift 16s ease-in-out infinite; }
+.spin-slow-anim  { animation: spin-slow 14s linear infinite; }
+.shine-anim      { animation: shine-sweep 3.6s ease-in-out infinite; }
 .water-drift-anim { animation: water-drift 14s linear infinite; }
 
-/* Reduced-motion guard — disable everything decorative. */
+/* Reveal sweep over the brand mark — used in plan-reveal hero */
+@keyframes sheen-pass {
+  0%   { transform: translateX(-120%) skewX(-15deg); opacity: 0; }
+  20%  { opacity: 0.85; }
+  100% { transform: translateX(220%) skewX(-15deg); opacity: 0; }
+}
+.sheen-pass-anim { animation: sheen-pass 2.2s cubic-bezier(.4,.0,.2,1) infinite; }
+
+/* Glass surface tinted to the brand */
+.glass-cyan {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(0, 143, 208, 0.04) 100%);
+  border: 1px solid rgba(0, 174, 240, 0.18);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  backdrop-filter: blur(18px) saturate(160%);
+  border-radius: var(--radius-lg);
+}
+
+/* Reduced-motion guard */
 @media (prefers-reduced-motion: reduce) {
   .ring-anim, .sheet-anim, .fade-anim, .skeleton,
   .count-up-anim, .scale-in-anim, .pillar-fade-anim,
@@ -346,6 +491,7 @@ button { -webkit-tap-highlight-color: transparent; }
   .pop-in-anim, .bubble-anim, .blur-in-anim, .float-anim,
   .pulse-soft-anim, .pulse-ring-anim, .draw-anim,
   .aurora-anim, .spin-slow-anim, .shine-anim, .water-drift-anim,
+  .brand-spin-slow, .brand-spin-med, .sheen-pass-anim,
   .stagger-up > * {
     animation: none !important;
   }

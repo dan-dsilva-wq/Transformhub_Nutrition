@@ -52,7 +52,7 @@ export function DietStep({ onNext }: { onNext: () => void }) {
           Anything we should keep off your plate?
         </h2>
         <p className="mt-2 text-sm text-muted">
-          Tap any that apply. Tailors your future food guide.
+          Tap any that apply. We&apos;ll keep these out of your meal suggestions.
         </p>
         <div className="mt-8 flex flex-wrap gap-2">
           {options.map((o) => {
@@ -64,10 +64,10 @@ export function DietStep({ onNext }: { onNext: () => void }) {
                 data-tap
                 onClick={() => toggle(o.id)}
                 className={clsx(
-                  "rounded-full border px-4 py-2 text-sm transition backdrop-blur-xl",
+                  "rounded-full border px-4 py-2 text-[13px] font-medium transition backdrop-blur-xl",
                   active
-                    ? "border-forest bg-forest text-white"
-                    : "border-white/70 bg-white/55 text-ink-2 hover:bg-white/75",
+                    ? "border-[#00aef0] bg-[#00aef0] text-white shadow-[0_4px_14px_-2px_rgba(0,143,208,0.55)]"
+                    : "border-white/15 bg-white/[0.04] text-white/80 hover:bg-white/[0.08] hover:text-white",
                 )}
               >
                 {o.label}
